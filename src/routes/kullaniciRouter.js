@@ -40,7 +40,7 @@ var baglanti = mysql.createConnection({
         if(err){
             throw err
         }else{
-            console.log("Connection Successful")
+            console.log("Connection Successfull")
         }
     })
 
