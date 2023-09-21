@@ -50,7 +50,7 @@ var baglanti = mysql.createConnection({
 async function userFind(kullaniciAdi) {
   var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,);
   var sayiString = JSON.parse(JSON.stringify(result))
-  console.log(sayiString[0].sayi)
+  //console.log(sayiString[0].sayi)
   if(sayiString[0].sayi){
       return true
   }
@@ -64,7 +64,19 @@ async function userEmail(email){
     var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?",email)
     
     var sayiString = JSON.parse(JSON.stringify(result))
-    if(sayiString[0].sayi == "1"){
+    if(sayiString[0].sayi == 1){
+        return true
+    }
+    else{
+        return false
+    }
+}
+
+async function userPassword(şifre){
+    var passwordToken = md5(şifre)
+    var result = await query("SELECT COUNT(*) as sayi FROM kullanici WHERE şifre = ?",passwordToken)
+    var sayiString = JSON.parse(JSON.stringify(result))
+    if(sayiString[0].sayi == 1){
         return true
     }
     else{
@@ -88,13 +100,14 @@ router.post("/signup",async(req,res)=>{
     const sifre = req.body.sifre
     const email = req.body.email
     var isUserExist = await userFind(kullaniciAdi);
-
+    var isEmailExist = await userEmail(email)
 
     
     var passwordToken = md5(sifre)
-    console.log(isUserExist)
+    //console.log(isUserExist)
     if(isUserExist == false){
-        if(userEmail(email) == 0){
+        //console.log(isEmailExist)
+        if(isEmailExist == false){
             baglanti.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)",[kullaniciAdi,passwordToken,email],(err)=>{
                 if(err) throw err
 
@@ -119,37 +132,6 @@ router.post("/signup",async(req,res)=>{
             message:"Böyle bir kullanici adi vardir"
         }) 
     }
-    /* baglanti.query("SELECT kullaniciAdi FROM kullanici",(err,result)=>{
-        var kullaniciAdiString = JSON.parse(JSON.stringify(result))
-        if(err){
-            throw err
-        }else{
-            for(var i = 0 ; i < kullaniciAdiString.length ; i++){
-                
-                if(kullaniciAdiString[i].kullaniciAdi == kullaniciAdi){  //epostayı ayrı bi yerde if diyeceksin checkeposta yapacan
-                    global.check = false
-
-                }else{
-                    global.check = true
-                }
-            }
-            if(global.check == true){
-                baglanti.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)",[kullaniciAdi,passwordToken,email],(err)=>{
-                    if(err) throw err
-                   res.json({
-                    status:"SUCCES",
-                    message:"Başarili bir şekilde kayit oldun"
-                    //accessToken:passwordToken
-                   })
-                }) 
-            }else{
-                res.json({
-                    status:"FAILED",
-                    message:"Böyle bir kullanici vardir"
-                }) 
-            }
-        }
-    }) */
 })    
 
 router.get("/signin",async (req,res)=>{
@@ -158,35 +140,22 @@ router.get("/signin",async (req,res)=>{
    
     var passwordToken = md5(sifre)
 
-    baglanti.query("SELECT * FROM kullanici",(err,result)=>{
-        var kullaniciAdiSifre = JSON.parse(JSON.stringify(result))
-        //console.log(sifre)
-        if(err){
-            throw err
-        }else{
-            for(var i = 0 ; i < kullaniciAdiSifre.length ; i++){
-                if(kullaniciAdiSifre[i].kullaniciAdi == kullaniciAdi && kullaniciAdiSifre[i].şifre == passwordToken){    //boolean olanı yapcan buraya 
-                    global.check = true
-                    
-                }else{
-                    global.check = false
-                    
-                }
-            }
-            if(global.check == true){
-                res.json({
-                    status:"SUCCES",
-                    message:"Başarili bir şekilde giriş"
-                })
-                 
-            }else{
-                res.json({
-                    status:"FAILED",
-                    message:"Kullanici adi ve ya şifre hatalidir"
-                }) 
-            }
-        }
-    })
+    var isUserExist = await userFind(kullaniciAdi)
+    var sifreDT = await userPassword(sifre)
+
+    if(isUserExist == true && sifreDT == true){
+        res.json({
+            status:"SUCCES",
+            message:"Basarili bir sekilde giris yaptini<"
+        })
+    }
+    else{
+        res.json({
+            status:"FAILED",
+            message:"Kullanici adi ve ya sifre hatali"
+        })
+    }
+
 })
 
 router.put("/meslekDilSecimi",(req,res)=>{
@@ -283,8 +252,28 @@ global.check2;
 router.post("/forgotPasswordCode",async (req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
     const email = req.body.email;
-    //const yeniSifre = req.body.yeniSifre
-    baglanti.query("SELECT COUNT(*) as sayi FROM kullanici WHERE kullaniciadi = ?" ,(err,result)=>{
+    const yeniSifre = req.body.yeniSifre
+
+    var isUserExist = await userFind(kullaniciAdi)
+    var isEmailExist = await userEmail(email)   
+
+    
+
+
+
+    if(isUserExist == true){
+        baglanti.query("SELECT * FROM kullanici WHERE = ?",kullaniciAdi,err,result{
+            
+        })
+    }else{
+        res.json({
+            status:"FAILED",
+            message:"Kullan"
+        })
+    }
+
+
+    /* baglanti.query("SELECT COUNT(*) as sayi FROM kullanici WHERE kullaniciadi = ?" ,(err,result)=>{
         if(err){
             throw err
         }else{
@@ -326,7 +315,7 @@ router.post("/forgotPasswordCode",async (req,res)=>{
                 }
             }
         }
-    })
+    }) */
     
 
 
