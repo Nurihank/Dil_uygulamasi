@@ -52,21 +52,6 @@ app.put("/deneme", function (req, res) {
     console.log(kullaniciSchema) */
 });
 
-/* app.post("/kullaniciKayitOlma",(req,res)=>{
-    const kullaniciAdi = req.body.kullaniciAdi
-    const sifre = req.body.sifre
-    
-    baglanti.query("INSERT INTO kullanici (kullaniciAdi,şifre) values (?,?)",[kullaniciAdi,sifre],(err)=>{
-        if(err){
-            throw err
-        }
-        else{
-            res.send("Kullanici Eklendi")
-        }
-    })
-    
-}) */
-
 /* app.post("/kullaniciEkle",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre

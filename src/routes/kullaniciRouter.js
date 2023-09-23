@@ -68,6 +68,7 @@ async function userPassword(şifre){
     var passwordToken = md5(şifre)
     var result = await query("SELECT COUNT(*) as sayi FROM kullanici WHERE şifre = ?",passwordToken)
     var sayiString = JSON.parse(JSON.stringify(result))
+
     if(sayiString[0].sayi == 1){
         return true
     }
@@ -77,7 +78,7 @@ async function userPassword(şifre){
 }
 
 
-global.check
+
 router.post("/signup",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre
@@ -302,6 +303,7 @@ router.put("/forgetPassword",async(req,res)=>{
 
     var codeToken = md5(code)
     var isUserExist = await userFind(kullaniciAdi)
+    var newPasswordToken = md5(newPassword)
     if(isUserExist == true)
     {baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",[kullaniciAdi],(err,result)=>{
         if(err){
@@ -309,10 +311,10 @@ router.put("/forgetPassword",async(req,res)=>{
         }
         else{
             var jsonResult = JSON.parse(JSON.stringify(result))
-            console.log(jsonResult[0].forgetPasswordToken)
             var codeDtToken = result[0].forgetPasswordToken
+
             if(codeToken == codeDtToken){
-                baglanti.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ?",[newPassword,kullaniciAdi],(err)=>{
+                baglanti.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ?",[newPasswordToken,kullaniciAdi],(err)=>{
                     if(err){
                         throw err
                     }
@@ -331,34 +333,71 @@ router.put("/forgetPassword",async(req,res)=>{
     }
 })
 
-
-global.check1;
-router.put("/changePassword",(req,res)=>{
+router.put("/changePasswordCode",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi;
-    const sifre = req.body.sifre
+    const oldPassword = req.body.oldPassword
+    const email = req.body.email
+
+    var oldPasswordToken = md5(oldPassword)
+
+    var isUserExist = await userFind(kullaniciAdi)
+    var correctPassword = await userPassword(oldPassword)
+
+    var code = "1001"
+    var codeToken = md5(code)
+    console.log(codeToken)
+    if(isUserExist == true && correctPassword == true){
+        let transporter = nodemailer.createTransport({
+            host:"smtp.gmail.com",
+            port:465,
+            secure:true,
+            auth:{
+                user:'kavalcinurihan@gmail.com',
+                pass:'lfxtfgzyiserimdn'
+            },
+            postman:res.json({
+                message:"Code gönderildi"
+            })
+        })
+        transporter.sendMail({
+            from:'"You" <kavalcinurihan@gmail.com>',
+            to:email,
+            subject:"VERIFICATION CODE",
+            html:code,
+        })
+        baglanti.query("UPDATE kullanici SET changePasswordToken = ? WHERE kullaniciAdi = ? ",[codeToken,kullaniciAdi])
+    }
+    else{
+        res.send("Yanliş kullanici adi ve ya şifre")
+    }
+})
+
+router.put("/changePassword",async(req,res)=>{
+    const kullaniciAdi = req.body.kullaniciAdi
+    const code = req.body.code;
     const newPassword = req.body.newPassword
 
-    var passwordToken = md5(sifre)
+    var isUserExist = await userFind(kullaniciAdi)
+    var codeToken = md5(code)
     var newPasswordToken = md5(newPassword)
 
-    baglanti.query("SELECT * FROM kullanici",(err,result)=>{
-        var kullaniciAdiSifre = JSON.parse(JSON.stringify(result))
-        for(var i = 0 ; i < kullaniciAdiSifre.length ; i++){    
-            if(kullaniciAdiSifre[i].kullaniciAdi == kullaniciAdi && kullaniciAdiSifre[i].şifre == passwordToken){
-                global.check1 = true
-            }else{
-                global.check1 = false
+    if(isUserExist == true){
+        baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ? " ,[kullaniciAdi],(err,result)=>{
+            if(result[0].changePasswordToken == codeToken){
+                baglanti.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ? ",[newPasswordToken,kullaniciAdi],(err)=>{
+                    if(err){
+                        throw err
+                    }
+                })
+                res.send("Sifre degistirilmistir")
             }
-        }
-        if(global.check1 == true){
-            baglanti.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ? ",[newPasswordToken,kullaniciAdi],(err,result)=>{
-                res.send("Sifreni başarili bir şekilde degistirdin")
-            })
-        }else{
-            res.send("Yanliş şifre ya da kullanici adi girdiniz")
-        }
-    })
-    
+            else{
+                res.send("Yanlis ve ya eksik kod")
+            }
+        })
+    }else{
+        res.send("Böyle bir kullanici yoktur")
+    }
 })
 
 
