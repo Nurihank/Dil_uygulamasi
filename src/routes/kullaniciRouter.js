@@ -7,16 +7,8 @@ import crypto from "crypto"
 import bcrypt from "bcryptjs"
 import md5 from "md5"
 import nodemailer from "nodemailer"
+
 //crypto nedir araştır bak ve procademy den kurslara bak modeller vb
-//buraya schema oluşturuyorum onları başka yera taşıyacam
-
-
-/* kullaniciSchema.methods.createResetPasswordToken = () =>{ 
-    const resetPasswordToken = crypto.randomBytes(32,toString("hex"))
-    
-    //sha ile geri döndürülemeyecek şekilde şifrelenir
-    return passwordTokken = crypto.createHash("sha252").update(resetPasswordToken).digest("hex")
-} */
 
 
 const app = express();
@@ -45,10 +37,10 @@ var baglanti = mysql.createConnection({
     })
 
 
-    const query = util.promisify(baglanti.query).bind(baglanti);
+const query = util.promisify(baglanti.query).bind(baglanti);  //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 
 async function userFind(kullaniciAdi) {
-  var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,);
+  var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi);
   var sayiString = JSON.parse(JSON.stringify(result))
   //console.log(sayiString[0].sayi)
   if(sayiString[0].sayi){
@@ -84,15 +76,6 @@ async function userPassword(şifre){
     }
 }
 
-/* function user(kullaniciAdi){
-    baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ? ",kullaniciAdi,(err,result)=>{
-        var resultString = JSON.parse(JSON.stringify(result))
-        console.log(resultString)
-    })
-} */
-
-//userFind("NurihanK")
-//user("NurihanK")
 
 global.check
 router.post("/signup",async(req,res)=>{
@@ -248,101 +231,106 @@ router.put("/meslekDilSecimi",(req,res)=>{
     })
 })
 
-global.check2;
-router.post("/forgotPasswordCode",async (req,res)=>{
+router.post("/forgetPasswordCode",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
     const email = req.body.email;
-    const yeniSifre = req.body.yeniSifre
+   // const yeniSifre = req.body.yeniSifre
 
     var isUserExist = await userFind(kullaniciAdi)
     var isEmailExist = await userEmail(email)   
 
     
-
-
-
     if(isUserExist == true){
-        baglanti.query("SELECT * FROM kullanici WHERE = ?",kullaniciAdi,err,result{
+
+        baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,(err,result)=>{
+            var emailMatch = JSON.parse(JSON.stringify(result))
+            if(emailMatch[0].email == email){
+
+                async function codeUret(min,max){
+                    var sayi = ""
+                    var sayi = Math.floor(Math.random()*(max-min))+min
+                    return sayi
+                }
+                var code = "1000"
+                var codeToken = md5(code)
             
+                let transporter = nodemailer.createTransport({
+                    host:"smtp.gmail.com",
+                    port:465,
+                    secure:true,
+                    auth:{
+                        user:'kavalcinurihan@gmail.com',
+                        pass:'lfxtfgzyiserimdn'
+                    },
+                    postman:res.json({
+                        message:"Code gönderildi"
+                    })
+                })
+                transporter.sendMail({
+                    from:'"You" <kavalcinurihan@gmail.com>',
+                    to:email,
+                    subject:"VERIFICATION CODE",
+                    html:code,
+                })
+                baglanti.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ",[ codeToken,kullaniciAdi],(err)=>{
+                    if(err){
+                        throw err
+                    }
+                    else{   
+                    }
+                })
+            }
+            else{
+                res.json({
+                    succes:"FAILED",
+                    message:"Kullanici adi ve email eşleşmiyo"
+                })
+            }
         })
     }else{
         res.json({
             status:"FAILED",
-            message:"Kullan"
+            message:"Kullanici adi hatalidir"
         })
     }
+})
 
+router.put("/forgetPassword",async(req,res)=>{
+    const kullaniciAdi = req.body.kullaniciAdi
+    const code = req.body.code;
+    const newPassword = req.body.newPassword
 
-    /* baglanti.query("SELECT COUNT(*) as sayi FROM kullanici WHERE kullaniciadi = ?" ,(err,result)=>{
+    var codeToken = md5(code)
+    var isUserExist = await userFind(kullaniciAdi)
+    if(isUserExist == true)
+    {baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",[kullaniciAdi],(err,result)=>{
         if(err){
             throw err
-        }else{
-            var kullaniciAdiString = JSON.parse(JSON.stringify(result))
-            function sayiUret(min,max){
-                var sayi = Math.floor(Math.random()*(max-min))+min
-                return sayi
+        }
+        else{
+            var jsonResult = JSON.parse(JSON.stringify(result))
+            console.log(jsonResult[0].forgetPasswordToken)
+            var codeDtToken = result[0].forgetPasswordToken
+            if(codeToken == codeDtToken){
+                baglanti.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ?",[newPassword,kullaniciAdi],(err)=>{
+                    if(err){
+                        throw err
+                    }
+                    else{
+                        res.send("Şifre değiştirildi")
+                    }
+                })
             }
-            var uretilenSayi = sayiUret(1000,99999);
-            for(var i = 0 ; i < kullaniciAdiString.length ; i++){
-                console.log("a")
-                if(kullaniciAdiString[i].kullaniciAdi == kullaniciAdi){
-                    let transporter = nodemailer.createTransport({
-                        host:"smtp.gmail.com",
-                        port:465,
-                        secure:true,
-                        auth:{
-                            user:'kavalcinurihan@gmail.com',
-                            pass:'lfxtfgzyiserimdn'
-                        },
-                    })
-                    console.log("a")
-    
-                    transporter.sendMail({
-                        from:'"You" <kavalcinurihan@gmail.com>',
-                        to:email,
-                        subject:"Verification Code",
-                        html:uretilenSayi,
-                    })
-                    console.log("a")
-                    res.json({
-                        succeeded: true,
-                        message:uretilenSayi
-
-                    })
-                    console.log("a")
-                }else{
-                    global.check2 = false;
-                }
+            else{
+                res.send("Yanlis ve ya eksik kod")
             }
         }
-    }) */
-    
-
-
-
-
-    /* let transporter = nodemailer.createTransport({
-        host:"smtp.gmail.com",
-        port:465,
-        secure:true,
-        auth:{
-            user:'kavalcinurihan@gmail.com',
-            pass:'lfxtfgzyiserimdn'
-        },
-    })
-
-    
-    await transporter.sendMail({
-        from:'"You" <kavalcinurihan@gmail.com>',
-        to:email,
-        subject:"Verification Code",
-        html:`<p>?</p>`,
-    })
-    
-    res.json({
-        succeeded: true
-    }) */
+    })}
+    else{
+        res.send("Böyle bir kullanici adi yoktur")
+    }
 })
+
 
 global.check1;
 router.put("/changePassword",(req,res)=>{
