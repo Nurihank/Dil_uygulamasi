@@ -25,7 +25,7 @@ const query = util.promisify(con.query).bind(con);
 //bilgileri getirme usermodel tarzı bişiler yapacaksın
 async function languageFind(language){
     var result = await query("Select COUNT(*) as sayi FROM dil WHERE dil_adi = ?",language);
-    console.log(result[0].sayi)
+    
     if(result[0].sayi==1){
         return true
     }
@@ -36,7 +36,7 @@ async function languageFind(language){
 
 async function jobFind(meslek){
     var result = await query("Select COUNT(*) as sayi FROM meslek WHERE meslek = ?",meslek);
-    console.log(result[0].sayi)
+    
     if(result[0].sayi==1){
         return true
     }
@@ -197,9 +197,6 @@ router.post("/addCategory",(req,res)=>{
         res.send("Kategori eklendi")
     })
 })
-
-
-
 
 
 module.exports = router

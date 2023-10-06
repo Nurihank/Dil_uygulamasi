@@ -38,15 +38,14 @@ function _languageFind() {
           return query("Select COUNT(*) as sayi FROM dil WHERE dil_adi = ?", language);
         case 2:
           result = _context4.sent;
-          console.log(result[0].sayi);
           if (!(result[0].sayi == 1)) {
-            _context4.next = 8;
+            _context4.next = 7;
             break;
           }
           return _context4.abrupt("return", true);
-        case 8:
+        case 7:
           return _context4.abrupt("return", false);
-        case 9:
+        case 8:
         case "end":
           return _context4.stop();
       }
@@ -67,15 +66,14 @@ function _jobFind() {
           return query("Select COUNT(*) as sayi FROM meslek WHERE meslek = ?", meslek);
         case 2:
           result = _context5.sent;
-          console.log(result[0].sayi);
           if (!(result[0].sayi == 1)) {
-            _context5.next = 8;
+            _context5.next = 7;
             break;
           }
           return _context5.abrupt("return", true);
-        case 8:
+        case 7:
           return _context5.abrupt("return", false);
-        case 9:
+        case 8:
         case "end":
           return _context5.stop();
       }
