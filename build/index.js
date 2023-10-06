@@ -2,12 +2,10 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _express = _interopRequireDefault(require("express"));
-var _mysql = _interopRequireDefault(require("mysql"));
-var _path = _interopRequireDefault(require("path"));
 var _bodyParser = _interopRequireDefault(require("body-parser"));
 var _kullaniciRouter = _interopRequireDefault(require("./routes/kullaniciRouter.js"));
+var _authorizedRouter = _interopRequireDefault(require("./routes/authorizedRouter.js"));
 var app = (0, _express["default"])();
-var router = _express["default"].Router();
 app.use(_bodyParser["default"].json());
 app.use(_bodyParser["default"].urlencoded({
   extended: true
@@ -16,41 +14,13 @@ app.use(_express["default"].urlencoded({
   extended: true
 }));
 app.use(_express["default"].json());
-var baglanti = _mysql["default"].createConnection({
-  host: "localhost",
-  user: "root",
-  password: "15935738a",
-  database: "ingilizce_uygulamasi"
-});
 app.listen(3000, function (err) {
   if (err) {
     console.log("hata verdi");
   }
 });
-baglanti.connect(function (err) {
-  if (err) {
-    throw err;
-  } else {
-    console.log("Connection Successful");
-  }
-});
-console.log();
 app.use("/kullanici", _kullaniciRouter["default"]);
-/* 
-baglanti.query("SELECT kullaniciAdi FROM kullanici",(err,result,fields)=>{
-    var kullaniciAdiString = JSON.parse(JSON.stringify(result))
-    console.log(kullaniciAdiString[0].kullaniciAdi)
-}) */
-
-app.put("/deneme", function (req, res) {
-  /* kullaniciSchema.methods.createResetPasswordToken = function(){ 
-      const resetPasswordToken = crypto.randomBytes(32,toString("hex"))
-      
-      //sha ile geri döndürülemeyecek şekilde şifrelenir
-      return passwordTokken = crypto.createHash("sha252").update(resetPasswordToken).digest("hex")
-  }
-    console.log(kullaniciSchema) */
-});
+app.use("/authorized", _authorizedRouter["default"]);
 
 /* app.post("/kullaniciEkle",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi

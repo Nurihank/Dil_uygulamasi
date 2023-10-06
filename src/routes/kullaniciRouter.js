@@ -2,30 +2,24 @@ const router = require("express").Router();
 import mysql from "mysql"
 import util from "util"
 import bodyParser, { json } from "body-parser";
-import express from "express"
-import crypto from "crypto"
-import bcrypt from "bcryptjs"
 import md5 from "md5"
 import nodemailer from "nodemailer"
 
 //crypto nedir araştır bak ve procademy den kurslara bak modeller vb
 
-
-const app = express();
-
-app.use(bodyParser.json())
+/* app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
     extended:true
 }))
 
 app.use(express.urlencoded({extended:true}))
-app.use(express.json())
+app.use(express.json()) */
 
 var baglanti = mysql.createConnection({
     host:"localhost",
     user:"root",
     password:"15935738a",
-    database:"ingilizce_uygulamasi"
+    database:"dil_uygulamasi"
     })
 
     baglanti.connect((err)=>{
@@ -78,7 +72,6 @@ async function userPassword(şifre){
 }
 
 
-
 router.post("/signup",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre
@@ -126,6 +119,8 @@ router.get("/signin",async (req,res)=>{
 
     var isUserExist = await userFind(kullaniciAdi)
     var sifreDT = await userPassword(sifre)
+
+    
 
     if(isUserExist == true && sifreDT == true){
         res.json({

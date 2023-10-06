@@ -1,12 +1,9 @@
 import express from "express"
-import mysql from "mysql"
-import path from "path"
 import bodyParser from "body-parser";
 import kullaniciRouter from "./routes/kullaniciRouter.js"
+import authorizedRouter from "./routes/authorizedRouter.js"
 
 const app = express();
-const router = express.Router();
-
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
@@ -16,46 +13,18 @@ app.use(bodyParser.urlencoded({
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 
-var baglanti = mysql.createConnection({
-    host:"localhost",
-    user:"root",
-    password:"15935738a",
-    database:"ingilizce_uygulamasi"
-})
-
 app.listen(3000,(err)=>{
     if(err){
         console.log("hata verdi")
     }
 })
-baglanti.connect(function(err){
-    if(err){
-        throw err
-    }
-    else{
-        console.log("Connection Successful")
-    }
-})
 
-console.log()
+
+
 app.use("/kullanici",kullaniciRouter)
-/* 
-baglanti.query("SELECT kullaniciAdi FROM kullanici",(err,result,fields)=>{
-    var kullaniciAdiString = JSON.parse(JSON.stringify(result))
-    console.log(kullaniciAdiString[0].kullaniciAdi)
-}) */
+app.use("/authorized",authorizedRouter)
 
 
-app.put("/deneme",(req,res)=>{
-    /* kullaniciSchema.methods.createResetPasswordToken = function(){ 
-        const resetPasswordToken = crypto.randomBytes(32,toString("hex"))
-        
-        //sha ile geri döndürülemeyecek şekilde şifrelenir
-        return passwordTokken = crypto.createHash("sha252").update(resetPasswordToken).digest("hex")
-    }
-
-    console.log(kullaniciSchema) */
-})
 
 
 
