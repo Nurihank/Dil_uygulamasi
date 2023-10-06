@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
 --
--- Host: localhost    Database: ingilizce_uygulamasi
+-- Host: localhost    Database: dil_uygulamasi
 -- ------------------------------------------------------
 -- Server version	8.0.34
 
@@ -26,7 +26,7 @@ CREATE TABLE `dil` (
   `id` int NOT NULL AUTO_INCREMENT,
   `dil_adi` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -35,6 +35,7 @@ CREATE TABLE `dil` (
 
 LOCK TABLES `dil` WRITE;
 /*!40000 ALTER TABLE `dil` DISABLE KEYS */;
+INSERT INTO `dil` VALUES (1,'Turkce'),(2,'Ingilizce'),(3,'Almanca'),(4,'Portekizce'),(5,'Fransızca');
 /*!40000 ALTER TABLE `dil` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -74,7 +75,7 @@ CREATE TABLE `kategori` (
   `kategori` varchar(45) DEFAULT NULL,
   `meslek_id` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='		';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='		';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -83,6 +84,7 @@ CREATE TABLE `kategori` (
 
 LOCK TABLES `kategori` WRITE;
 /*!40000 ALTER TABLE `kategori` DISABLE KEYS */;
+INSERT INTO `kategori` VALUES (1,'kolay',4),(2,'kolay',3),(3,'kolay',3);
 /*!40000 ALTER TABLE `kategori` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -123,7 +125,7 @@ CREATE TABLE `kelime` (
   `kategori_id` int DEFAULT NULL,
   `kelime` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -132,6 +134,7 @@ CREATE TABLE `kelime` (
 
 LOCK TABLES `kelime` WRITE;
 /*!40000 ALTER TABLE `kelime` DISABLE KEYS */;
+INSERT INTO `kelime` VALUES (1,2,'bilgisayar'),(2,1,'uçak'),(3,3,'yazılım');
 /*!40000 ALTER TABLE `kelime` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -178,7 +181,7 @@ CREATE TABLE `kullanici` (
   `forgetPasswordToken` varchar(255) DEFAULT NULL,
   `changePasswordToken` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=110 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=111 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -187,7 +190,7 @@ CREATE TABLE `kullanici` (
 
 LOCK TABLES `kullanici` WRITE;
 /*!40000 ALTER TABLE `kullanici` DISABLE KEYS */;
-INSERT INTO `kullanici` VALUES (91,'nk31','123456',1,2,1,'nk123',NULL,NULL),(101,'NurihanK','01c96beddb172095388e43835bdb7145',NULL,NULL,NULL,'nnk123',NULL,NULL),(102,'efeiti','f899139df5e1059396431415e770c6dd',NULL,NULL,NULL,'kavalcinurihan@gmail.com','a9b7ba70783b617e9998dc4dd82eb3c5','b8c37e33defde51cf91e1e03e51657da'),(108,'NurihanK31','e35cf7b66449df565f93c607d5a81d09',NULL,NULL,NULL,'nrhnASD',NULL,NULL),(109,'nunu','2f8c3ab806a42e79c774cb09b41a53c8',NULL,NULL,NULL,'nunu',NULL,NULL);
+INSERT INTO `kullanici` VALUES (91,'nk31','123456',1,2,1,'nk123',NULL,NULL),(101,'NurihanK','01c96beddb172095388e43835bdb7145',NULL,NULL,NULL,'nnk123',NULL,NULL),(102,'efeiti','f899139df5e1059396431415e770c6dd',NULL,NULL,NULL,'kavalcinurihan@gmail.com','a9b7ba70783b617e9998dc4dd82eb3c5','b8c37e33defde51cf91e1e03e51657da'),(108,'NurihanK31','e35cf7b66449df565f93c607d5a81d09',NULL,NULL,NULL,'nrhnASD',NULL,NULL),(109,'nunu','2f8c3ab806a42e79c774cb09b41a53c8',NULL,NULL,NULL,'nunu',NULL,NULL),(110,'efecan','c16a5320fa475530d9583c34fd356ef5',NULL,NULL,NULL,'nk',NULL,NULL);
 /*!40000 ALTER TABLE `kullanici` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -202,7 +205,7 @@ CREATE TABLE `meslek` (
   `idMeslek` int NOT NULL AUTO_INCREMENT,
   `meslek` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`idMeslek`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +214,7 @@ CREATE TABLE `meslek` (
 
 LOCK TABLES `meslek` WRITE;
 /*!40000 ALTER TABLE `meslek` DISABLE KEYS */;
-INSERT INTO `meslek` VALUES (1,'Bilgisayar Mühendisi'),(2,'Ogretmen'),(3,'İnşaat Mühendisi');
+INSERT INTO `meslek` VALUES (1,'Bilgisayar Mühendisi'),(2,'Ogretmen'),(3,'İnşaat Mühendisi'),(4,'Pilot');
 /*!40000 ALTER TABLE `meslek` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -249,4 +252,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-09-29 13:00:58
+-- Dump completed on 2023-10-06 13:26:45

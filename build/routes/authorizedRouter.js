@@ -29,42 +29,13 @@ function languageFind(_x) {
   return _languageFind.apply(this, arguments);
 }
 function _languageFind() {
-  _languageFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(language) {
-    var result;
-    return _regenerator["default"].wrap(function _callee3$(_context3) {
-      while (1) switch (_context3.prev = _context3.next) {
-        case 0:
-          _context3.next = 2;
-          return query("Select COUNT(*) as sayi FROM dil WHERE dil_adi = ?", language);
-        case 2:
-          result = _context3.sent;
-          console.log(result[0].sayi);
-          if (!(result[0].sayi == 1)) {
-            _context3.next = 8;
-            break;
-          }
-          return _context3.abrupt("return", true);
-        case 8:
-          return _context3.abrupt("return", false);
-        case 9:
-        case "end":
-          return _context3.stop();
-      }
-    }, _callee3);
-  }));
-  return _languageFind.apply(this, arguments);
-}
-function jobFind(_x2) {
-  return _jobFind.apply(this, arguments);
-}
-function _jobFind() {
-  _jobFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(meslek) {
+  _languageFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(language) {
     var result;
     return _regenerator["default"].wrap(function _callee4$(_context4) {
       while (1) switch (_context4.prev = _context4.next) {
         case 0:
           _context4.next = 2;
-          return query("Select COUNT(*) as sayi FROM meslek WHERE meslek = ?", meslek);
+          return query("Select COUNT(*) as sayi FROM dil WHERE dil_adi = ?", language);
         case 2:
           result = _context4.sent;
           console.log(result[0].sayi);
@@ -81,7 +52,64 @@ function _jobFind() {
       }
     }, _callee4);
   }));
+  return _languageFind.apply(this, arguments);
+}
+function jobFind(_x2) {
   return _jobFind.apply(this, arguments);
+}
+function _jobFind() {
+  _jobFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(meslek) {
+    var result;
+    return _regenerator["default"].wrap(function _callee5$(_context5) {
+      while (1) switch (_context5.prev = _context5.next) {
+        case 0:
+          _context5.next = 2;
+          return query("Select COUNT(*) as sayi FROM meslek WHERE meslek = ?", meslek);
+        case 2:
+          result = _context5.sent;
+          console.log(result[0].sayi);
+          if (!(result[0].sayi == 1)) {
+            _context5.next = 8;
+            break;
+          }
+          return _context5.abrupt("return", true);
+        case 8:
+          return _context5.abrupt("return", false);
+        case 9:
+        case "end":
+          return _context5.stop();
+      }
+    }, _callee5);
+  }));
+  return _jobFind.apply(this, arguments);
+}
+function wordFind(_x3) {
+  return _wordFind.apply(this, arguments);
+}
+function _wordFind() {
+  _wordFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(word) {
+    var result;
+    return _regenerator["default"].wrap(function _callee6$(_context6) {
+      while (1) switch (_context6.prev = _context6.next) {
+        case 0:
+          _context6.next = 2;
+          return query("SELECT COUNT(*) as sayi FROM kelime WHERE kelime = ?", word);
+        case 2:
+          result = _context6.sent;
+          if (!result[0].sayi) {
+            _context6.next = 7;
+            break;
+          }
+          return _context6.abrupt("return", true);
+        case 7:
+          return _context6.abrupt("return", false);
+        case 8:
+        case "end":
+          return _context6.stop();
+      }
+    }, _callee6);
+  }));
+  return _wordFind.apply(this, arguments);
 }
 router.get("/language", function (req, res) {
   con.query("SELECT * FROM dil", function (err, result) {
@@ -127,7 +155,7 @@ router.post("/addLanguage", /*#__PURE__*/function () {
       }
     }, _callee);
   }));
-  return function (_x3, _x4) {
+  return function (_x4, _x5) {
     return _ref.apply(this, arguments);
   };
 }());
@@ -177,8 +205,81 @@ router.post("/addJob", /*#__PURE__*/function () {
       }
     }, _callee2);
   }));
-  return function (_x5, _x6) {
+  return function (_x6, _x7) {
     return _ref2.apply(this, arguments);
   };
 }());
+router.get("/word", function (req, res) {
+  con.query("SELECT * FROM kelime", function (err, result) {
+    res.send(result);
+  });
+});
+router.get("/word/:id", function (req, res) {
+  var id = req.params.id;
+  con.query("SELECT * FROM kelime Where id = ?", id, function (err, result) {
+    res.send(result);
+  });
+});
+router.post("/addWord", /*#__PURE__*/function () {
+  var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(req, res) {
+    var kelime, kategori_id, isWordExist;
+    return _regenerator["default"].wrap(function _callee3$(_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          kelime = req.body.kelime;
+          kategori_id = req.body.kategori_id;
+          _context3.next = 4;
+          return wordFind(kelime);
+        case 4:
+          isWordExist = _context3.sent;
+          if (isWordExist == true) {
+            res.send("Böyle bir kelime vardir");
+          } else {
+            con.query("INSERT INTO kelime (kategori_id,kelime) values (?,?)", [kategori_id, kelime], function (err, result) {
+              if (err) {
+                throw err;
+              } else {
+                res.send("Kelime eklendi");
+              }
+            });
+          }
+        case 6:
+        case "end":
+          return _context3.stop();
+      }
+    }, _callee3);
+  }));
+  return function (_x8, _x9) {
+    return _ref3.apply(this, arguments);
+  };
+}());
+router.get("/category", function (req, res) {
+  con.query("SELECT * FROM kategori", function (err, result) {
+    if (err) {
+      throw err;
+    } else {
+      res.send(result);
+    }
+  });
+});
+router.get("/category/:id", function (req, res) {
+  var id = req.params.id;
+  con.query("SELECT * FROM kategori WHERE id = ?", id, function (err, result) {
+    if (err) {
+      throw err;
+    } else {
+      res.send(result);
+    }
+  });
+});
+router.post("/addCategory", function (req, res) {
+  var kategori = req.body.kategori;
+  var meslek_id = req.body.meslek_id;
+  con.query("INSERT INTO kategori (kategori,meslek_id) values (?,?)", [kategori, meslek_id], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.send("Kategori eklendi");
+  });
+});
 module.exports = router;

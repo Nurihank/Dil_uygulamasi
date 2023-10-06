@@ -45,6 +45,15 @@ async function jobFind(meslek){
     }
 }
 
+async function wordFind(word){
+    var result = await query("SELECT COUNT(*) as sayi FROM kelime WHERE kelime = ?",word)
+    if(result[0].sayi){
+        return true
+    }else{
+        return false
+    }
+}
+
 router.get("/language",(req,res)=>{
     con.query("SELECT * FROM dil",(err,result)=>{
         if(err){
@@ -119,4 +128,78 @@ router.post("/addJob",async(req,res)=>{
     }
     
 })
+
+router.get("/word",(req,res)=>{
+    con.query("SELECT * FROM kelime",(err,result)=>{
+        res.send(result)
+    })
+})
+
+router.get("/word/:id",(req,res)=>{
+    const id = req.params.id;
+
+    con.query("SELECT * FROM kelime Where id = ?",id,(err,result)=>{
+        res.send(result)
+    })
+})
+
+router.post("/addWord",async(req,res)=>{
+    const kelime = req.body.kelime
+    const kategori_id = req.body.kategori_id
+
+    const isWordExist = await wordFind(kelime)
+
+    if(isWordExist == true){
+        res.send("Böyle bir kelime vardir")
+    }else{
+        con.query("INSERT INTO kelime (kategori_id,kelime) values (?,?)",[kategori_id,kelime],(err,result)=>{
+            if(err){
+                throw err
+            }else{
+                res.send("Kelime eklendi")
+            }
+        })
+        
+    }
+
+})
+
+router.get("/category",(req,res)=>{
+    con.query("SELECT * FROM kategori",(err,result)=>{
+        if(err){
+            throw err
+        }else{
+            res.send(result)
+        }
+    })
+})
+
+router.get("/category/:id",(req,res)=>{
+    const id = req.params.id
+    
+    con.query("SELECT * FROM kategori WHERE id = ?",id,(err,result)=>{
+        if(err){
+            throw err
+        }else{
+            res.send(result)
+        }
+    })
+})
+
+router.post("/addCategory",(req,res)=>{
+    const kategori = req.body.kategori
+    const meslek_id = req.body.meslek_id
+
+    con.query("INSERT INTO kategori (kategori,meslek_id) values (?,?)",[kategori,meslek_id],(err,result)=>{
+        if(err){
+            throw err
+        }
+        res.send("Kategori eklendi")
+    })
+})
+
+
+
+
+
 module.exports = router
