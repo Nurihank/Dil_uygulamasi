@@ -1,7 +1,12 @@
+require('dotenv').config() //tokenlerin gözükmesi için yazdık bunu
 import express from "express"
 import bodyParser from "body-parser";
 import kullaniciRouter from "./routes/kullaniciRouter.js"
 import authorizedRouter from "./routes/authorizedRouter.js"
+import { networkInterfaces } from "os";
+const jwt = require("jsonwebtoken")
+const crypto = require("crypto")
+//nodemon a bak otomatik yeniliyo tekrar başlatmamıza gerek yok
 
 const app = express();
 
@@ -11,7 +16,7 @@ app.use(bodyParser.urlencoded({
 }))
 
 app.use(express.urlencoded({extended:true}))
-app.use(express.json())
+app.use(express.json())  //verileri json formatına çeviriyor  
 
 app.listen(3000,(err)=>{
     if(err){
@@ -24,11 +29,41 @@ app.listen(3000,(err)=>{
 app.use("/kullanici",kullaniciRouter)
 app.use("/authorized",authorizedRouter)
 
+const posts = [
+    {
+        username : "nuri",
+        title : "1"
+    },
+    {
+        username : "mahir",
+        title : "2"
+    }
+]
+
+app.post("/posts",(req,res)=>{
+    res.json(posts.filter(post => post.username === req.user.name))
+})
+
+app.post("/login",(req,res)=>{
+    const username = req.body.userName
+    const user = { name: username}
+    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+    res.json({accessToken:accessToken})
+})
 
 
+function authenticateToken(req,res,next) {
+    const authHeader = req.headers["authorization"]
+    const token = authHeader && authHeader.split('')[1]
+    if(token == null) return res.sendStatus(401)
 
+    jwt.verify(token, procces.env.ACCESS_TOKEN_SECRET,(err,user) =>{ 
+        if(err) return res.sendStatus(403) //bir jeton var ama geçerli değil
 
-
+        req.user = user
+        next()
+    })
+}
 
 
 

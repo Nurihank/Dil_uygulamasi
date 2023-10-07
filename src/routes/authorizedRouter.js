@@ -2,6 +2,7 @@ const router = require("express").Router();//routerları export etmek için
 import mysql from "mysql" //sql bağlantısı kurmak için
 import express from "express";
 import util from "util"
+import { error } from "console";
 
 var con = mysql.createConnection({
     host:"localhost",
@@ -74,7 +75,7 @@ router.get("/language/:id",(req,res)=>{
     })
 })
 
-router.post("/addLanguage",async(req,res)=>{
+router.post("/language",async(req,res)=>{
     const dil = req.body.dil
     const isLanguageExist = await languageFind(dil)
     
@@ -87,6 +88,22 @@ router.post("/addLanguage",async(req,res)=>{
             }
             res.send("Dil eklendi")
         })
+    }
+})
+
+router.delete("/language",async(req,res)=>{
+    const dil = req.body.dil
+    const isLanguageExist = await languageFind(dil)
+
+    if(isLanguageExist == true){
+        con.query("DELETE FROM dil WHERE dil_adi = ? ",dil,(err)=>{
+            if(err){
+                throw err
+            }
+            res.send("Basarili bir sekilde silindi")
+        })
+    }else{
+        res.send("Böyle bir dil bulunamadi")
     }
 })
 
@@ -111,7 +128,7 @@ router.get("/job/:id",(req,res)=>{
     })
 })
 
-router.post("/addJob",async(req,res)=>{
+router.post("/job",async(req,res)=>{
     const job = req.body.job
     const isJobExist = await jobFind(job)
 
@@ -129,6 +146,22 @@ router.post("/addJob",async(req,res)=>{
     
 })
 
+router.delete("/job",async(req,res)=>{
+    const meslek = req.body.meslek
+    const isJobExist = await jobFind(meslek)
+
+    if(isJobExist == true){
+        con.query("DELETE FROM meslek WHERE meslek = ? ",meslek,(err)=>{
+            if(err){
+                throw err
+            }
+            res.send("Basarili bir sekilde silindi")
+        })
+    }else{
+        res.send("Böyle bir meslek bulunamadi")
+    } 
+})
+
 router.get("/word",(req,res)=>{
     con.query("SELECT * FROM kelime",(err,result)=>{
         res.send(result)
@@ -143,7 +176,7 @@ router.get("/word/:id",(req,res)=>{
     })
 })
 
-router.post("/addWord",async(req,res)=>{
+router.post("/word",async(req,res)=>{
     const kelime = req.body.kelime
     const kategori_id = req.body.kategori_id
 
@@ -162,6 +195,22 @@ router.post("/addWord",async(req,res)=>{
         
     }
 
+})
+
+router.delete("/word",async(req,res)=>{
+    const kelime = req.body.kelime
+    const isWordExist = await wordFind(kelime)
+
+    if(isWordExist == true){
+        con.query("DELETE FROM kelime WHERE kelime = ? ",kelime,(err)=>{
+            if(err){
+                throw err
+            }
+            res.send("Basarili bir sekilde silindi")
+        })
+    }else{
+        res.send("Böyle bir kelime bulunamadi")
+    }
 })
 
 router.get("/category",(req,res)=>{
@@ -186,7 +235,7 @@ router.get("/category/:id",(req,res)=>{
     })
 })
 
-router.post("/addCategory",(req,res)=>{
+router.post("/category",(req,res)=>{
     const kategori = req.body.kategori
     const meslek_id = req.body.meslek_id
 
@@ -195,6 +244,17 @@ router.post("/addCategory",(req,res)=>{
             throw err
         }
         res.send("Kategori eklendi")
+    })
+})
+
+router.delete("/category",(req,res)=>{
+    const id = req.body.id
+
+    con.query("DELETE FROM kategori WHERE id = ? ",id,(err)=>{
+        if(err){
+            throw err
+        }
+        res.send("Basarili bir sekilde silindi")
     })
 })
 

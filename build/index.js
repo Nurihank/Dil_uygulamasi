@@ -5,6 +5,13 @@ var _express = _interopRequireDefault(require("express"));
 var _bodyParser = _interopRequireDefault(require("body-parser"));
 var _kullaniciRouter = _interopRequireDefault(require("./routes/kullaniciRouter.js"));
 var _authorizedRouter = _interopRequireDefault(require("./routes/authorizedRouter.js"));
+var _os = require("os");
+require('dotenv').config(); //tokenlerin gözükmesi için yazdık bunu
+
+var jwt = require("jsonwebtoken");
+var crypto = require("crypto");
+//nodemon a bak otomatik yeniliyo tekrar başlatmamıza gerek yok
+
 var app = (0, _express["default"])();
 app.use(_bodyParser["default"].json());
 app.use(_bodyParser["default"].urlencoded({
@@ -13,7 +20,8 @@ app.use(_bodyParser["default"].urlencoded({
 app.use(_express["default"].urlencoded({
   extended: true
 }));
-app.use(_express["default"].json());
+app.use(_express["default"].json()); //verileri json formatına çeviriyor  
+
 app.listen(3000, function (err) {
   if (err) {
     console.log("hata verdi");
@@ -21,6 +29,39 @@ app.listen(3000, function (err) {
 });
 app.use("/kullanici", _kullaniciRouter["default"]);
 app.use("/authorized", _authorizedRouter["default"]);
+var posts = [{
+  username: "nuri",
+  title: "1"
+}, {
+  username: "mahir",
+  title: "2"
+}];
+app.post("/posts", function (req, res) {
+  res.json(posts.filter(function (post) {
+    return post.username === req.user.name;
+  }));
+});
+app.post("/login", function (req, res) {
+  var username = req.body.userName;
+  var user = {
+    name: username
+  };
+  var accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
+  res.json({
+    accessToken: accessToken
+  });
+});
+function authenticateToken(req, res, next) {
+  var authHeader = req.headers["authorization"];
+  var token = authHeader && authHeader.split('')[1];
+  if (token == null) return res.sendStatus(401);
+  jwt.verify(token, procces.env.ACCESS_TOKEN_SECRET, function (err, user) {
+    if (err) return res.sendStatus(403); //bir jeton var ama geçerli değil
+
+    req.user = user;
+    next();
+  });
+}
 
 /* app.post("/kullaniciEkle",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi

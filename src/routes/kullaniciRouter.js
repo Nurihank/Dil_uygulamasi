@@ -5,16 +5,6 @@ import bodyParser, { json } from "body-parser";
 import md5 from "md5"
 import nodemailer from "nodemailer"
 
-//crypto nedir araştır bak ve procademy den kurslara bak modeller vb
-
-/* app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({
-    extended:true
-}))
-
-app.use(express.urlencoded({extended:true}))
-app.use(express.json()) */
-
 var baglanti = mysql.createConnection({
     host:"localhost",
     user:"root",
