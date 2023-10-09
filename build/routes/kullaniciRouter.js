@@ -9,6 +9,7 @@ var _util = _interopRequireDefault(require("util"));
 var _bodyParser = _interopRequireWildcard(require("body-parser"));
 var _md = _interopRequireDefault(require("md5"));
 var _nodemailer = _interopRequireDefault(require("nodemailer"));
+var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var router = require("express").Router();
@@ -26,50 +27,43 @@ baglanti.connect(function (err) {
   }
 });
 var query = _util["default"].promisify(baglanti.query).bind(baglanti); //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
-function userFind(_x) {
-  return _userFind.apply(this, arguments);
+function userData(_x) {
+  return _userData.apply(this, arguments);
 }
-function _userFind() {
-  _userFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(kullaniciAdi) {
-    var result, sayiString;
+function _userData() {
+  _userData = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(kullaniciAdi) {
+    var result;
     return _regenerator["default"].wrap(function _callee8$(_context8) {
       while (1) switch (_context8.prev = _context8.next) {
         case 0:
           _context8.next = 2;
-          return query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi);
+          return query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi);
         case 2:
           result = _context8.sent;
-          sayiString = JSON.parse(JSON.stringify(result)); //console.log(sayiString[0].sayi)
-          if (!sayiString[0].sayi) {
-            _context8.next = 8;
-            break;
-          }
-          return _context8.abrupt("return", true);
-        case 8:
-          return _context8.abrupt("return", false);
-        case 9:
+          return _context8.abrupt("return", result);
+        case 4:
         case "end":
           return _context8.stop();
       }
     }, _callee8);
   }));
+  return _userData.apply(this, arguments);
+}
+function userFind(_x2) {
   return _userFind.apply(this, arguments);
 }
-function userEmail(_x2) {
-  return _userEmail.apply(this, arguments);
-}
-function _userEmail() {
-  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(email) {
+function _userFind() {
+  _userFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(kullaniciAdi) {
     var result, sayiString;
     return _regenerator["default"].wrap(function _callee9$(_context9) {
       while (1) switch (_context9.prev = _context9.next) {
         case 0:
           _context9.next = 2;
-          return query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email);
+          return query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi);
         case 2:
           result = _context9.sent;
-          sayiString = JSON.parse(JSON.stringify(result));
-          if (!(sayiString[0].sayi == 1)) {
+          sayiString = JSON.parse(JSON.stringify(result)); //console.log(sayiString[0].sayi)
+          if (!sayiString[0].sayi) {
             _context9.next = 8;
             break;
           }
@@ -82,35 +76,64 @@ function _userEmail() {
       }
     }, _callee9);
   }));
+  return _userFind.apply(this, arguments);
+}
+function userEmail(_x3) {
   return _userEmail.apply(this, arguments);
 }
-function userPassword(_x3) {
-  return _userPassword.apply(this, arguments);
-}
-function _userPassword() {
-  _userPassword = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(şifre) {
-    var passwordToken, result, sayiString;
+function _userEmail() {
+  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(email) {
+    var result, sayiString;
     return _regenerator["default"].wrap(function _callee10$(_context10) {
       while (1) switch (_context10.prev = _context10.next) {
         case 0:
-          passwordToken = (0, _md["default"])(şifre);
-          _context10.next = 3;
-          return query("SELECT COUNT(*) as sayi FROM kullanici WHERE şifre = ?", passwordToken);
-        case 3:
+          _context10.next = 2;
+          return query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email);
+        case 2:
           result = _context10.sent;
           sayiString = JSON.parse(JSON.stringify(result));
           if (!(sayiString[0].sayi == 1)) {
-            _context10.next = 9;
+            _context10.next = 8;
             break;
           }
           return _context10.abrupt("return", true);
-        case 9:
+        case 8:
           return _context10.abrupt("return", false);
-        case 10:
+        case 9:
         case "end":
           return _context10.stop();
       }
     }, _callee10);
+  }));
+  return _userEmail.apply(this, arguments);
+}
+function userPassword(_x4) {
+  return _userPassword.apply(this, arguments);
+}
+function _userPassword() {
+  _userPassword = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee11(şifre) {
+    var passwordToken, result, sayiString;
+    return _regenerator["default"].wrap(function _callee11$(_context11) {
+      while (1) switch (_context11.prev = _context11.next) {
+        case 0:
+          passwordToken = (0, _md["default"])(şifre);
+          _context11.next = 3;
+          return query("SELECT COUNT(*) as sayi FROM kullanici WHERE şifre = ?", passwordToken);
+        case 3:
+          result = _context11.sent;
+          sayiString = JSON.parse(JSON.stringify(result));
+          if (!(sayiString[0].sayi == 1)) {
+            _context11.next = 9;
+            break;
+          }
+          return _context11.abrupt("return", true);
+        case 9:
+          return _context11.abrupt("return", false);
+        case 10:
+        case "end":
+          return _context11.stop();
+      }
+    }, _callee11);
   }));
   return _userPassword.apply(this, arguments);
 }
@@ -161,13 +184,20 @@ router.post("/signup", /*#__PURE__*/function () {
       }
     }, _callee);
   }));
-  return function (_x4, _x5) {
+  return function (_x5, _x6) {
     return _ref.apply(this, arguments);
   };
 }());
+
+/* router.get("/deneme",async(req,res)=>{
+    var dene = await user("NurihanK")
+    res.send(dene[0].kullaniciAdi)
+
+}) */
+
 router.get("/signin", /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
-    var kullaniciAdi, sifre, passwordToken, isUserExist, sifreDT;
+    var kullaniciAdi, sifre, passwordToken, isUserExist, user, accessToken;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
@@ -179,19 +209,27 @@ router.get("/signin", /*#__PURE__*/function () {
         case 5:
           isUserExist = _context2.sent;
           _context2.next = 8;
-          return userPassword(sifre);
+          return userData(kullaniciAdi);
         case 8:
-          sifreDT = _context2.sent;
-          if (isUserExist == true && sifreDT == true) {
-            res.json({
-              status: "SUCCES",
-              message: "Basarili bir sekilde giris yaptini<"
-            });
+          user = _context2.sent;
+          if (isUserExist == true) {
+            if (passwordToken == user[0].şifre) {
+              accessToken = _jsonwebtoken["default"].sign({
+                kullaniciAdi: user[0].kullaniciAdi,
+                email: user[0].email
+              }, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: "15m"
+              });
+              baglanti.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ", [accessToken, kullaniciAdi]);
+              res.json({
+                message: "Basarili bir sekilde giris yaptiniz",
+                accesToken: accessToken
+              });
+            } else {
+              res.send("Kullanici adi ve ya şifre hatalidir");
+            }
           } else {
-            res.json({
-              status: "FAILED",
-              message: "Kullanici adi ve ya sifre hatali"
-            });
+            res.send("Böyle bir kullanici adi yoktur");
           }
         case 10:
         case "end":
@@ -199,7 +237,7 @@ router.get("/signin", /*#__PURE__*/function () {
       }
     }, _callee2);
   }));
-  return function (_x6, _x7) {
+  return function (_x7, _x8) {
     return _ref2.apply(this, arguments);
   };
 }());
@@ -319,7 +357,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
                       }
                     }, _callee3);
                   }));
-                  return function codeUret(_x10, _x11) {
+                  return function codeUret(_x11, _x12) {
                     return _ref4.apply(this, arguments);
                   };
                 }();
@@ -367,7 +405,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
       }
     }, _callee4);
   }));
-  return function (_x8, _x9) {
+  return function (_x9, _x10) {
     return _ref3.apply(this, arguments);
   };
 }());
@@ -415,7 +453,7 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
       }
     }, _callee5);
   }));
-  return function (_x12, _x13) {
+  return function (_x13, _x14) {
     return _ref5.apply(this, arguments);
   };
 }());
@@ -469,7 +507,7 @@ router.put("/changePasswordCode", /*#__PURE__*/function () {
       }
     }, _callee6);
   }));
-  return function (_x14, _x15) {
+  return function (_x15, _x16) {
     return _ref6.apply(this, arguments);
   };
 }());
@@ -510,7 +548,7 @@ router.put("/changePassword", /*#__PURE__*/function () {
       }
     }, _callee7);
   }));
-  return function (_x16, _x17) {
+  return function (_x17, _x18) {
     return _ref7.apply(this, arguments);
   };
 }());

@@ -4,6 +4,7 @@ import util from "util"
 import bodyParser, { json } from "body-parser";
 import md5 from "md5"
 import nodemailer from "nodemailer"
+import jwt from "jsonwebtoken"
 
 var baglanti = mysql.createConnection({
     host:"localhost",
@@ -22,6 +23,11 @@ var baglanti = mysql.createConnection({
 
 
 const query = util.promisify(baglanti.query).bind(baglanti);  //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
+
+async function userData(kullaniciAdi){
+    var result = await query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi)
+    return result
+}
 
 async function userFind(kullaniciAdi) {
   var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi);
@@ -101,6 +107,12 @@ router.post("/signup",async(req,res)=>{
     }
 })    
 
+/* router.get("/deneme",async(req,res)=>{
+    var dene = await user("NurihanK")
+    res.send(dene[0].kullaniciAdi)
+
+}) */
+
 router.get("/signin",async (req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi;
     const sifre = req.body.sifre
@@ -108,22 +120,27 @@ router.get("/signin",async (req,res)=>{
     var passwordToken = md5(sifre)
 
     var isUserExist = await userFind(kullaniciAdi)
-    var sifreDT = await userPassword(sifre)
+    var user = await userData(kullaniciAdi)
+    
+
+    if(isUserExist == true ){
+        if(passwordToken == user[0].şifre){
+
+            const accessToken = jwt.sign({kullaniciAdi:user[0].kullaniciAdi,email:user[0].email},
+                process.env.ACCESS_TOKEN_SECRET,
+                {expiresIn:"15m"})
+            baglanti.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ",[accessToken,kullaniciAdi])
+            res.json({message:"Basarili bir sekilde giris yaptiniz",accesToken:accessToken})
+        }else{
+            res.send("Kullanici adi ve ya şifre hatalidir")
+        }
+    }else{
+        res.send("Böyle bir kullanici adi yoktur")
+    }
 
     
 
-    if(isUserExist == true && sifreDT == true){
-        res.json({
-            status:"SUCCES",
-            message:"Basarili bir sekilde giris yaptini<"
-        })
-    }
-    else{
-        res.json({
-            status:"FAILED",
-            message:"Kullanici adi ve ya sifre hatali"
-        })
-    }
+    
 
 })
 

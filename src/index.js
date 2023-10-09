@@ -4,9 +4,9 @@ import bodyParser from "body-parser";
 import kullaniciRouter from "./routes/kullaniciRouter.js"
 import authorizedRouter from "./routes/authorizedRouter.js"
 import { networkInterfaces } from "os";
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken")  //token oluşturmak için
 const crypto = require("crypto")
-//nodemon a bak otomatik yeniliyo tekrar başlatmamıza gerek yok
+import authMiddleware from "./middlewares/auth.js"
 
 const app = express();
 
@@ -29,41 +29,49 @@ app.listen(3000,(err)=>{
 app.use("/kullanici",kullaniciRouter)
 app.use("/authorized",authorizedRouter)
 
-const posts = [
-    {
-        username : "nuri",
-        title : "1"
+const user = {
+        kullaniciAdi : "nuri",
+        sifre : "12356"
+    }
+
+const animalArray = [{
+    name : "lion"
     },
     {
-        username : "mahir",
-        title : "2"
+        name:"turtle"
+    },
+    {
+        name:"horse"
     }
 ]
 
-app.post("/posts",(req,res)=>{
-    res.json(posts.filter(post => post.username === req.user.name))
+app.get("/animal",authMiddleware,(req,res)=>{
+    console.log(req.user)
+    res.json(animalArray)
 })
+
 
 app.post("/login",(req,res)=>{
-    const username = req.body.userName
-    const user = { name: username}
-    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
-    res.json({accessToken:accessToken})
+    const kullaniciAdi= req.body.kullaniciAdi;
+    const sifre = req.body.sifre
+    if(kullaniciAdi !== user.kullaniciAdi || user.sifre !== sifre){
+        res.send("Yanliş bilgi")
+    }
+    else{
+        const accesToken = jwt.sign({kullaniciAdi : user.kullaniciAdi , sifre : user.sifre},
+            process.env.ACCESS_TOKEN_SECRET,
+            {expiresIn: "15m"}) //saklamak istediklerimiz ,sonra imza,sonra süre(15dk)
+
+        const refreshToken = jwt.sign({kullaniciAdi : user.kullaniciAdi , sifre : user.sifre},
+            process.env.REFRESH_TOKEN_SECRET,
+            ) //saklamak istediklerimiz ,sonra imza,sonra süre(refresh tokeni sınırsız yaptık)
+    
+        return res.status(200).json({accesToken,refreshToken})
+    }
+    
 })
 
 
-function authenticateToken(req,res,next) {
-    const authHeader = req.headers["authorization"]
-    const token = authHeader && authHeader.split('')[1]
-    if(token == null) return res.sendStatus(401)
-
-    jwt.verify(token, procces.env.ACCESS_TOKEN_SECRET,(err,user) =>{ 
-        if(err) return res.sendStatus(403) //bir jeton var ama geçerli değil
-
-        req.user = user
-        next()
-    })
-}
 
 
 
