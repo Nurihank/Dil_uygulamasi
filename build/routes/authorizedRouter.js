@@ -13,7 +13,7 @@ var router = require("express").Router(); //routerları export etmek için
 var con = _mysql["default"].createConnection({
   host: "localhost",
   user: "root",
-  password: "15935738a",
+  password: "nurihan38",
   database: "dil_uygulamasi"
 });
 con.connect(function (err) {
