@@ -7,13 +7,14 @@ var _mysql = _interopRequireDefault(require("mysql"));
 var _express = _interopRequireDefault(require("express"));
 var _util = _interopRequireDefault(require("util"));
 var _console = require("console");
+var _auth = _interopRequireDefault(require("../middlewares/auth.js"));
 var router = require("express").Router(); //routerları export etmek için   
 //sql bağlantısı kurmak için
 
 var con = _mysql["default"].createConnection({
   host: "localhost",
   user: "root",
-  password: "nurihan38",
+  password: "15935738a",
   database: "dil_uygulamasi"
 });
 con.connect(function (err) {
@@ -108,7 +109,7 @@ function _wordFind() {
   }));
   return _wordFind.apply(this, arguments);
 }
-router.get("/language", function (req, res) {
+router.get("/language", _auth["default"], function (req, res) {
   con.query("SELECT * FROM dil", function (err, result) {
     if (err) {
       throw err;
@@ -116,7 +117,7 @@ router.get("/language", function (req, res) {
     res.send(result);
   });
 });
-router.get("/language/:id", function (req, res) {
+router.get("/language/:id", _auth["default"], function (req, res) {
   var id = req.params.id;
   con.query("SELECT * FROM dil where id = ? ", id, function (err, result) {
     if (err) {
@@ -125,7 +126,7 @@ router.get("/language/:id", function (req, res) {
     res.send(result);
   });
 });
-router.post("/language", /*#__PURE__*/function () {
+router.post("/language", _auth["default"], /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(req, res) {
     var dil, isLanguageExist;
     return _regenerator["default"].wrap(function _callee$(_context) {
@@ -156,7 +157,7 @@ router.post("/language", /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }());
-router["delete"]("/language", /*#__PURE__*/function () {
+router["delete"]("/language", _auth["default"], /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
     var dil, isLanguageExist;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
@@ -187,7 +188,7 @@ router["delete"]("/language", /*#__PURE__*/function () {
     return _ref2.apply(this, arguments);
   };
 }());
-router.get("/job", function (req, res) {
+router.get("/job", _auth["default"], function (req, res) {
   con.query("SELECT * FROM meslek", function (err, result) {
     if (err) {
       throw err;
@@ -196,7 +197,7 @@ router.get("/job", function (req, res) {
     }
   });
 });
-router.get("/job/:id", function (req, res) {
+router.get("/job/:id", _auth["default"], function (req, res) {
   var id = req.params.id;
   con.query("SELECT * FROM meslek where idMeslek = ?", id, function (err, result) {
     if (err) {
@@ -206,7 +207,7 @@ router.get("/job/:id", function (req, res) {
     }
   });
 });
-router.post("/job", /*#__PURE__*/function () {
+router.post("/job", _auth["default"], /*#__PURE__*/function () {
   var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(req, res) {
     var job, isJobExist;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
@@ -237,7 +238,7 @@ router.post("/job", /*#__PURE__*/function () {
     return _ref3.apply(this, arguments);
   };
 }());
-router["delete"]("/job", /*#__PURE__*/function () {
+router["delete"]("/job", _auth["default"], /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(req, res) {
     var meslek, isJobExist;
     return _regenerator["default"].wrap(function _callee4$(_context4) {
@@ -268,18 +269,18 @@ router["delete"]("/job", /*#__PURE__*/function () {
     return _ref4.apply(this, arguments);
   };
 }());
-router.get("/word", function (req, res) {
+router.get("/word", _auth["default"], function (req, res) {
   con.query("SELECT * FROM kelime", function (err, result) {
     res.send(result);
   });
 });
-router.get("/word/:id", function (req, res) {
+router.get("/word/:id", _auth["default"], function (req, res) {
   var id = req.params.id;
   con.query("SELECT * FROM kelime Where id = ?", id, function (err, result) {
     res.send(result);
   });
 });
-router.post("/word", /*#__PURE__*/function () {
+router.post("/word", _auth["default"], /*#__PURE__*/function () {
   var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(req, res) {
     var kelime, kategori_id, isWordExist;
     return _regenerator["default"].wrap(function _callee5$(_context5) {
@@ -312,7 +313,7 @@ router.post("/word", /*#__PURE__*/function () {
     return _ref5.apply(this, arguments);
   };
 }());
-router["delete"]("/word", /*#__PURE__*/function () {
+router["delete"]("/word", _auth["default"], /*#__PURE__*/function () {
   var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res) {
     var kelime, isWordExist;
     return _regenerator["default"].wrap(function _callee6$(_context6) {
@@ -343,7 +344,7 @@ router["delete"]("/word", /*#__PURE__*/function () {
     return _ref6.apply(this, arguments);
   };
 }());
-router.get("/category", function (req, res) {
+router.get("/category", _auth["default"], function (req, res) {
   con.query("SELECT * FROM kategori", function (err, result) {
     if (err) {
       throw err;
@@ -352,7 +353,7 @@ router.get("/category", function (req, res) {
     }
   });
 });
-router.get("/category/:id", function (req, res) {
+router.get("/category/:id", _auth["default"], function (req, res) {
   var id = req.params.id;
   con.query("SELECT * FROM kategori WHERE id = ?", id, function (err, result) {
     if (err) {
@@ -362,7 +363,7 @@ router.get("/category/:id", function (req, res) {
     }
   });
 });
-router.post("/category", function (req, res) {
+router.post("/category", _auth["default"], function (req, res) {
   var kategori = req.body.kategori;
   var meslek_id = req.body.meslek_id;
   con.query("INSERT INTO kategori (kategori,meslek_id) values (?,?)", [kategori, meslek_id], function (err, result) {
@@ -372,7 +373,7 @@ router.post("/category", function (req, res) {
     res.send("Kategori eklendi");
   });
 });
-router["delete"]("/category", function (req, res) {
+router["delete"]("/category", _auth["default"], function (req, res) {
   var id = req.body.id;
   con.query("DELETE FROM kategori WHERE id = ? ", id, function (err) {
     if (err) {

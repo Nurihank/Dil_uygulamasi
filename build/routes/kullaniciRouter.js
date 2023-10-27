@@ -17,7 +17,7 @@ var router = require("express").Router(); //routerları export etmek için
 var baglanti = _mysql["default"].createConnection({
   host: "localhost",
   user: "root",
-  password: "nurihan38",
+  password: "15935738a",
   database: "dil_uygulamasi"
 });
 baglanti.connect(function (err) {
@@ -155,16 +155,14 @@ router.post("/signup", /*#__PURE__*/function () {
           return userEmail(email);
         case 8:
           isEmailExist = _context.sent;
-          passwordToken = (0, _md["default"])(sifre); //console.log(isUserExist)
+          passwordToken = (0, _md["default"])(sifre);
           if (isUserExist == false) {
-            //console.log(isEmailExist)
             if (isEmailExist == false) {
               baglanti.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)", [kullaniciAdi, passwordToken, email], function (err) {
                 if (err) throw err;
                 res.json({
                   status: "SUCCES",
                   message: "Başarili bir şekilde kayit oldun"
-                  //accessToken:passwordToken
                 });
               });
             } else {

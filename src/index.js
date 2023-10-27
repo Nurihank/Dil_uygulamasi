@@ -7,6 +7,8 @@ import { networkInterfaces } from "os";
 const jwt = require("jsonwebtoken")  //token oluşturmak için
 const crypto = require("crypto")
 import authMiddleware from "./middlewares/auth.js"
+import adminRouter from "./routes/adminLoginRouter.js"
+
 
 const app = express();
 
@@ -28,7 +30,8 @@ app.listen(3000,(err)=>{
 
 app.use("/kullanici",kullaniciRouter)
 app.use("/authorized",authorizedRouter)
-
+app.use("/adminLogin",adminRouter
+)
 const user = {
         kullaniciAdi : "nuri",
         sifre : "12356"

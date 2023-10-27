@@ -7,6 +7,7 @@ var _kullaniciRouter = _interopRequireDefault(require("./routes/kullaniciRouter.
 var _authorizedRouter = _interopRequireDefault(require("./routes/authorizedRouter.js"));
 var _os = require("os");
 var _auth = _interopRequireDefault(require("./middlewares/auth.js"));
+var _adminLoginRouter = _interopRequireDefault(require("./routes/adminLoginRouter.js"));
 require('dotenv').config(); //tokenlerin gözükmesi için yazdık bunu
 
 var jwt = require("jsonwebtoken"); //token oluşturmak için
@@ -28,6 +29,7 @@ app.listen(3000, function (err) {
 });
 app.use("/kullanici", _kullaniciRouter["default"]);
 app.use("/authorized", _authorizedRouter["default"]);
+app.use("/adminLogin", _adminLoginRouter["default"]);
 var user = {
   kullaniciAdi: "nuri",
   sifre: "12356"

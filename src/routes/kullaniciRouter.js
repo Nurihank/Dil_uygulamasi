@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken"
 var baglanti = mysql.createConnection({
     host:"localhost",
     user:"root",
-    password:"nurihan38",
+    password:"15935738a",
     database:"dil_uygulamasi"
     })
 
