@@ -23,7 +23,6 @@ con.connect((err)=>{
 const query = util.promisify(con.query).bind(con);
 
 
-//bilgileri getirme usermodel tarzı bişiler yapacaksın
 async function languageFind(language){
     var result = await query("Select COUNT(*) as sayi FROM dil WHERE dil_adi = ?",language);
     
@@ -54,6 +53,7 @@ async function wordFind(word){
         return false
     }
 }
+
 
 router.get("/language",(req,res)=>{
     con.query("SELECT * FROM dil",(err,result)=>{

@@ -1,4 +1,4 @@
-const router = require("express").Router();
+const router = require("express").Router(); //routerları export etmek için   
 import mysql from "mysql"
 import util from "util"
 import bodyParser, { json } from "body-parser";
@@ -77,17 +77,14 @@ router.post("/signup",async(req,res)=>{
 
     
     var passwordToken = md5(sifre)
-    //console.log(isUserExist)
-    if(isUserExist == false){
-        //console.log(isEmailExist)
+    if(isUserExist == false){      
         if(isEmailExist == false){
             baglanti.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)",[kullaniciAdi,passwordToken,email],(err)=>{
                 if(err) throw err
 
                 res.json({
                     status:"SUCCES",
-                    message:"Başarili bir şekilde kayit oldun"
-                    //accessToken:passwordToken
+                    message:"Başarili bir şekilde kayit oldun"  
                 })
             }) 
         }
@@ -136,103 +133,9 @@ router.get("/signin",async (req,res)=>{
         }
     }else{
         res.send("Böyle bir kullanici adi yoktur")
+
     }
-
-    
-
-    
-
-})
-
-router.put("/meslekDilSecimi",(req,res)=>{
-    const kullaniciAdi = req.body.kullaniciAdi
-    const meslek = req.body.meslek
-    const dil = req.body.dil
-    const sectigiDil = req.body.sectigiDil
-
-    baglanti.query("SELECT * FROM kullanici",(err,result)=>{
-        var kullaniciAdiString = JSON.parse(JSON.stringify(result))
-        if(err){
-            throw err
-        }
-        else{
-            for(var i = 0 ; i < kullaniciAdiString.length ; i++){
-                if(kullaniciAdiString[i].kullaniciAdi == kullaniciAdi){
-                    baglanti.query("SELECT * FROM meslek",(err,result)=>{
-                        if(err){
-                            throw err;
-                        }
-                        else{
-                            var meslekIdString = JSON.parse(JSON.stringify(result))
-                            for(var i = 0 ; i < meslekIdString.length ; i++){
-                                console.log(meslekIdString[0].Meslek)
-                                if(meslek == meslekIdString[i].Meslek){
-                                    const idJop = meslekIdString[i].idMeslek
-                                    baglanti.query("UPDATE kullanici SET MeslekID = ? WHERE kullaniciAdi = ?",[idJop,kullaniciAdi],(err)=>{
-                                        if(err){
-                                            throw err
-                                        }else{
-                                            res.send("Guncellendi")
-                                        }
-                                    })
-                                }
-                                /* else{
-                                    res.send("Böyle bir meslek bulunamadi")
-                                } */
-                            }
-                        }
-                    })
-                        
-                }
-                if(kullaniciAdiString[i].kullaniciAdi == kullaniciAdi){
-                    baglanti.query("SELECT * FROM dil",(err,result)=>{
-                        if(err){
-                            throw err
-                        }
-                        else{
-                            var dilIdString = JSON.parse(JSON.stringify(result))
-                            for(var i = 0 ; i < dilIdString.length ; i++){
-                                if(dil == dilIdString[i].Dil){
-                                    console.log(dilIdString[i].Dil)
-                                    const idDil = dilIdString[i].idDil
-                                    baglanti.query("UPDATE kullanici SET DilID = ? WHERE kullaniciAdi = ?",[idDil,kullaniciAdi],(err)=>{
-                                        if(err){
-                                            throw err
-                                        }
-                                    })
-                                }
-                            }
-                        }
-                    })       
-                }
-                if(kullaniciAdiString[i].kullaniciAdi == kullaniciAdi){
-                    baglanti.query("SELECT * FROM dil",(err,result)=>{
-                        if(err){
-                            throw err
-                        }
-                        else{
-                            var SectigidilIdString = JSON.parse(JSON.stringify(result))
-                            for(var i = 0 ; i < SectigidilIdString.length ; i++){
-                                if(sectigiDil == SectigidilIdString[i].Dil){
-                                    console.log(SectigidilIdString[i].Dil)
-                                    const idDil = SectigidilIdString[i].idDil
-                                    baglanti.query("UPDATE kullanici SET SectigiDilID = ? WHERE kullaniciAdi = ?",[idDil,kullaniciAdi],(err)=>{
-                                        if(err){
-                                            throw err
-                                        }
-                                    })
-                                }
-                            }
-                        }
-                    })       
-                }
-            }
-             
-        }
-        
-
-    })
-})
+})     
 
 router.post("/forgetPasswordCode",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
@@ -404,4 +307,4 @@ router.put("/changePassword",async(req,res)=>{
 
 
 
-module.exports = router;
+module.exports = router
