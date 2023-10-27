@@ -29,7 +29,7 @@ router.get("/signin",(req,res)=>{
 
             const accessToken = jwt.sign({kullaniciAdi:kullaniciAdi},
                 process.env.ACCESS_TOKEN_SECRET,
-                {expiresIn:"60s"})
+                {expiresIn:"10m"})
 
             const refreshToken = jwt.sign({kullaniciAdi:kullaniciAdi},
                 process.env.REFRESH_TOKEN_SECRET,

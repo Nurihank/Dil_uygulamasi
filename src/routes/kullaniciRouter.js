@@ -242,7 +242,7 @@ router.put("/forgetPassword",async(req,res)=>{
     }
 })
 
-router.put("/changePasswordCode",async(req,res)=>{
+router.post("/changePasswordCode",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi;
     const oldPassword = req.body.oldPassword
     const email = req.body.email

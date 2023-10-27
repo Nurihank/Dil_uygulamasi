@@ -76,6 +76,22 @@ router.get("/language/:id",authMiddleware,(req,res)=>{
     })
 })
 
+router.put("/language/:id",authMiddleware,(req,res)=>{
+    const id = req.params.id
+    const dilAdi = req.body.dilAdi;
+
+    if(dilAdi != null){
+        con.query("UPDATE dil SET dil_adi = ? WHERE id = ?",[dilAdi,id],(err,result)=>{
+            if(err) throw err
+    
+            res.send("Başarıyla güncellendi")
+        })
+    }
+    else{
+        res.send("Dil giriniz")
+    }
+    
+})
 router.post("/language",authMiddleware,async(req,res)=>{
     const dil = req.body.dil
     const isLanguageExist = await languageFind(dil)
@@ -129,6 +145,23 @@ router.get("/job/:id",authMiddleware,(req,res)=>{
     })
 })
 
+router.put("/job/:id",authMiddleware,(req,res)=>{
+    const id = req.params.id
+    const job = req.body.job
+
+    if(job != null){
+        con.query("UPDATE meslek SET meslek = ? WHERE idMeslek = ?",[job,id],(err,result)=>{
+            if(err) throw err
+    
+            res.send("Başarıyla güncellendi")
+        })
+    }
+    else{
+        res.send("Meslek giriniz")
+    }
+    
+})
+
 router.post("/job",authMiddleware,async(req,res)=>{
     const job = req.body.job
     const isJobExist = await jobFind(job)
@@ -175,6 +208,24 @@ router.get("/word/:id",authMiddleware,(req,res)=>{
     con.query("SELECT * FROM kelime Where id = ?",id,(err,result)=>{
         res.send(result)
     })
+})
+
+router.put("/word/:id",authMiddleware,(req,res)=>{
+    const id = req.params.id;
+    const kategori_id = req.body.kategori_id
+    const kelime = req.body.kelime
+
+    if(kategori_id != null && kelime != null ){
+        con.query("UPDATE kelime SET kategori_id = ? , kelime = ? WHERE id = ?",[kategori_id,kelime,id],(err,result)=>{
+            if(err) throw err
+    
+            res.send("Başarıyla güncellendi")
+        })
+    }
+    else{
+        res.send("kategori_id veya kelime boş kalamaz")
+    }
+    
 })
 
 router.post("/word",authMiddleware,async(req,res)=>{
@@ -234,6 +285,23 @@ router.get("/category/:id",authMiddleware,(req,res)=>{
             res.send(result)
         }
     })
+})
+
+router.put("/category/:id",authMiddleware,(req,res)=>{
+    const id = req.params.id
+    const kategori = req.body.kategori
+    const meslek_id = req.body.meslek_id
+
+    if(kategori != null && meslek_id != null){
+        con.query("UPDATE kategori SET kategori = ? , meslek_id = ? WHERE id = ? ",[kategori,meslek_id,id],(err,result)=>{
+            if(err) throw err
+
+            res.send("Başarıyla güncellendi")
+        })
+    }   
+    else{
+        res.send("Kategori veya meslek_id boş kalamaz")
+    }
 })
 
 router.post("/category",authMiddleware,(req,res)=>{

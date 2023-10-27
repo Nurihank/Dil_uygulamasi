@@ -19,9 +19,6 @@ con.connect(function (err) {
   }
 });
 var admin = "admin";
-
-//var token = result[0].accesToken
-
 var authMiddleware = function authMiddleware(req, res, next) {
   // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
   //Bearer = token başta bu halde ondan split dedik bu headeri ikiye bölcek

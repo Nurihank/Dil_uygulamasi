@@ -126,6 +126,18 @@ router.get("/language/:id", _auth["default"], function (req, res) {
     res.send(result);
   });
 });
+router.put("/language/:id", _auth["default"], function (req, res) {
+  var id = req.params.id;
+  var dilAdi = req.body.dilAdi;
+  if (dilAdi != null) {
+    con.query("UPDATE dil SET dil_adi = ? WHERE id = ?", [dilAdi, id], function (err, result) {
+      if (err) throw err;
+      res.send("Başarıyla güncellendi");
+    });
+  } else {
+    res.send("Dil giriniz");
+  }
+});
 router.post("/language", _auth["default"], /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(req, res) {
     var dil, isLanguageExist;
@@ -207,6 +219,18 @@ router.get("/job/:id", _auth["default"], function (req, res) {
     }
   });
 });
+router.put("/job/:id", _auth["default"], function (req, res) {
+  var id = req.params.id;
+  var job = req.body.job;
+  if (job != null) {
+    con.query("UPDATE meslek SET meslek = ? WHERE idMeslek = ?", [job, id], function (err, result) {
+      if (err) throw err;
+      res.send("Başarıyla güncellendi");
+    });
+  } else {
+    res.send("Meslek giriniz");
+  }
+});
 router.post("/job", _auth["default"], /*#__PURE__*/function () {
   var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(req, res) {
     var job, isJobExist;
@@ -279,6 +303,19 @@ router.get("/word/:id", _auth["default"], function (req, res) {
   con.query("SELECT * FROM kelime Where id = ?", id, function (err, result) {
     res.send(result);
   });
+});
+router.put("/word/:id", _auth["default"], function (req, res) {
+  var id = req.params.id;
+  var kategori_id = req.body.kategori_id;
+  var kelime = req.body.kelime;
+  if (kategori_id != null && kelime != null) {
+    con.query("UPDATE kelime SET kategori_id = ? , kelime = ? WHERE id = ?", [kategori_id, kelime, id], function (err, result) {
+      if (err) throw err;
+      res.send("Başarıyla güncellendi");
+    });
+  } else {
+    res.send("kategori_id veya kelime boş kalamaz");
+  }
 });
 router.post("/word", _auth["default"], /*#__PURE__*/function () {
   var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(req, res) {
@@ -362,6 +399,19 @@ router.get("/category/:id", _auth["default"], function (req, res) {
       res.send(result);
     }
   });
+});
+router.put("/category/:id", _auth["default"], function (req, res) {
+  var id = req.params.id;
+  var kategori = req.body.kategori;
+  var meslek_id = req.body.meslek_id;
+  if (kategori != null && meslek_id != null) {
+    con.query("UPDATE kategori SET kategori = ? , meslek_id = ? WHERE id = ? ", [kategori, meslek_id, id], function (err, result) {
+      if (err) throw err;
+      res.send("Başarıyla güncellendi");
+    });
+  } else {
+    res.send("Kategori veya meslek_id boş kalamaz");
+  }
 });
 router.post("/category", _auth["default"], function (req, res) {
   var kategori = req.body.kategori;

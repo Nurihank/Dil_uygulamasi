@@ -28,7 +28,7 @@ router.get("/signin", function (req, res) {
       var accessToken = jwt.sign({
         kullaniciAdi: kullaniciAdi
       }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "60s"
+        expiresIn: "10m"
       });
       var refreshToken = jwt.sign({
         kullaniciAdi: kullaniciAdi

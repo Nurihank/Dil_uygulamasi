@@ -375,7 +375,7 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
     return _ref5.apply(this, arguments);
   };
 }());
-router.put("/changePasswordCode", /*#__PURE__*/function () {
+router.post("/changePasswordCode", /*#__PURE__*/function () {
   var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res) {
     var kullaniciAdi, oldPassword, email, oldPasswordToken, isUserExist, correctPassword, code, codeToken, transporter;
     return _regenerator["default"].wrap(function _callee6$(_context6) {

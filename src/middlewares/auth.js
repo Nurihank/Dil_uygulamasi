@@ -14,8 +14,6 @@ con.connect((err) =>{
 
 var admin = "admin"
 
-//var token = result[0].accesToken
-
 export const authMiddleware = (req, res, next) => {  // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
     //Bearer = token başta bu halde ondan split dedik bu headeri ikiye bölcek
     //const token = req.headers["authorization"]?.split(' ')[1]
