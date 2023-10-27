@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken"
 var baglanti = mysql.createConnection({
     host:"localhost",
     user:"root",
-    password:"15935738a",
+    password:"nurihan38",
     database:"dil_uygulamasi"
     })
 
@@ -135,7 +135,11 @@ router.get("/signin",async (req,res)=>{
         res.send("Böyle bir kullanici adi yoktur")
 
     }
+
 })     
+
+
+
 
 router.post("/forgetPasswordCode",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
