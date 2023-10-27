@@ -316,8 +316,8 @@ router.post("/category",authMiddleware,(req,res)=>{
     })
 })
 
-router.delete("/category",authMiddleware,(req,res)=>{
-    const id = req.body.id
+router.delete("/category/:id",authMiddleware,(req,res)=>{
+    const id = req.params.id
 
     con.query("DELETE FROM kategori WHERE id = ? ",id,(err)=>{
         if(err){

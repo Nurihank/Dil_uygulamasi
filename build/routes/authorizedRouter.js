@@ -423,8 +423,8 @@ router.post("/category", _auth["default"], function (req, res) {
     res.send("Kategori eklendi");
   });
 });
-router["delete"]("/category", _auth["default"], function (req, res) {
-  var id = req.body.id;
+router["delete"]("/category/:id", _auth["default"], function (req, res) {
+  var id = req.params.id;
   con.query("DELETE FROM kategori WHERE id = ? ", id, function (err) {
     if (err) {
       throw err;

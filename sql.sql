@@ -16,6 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `admin`
+--
+
+DROP TABLE IF EXISTS `admin`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `admin` (
+  `idadmin` int NOT NULL AUTO_INCREMENT,
+  `kullaniciAdi` varchar(45) DEFAULT NULL,
+  `sifre` varchar(45) DEFAULT NULL,
+  `accesToken` varchar(255) DEFAULT NULL,
+  `refreshToken` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`idadmin`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `admin`
+--
+
+LOCK TABLES `admin` WRITE;
+/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
+INSERT INTO `admin` VALUES (1,'admin','14bdff06ee49403514e698d9a45c4533','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrdWxsYW5pY2lBZGkiOiJhZG1pbiIsImlhdCI6MTY5ODQxMjE5NiwiZXhwIjoxNjk4NDEyNzk2fQ.LOFN_Qi3NQjdkr1yvOrThdqUOBL3oyNVwaMZw-Z23ho','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrdWxsYW5pY2lBZGkiOiJhZG1pbiIsImlhdCI6MTY5ODQxMjE5NiwiZXhwIjoxNjk4NDE5Mzk2fQ.0vxLVgu6xxzaW7BWFese1-SqSlSPAqPpu_BUfo0Zcn4');
+/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `dil`
 --
 
@@ -180,6 +207,8 @@ CREATE TABLE `kullanici` (
   `email` varchar(90) NOT NULL,
   `forgetPasswordToken` varchar(255) DEFAULT NULL,
   `changePasswordToken` varchar(255) DEFAULT NULL,
+  `accesToken` varchar(255) DEFAULT NULL,
+  `refreshToken` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=111 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -190,7 +219,7 @@ CREATE TABLE `kullanici` (
 
 LOCK TABLES `kullanici` WRITE;
 /*!40000 ALTER TABLE `kullanici` DISABLE KEYS */;
-INSERT INTO `kullanici` VALUES (91,'nk31','123456',1,2,1,'nk123',NULL,NULL),(101,'NurihanK','01c96beddb172095388e43835bdb7145',NULL,NULL,NULL,'nnk123',NULL,NULL),(102,'efeiti','f899139df5e1059396431415e770c6dd',NULL,NULL,NULL,'kavalcinurihan@gmail.com','a9b7ba70783b617e9998dc4dd82eb3c5','b8c37e33defde51cf91e1e03e51657da'),(108,'NurihanK31','e35cf7b66449df565f93c607d5a81d09',NULL,NULL,NULL,'nrhnASD',NULL,NULL),(109,'nunu','2f8c3ab806a42e79c774cb09b41a53c8',NULL,NULL,NULL,'nunu',NULL,NULL),(110,'efecan','c16a5320fa475530d9583c34fd356ef5',NULL,NULL,NULL,'nk',NULL,NULL);
+INSERT INTO `kullanici` VALUES (101,'NurihanK','01c96beddb172095388e43835bdb7145',NULL,NULL,NULL,'nnk123',NULL,NULL,NULL,NULL),(102,'efeiti','f899139df5e1059396431415e770c6dd',NULL,NULL,NULL,'kavalcinurihan@gmail.com','a9b7ba70783b617e9998dc4dd82eb3c5','b8c37e33defde51cf91e1e03e51657da',NULL,NULL),(108,'NurihanK31','e35cf7b66449df565f93c607d5a81d09',NULL,NULL,NULL,'nrhnASD',NULL,NULL,NULL,NULL),(109,'nunu','2f8c3ab806a42e79c774cb09b41a53c8',NULL,NULL,NULL,'nunu',NULL,NULL,NULL,NULL),(110,'efecan','c16a5320fa475530d9583c34fd356ef5',NULL,NULL,NULL,'nk',NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `kullanici` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -252,4 +281,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-10-06 13:26:45
+-- Dump completed on 2023-10-27 16:32:56
