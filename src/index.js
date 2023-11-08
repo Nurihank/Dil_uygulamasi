@@ -3,11 +3,12 @@ import express from "express"
 import bodyParser from "body-parser";
 import kullaniciRouter from "./routes/kullaniciRouter.js"
 import authorizedRouter from "./routes/authorizedRouter.js"
-import { networkInterfaces } from "os";
+import { networkInterfaces, userInfo } from "os";
 const jwt = require("jsonwebtoken")  //token oluşturmak için
 const crypto = require("crypto")
 import authMiddleware from "./middlewares/auth.js"
 import adminRouter from "./routes/adminLoginRouter.js"
+var userModel =  require("./model/userModel.js")
 
 
 const app = express();
@@ -26,62 +27,14 @@ app.listen(3000,(err)=>{
     }
 })
 
+var getUserInfo = userModel.user
+var sifre = new getUserInfo("NurihanK");
+sifre.getUser(); 
 
 
 app.use("/kullanici",kullaniciRouter)
 app.use("/authorized",authorizedRouter)
-app.use("/adminLogin",adminRouter
-)
-const user = {
-        kullaniciAdi : "nuri",
-        sifre : "12356"
-    }
-
-const animalArray = [{
-    name : "lion"
-    },
-    {
-        name:"turtle"
-    },
-    {
-        name:"horse"
-    }
-]
-
-app.get("/animal",authMiddleware,(req,res)=>{
-    console.log(req.user)
-    res.json(animalArray)
-})
-
-
-app.post("/login",(req,res)=>{
-    const kullaniciAdi= req.body.kullaniciAdi;
-    const sifre = req.body.sifre
-    if(kullaniciAdi !== user.kullaniciAdi || user.sifre !== sifre){
-        res.send("Yanliş bilgi")
-    }
-    else{
-        const accesToken = jwt.sign({kullaniciAdi : user.kullaniciAdi , sifre : user.sifre},
-            process.env.ACCESS_TOKEN_SECRET,
-            {expiresIn: "15m"}) //saklamak istediklerimiz ,sonra imza,sonra süre(15dk)
-
-        const refreshToken = jwt.sign({kullaniciAdi : user.kullaniciAdi , sifre : user.sifre},
-            process.env.REFRESH_TOKEN_SECRET,
-            ) //saklamak istediklerimiz ,sonra imza,sonra süre(refresh tokeni sınırsız yaptık)
-    
-        return res.status(200).json({accesToken,refreshToken})
-    }
-    
-})
-
-
-
-
-
-
-
-
-
+app.use("/adminLogin",adminRouter)
 
 
 

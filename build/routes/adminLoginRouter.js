@@ -2,7 +2,6 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _mysql = _interopRequireDefault(require("mysql"));
-var _util = _interopRequireDefault(require("util"));
 var _md = _interopRequireDefault(require("md5"));
 var router = require("express").Router(); //routerları export etmek için  
 

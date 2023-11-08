@@ -1,6 +1,6 @@
 const router = require("express").Router();  //routerları export etmek için  
 import mysql from "mysql" 
-import util from "util"
+
 import md5 from "md5";
 const jwt = require("jsonwebtoken");
 

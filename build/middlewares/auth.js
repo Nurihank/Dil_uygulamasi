@@ -33,7 +33,7 @@ var authMiddleware = function authMiddleware(req, res, next) {
     }
 
     _jsonwebtoken["default"].verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, user) {
-      //tokeni doğruluyo eğer doğruysa user objesini döndürüyor 
+      //tokeni doğruluyo 
       if (err) {
         // burdaki token veritabanından gelcek
         return res.status(400).json(err);
