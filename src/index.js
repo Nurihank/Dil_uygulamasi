@@ -27,10 +27,11 @@ app.listen(3000,(err)=>{
     }
 })
 
-var getUserInfo = userModel.user
+/* var getUserInfo = userModel.user
 var sifre = new getUserInfo("NurihanK");
 sifre.getUser(); 
-
+sifre.userFind();
+ */
 
 app.use("/kullanici",kullaniciRouter)
 app.use("/authorized",authorizedRouter)

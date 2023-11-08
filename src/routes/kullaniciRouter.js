@@ -5,6 +5,8 @@ import bodyParser, { json } from "body-parser";
 import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
+var userModel = require ("../model/userModel")
+
 
 var baglanti = mysql.createConnection({
     host:"localhost",
@@ -24,22 +26,6 @@ var baglanti = mysql.createConnection({
 
 const query = util.promisify(baglanti.query).bind(baglanti);  //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 
-async function userData(kullaniciAdi){
-    var result = await query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi)
-    return result
-}
-
-async function userFind(kullaniciAdi) {
-  var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi);
-  var sayiString = JSON.parse(JSON.stringify(result))
-  //console.log(sayiString[0].sayi)
-  if(sayiString[0].sayi){
-      return true
-  }
-  else{
-      return false
-  }
-}
 
 
 async function userEmail(email){ 
@@ -72,7 +58,12 @@ router.post("/signup",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre
     const email = req.body.email
-    var isUserExist = await userFind(kullaniciAdi);
+
+    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+    var userInfo = new getUserInfo(kullaniciAdi)
+
+
+    var isUserExist = await userInfo.userFind(kullaniciAdi);
     var isEmailExist = await userEmail(email)
 
     
@@ -116,8 +107,11 @@ router.get("/signin",async (req,res)=>{
    
     var passwordToken = md5(sifre)
 
-    var isUserExist = await userFind(kullaniciAdi)
-    var user = await userData(kullaniciAdi)
+    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+    var userInfo = new getUserInfo(kullaniciAdi)
+
+    var isUserExist = await userInfo.userFind(kullaniciAdi)
+    var user = await userInfo.userInfo(kullaniciAdi)
     
 
     if(isUserExist == true ){
@@ -146,7 +140,10 @@ router.post("/forgetPasswordCode",async(req,res)=>{
     const email = req.body.email;
    // const yeniSifre = req.body.yeniSifre
 
-    var isUserExist = await userFind(kullaniciAdi)
+    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+    var userInfo = new getUserInfo(kullaniciAdi)
+
+    var isUserExist = await userInfo.userFind(kullaniciAdi)
     var isEmailExist = await userEmail(email)   
 
     
@@ -178,7 +175,7 @@ router.post("/forgetPasswordCode",async(req,res)=>{
                 })
                 transporter.sendMail({
                     from:'"You" <kavalcinurihan@gmail.com>',
-                    to:email,
+                    to:"kavalcinurihan@gmail.com",
                     subject:"VERIFICATION CODE",
                     html:code,
                 })
@@ -211,7 +208,11 @@ router.put("/forgetPassword",async(req,res)=>{
     const newPassword = req.body.newPassword
 
     var codeToken = md5(code)
-    var isUserExist = await userFind(kullaniciAdi)
+
+    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+    var userInfo = new getUserInfo(kullaniciAdi)
+
+    var isUserExist = await userInfo.userFind(kullaniciAdi)
     var newPasswordToken = md5(newPassword)
     if(isUserExist == true)
     {baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",[kullaniciAdi],(err,result)=>{
@@ -242,19 +243,22 @@ router.put("/forgetPassword",async(req,res)=>{
     }
 })
 
-router.post("/changePasswordCode",async(req,res)=>{
+router.post("/changePasswordCode",async(req,res)=>{  //DÜZELT ŞİFRE SIKINTILI
     const kullaniciAdi = req.body.kullaniciAdi;
     const oldPassword = req.body.oldPassword
     const email = req.body.email
 
     var oldPasswordToken = md5(oldPassword)
 
-    var isUserExist = await userFind(kullaniciAdi)
+    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+    var userInfo = new getUserInfo(kullaniciAdi)
+
+    var isUserExist = await userInfo.userFind(kullaniciAdi)
     var correctPassword = await userPassword(oldPassword)
 
     var code = "1001"
     var codeToken = md5(code)
-    console.log(codeToken)
+    //console.log(codeToken)
     if(isUserExist == true && correctPassword == true){
         let transporter = nodemailer.createTransport({
             host:"smtp.gmail.com",
@@ -286,7 +290,10 @@ router.put("/changePassword",async(req,res)=>{
     const code = req.body.code;
     const newPassword = req.body.newPassword
 
-    var isUserExist = await userFind(kullaniciAdi)
+    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+    var userInfo = new getUserInfo(kullaniciAdi)
+
+    var isUserExist = await userInfo.userFind()
     var codeToken = md5(code)
     var newPasswordToken = md5(newPassword)
 

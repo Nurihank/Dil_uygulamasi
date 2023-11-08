@@ -14,6 +14,7 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var router = require("express").Router(); //routerları export etmek için   
 
+var userModel = require("../model/userModel");
 var baglanti = _mysql["default"].createConnection({
   host: "localhost",
   user: "root",
@@ -28,132 +29,83 @@ baglanti.connect(function (err) {
   }
 });
 var query = _util["default"].promisify(baglanti.query).bind(baglanti); //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
-function userData(_x) {
-  return _userData.apply(this, arguments);
+function userEmail(_x) {
+  return _userEmail.apply(this, arguments);
 }
-function _userData() {
-  _userData = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(kullaniciAdi) {
-    var result;
+function _userEmail() {
+  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(email) {
+    var result, sayiString;
     return _regenerator["default"].wrap(function _callee8$(_context8) {
       while (1) switch (_context8.prev = _context8.next) {
         case 0:
           _context8.next = 2;
-          return query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi);
+          return query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email);
         case 2:
           result = _context8.sent;
-          return _context8.abrupt("return", result);
-        case 4:
+          sayiString = JSON.parse(JSON.stringify(result));
+          if (!(sayiString[0].sayi == 1)) {
+            _context8.next = 8;
+            break;
+          }
+          return _context8.abrupt("return", true);
+        case 8:
+          return _context8.abrupt("return", false);
+        case 9:
         case "end":
           return _context8.stop();
       }
     }, _callee8);
   }));
-  return _userData.apply(this, arguments);
+  return _userEmail.apply(this, arguments);
 }
-function userFind(_x2) {
-  return _userFind.apply(this, arguments);
+function userPassword(_x2) {
+  return _userPassword.apply(this, arguments);
 }
-function _userFind() {
-  _userFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(kullaniciAdi) {
-    var result, sayiString;
+function _userPassword() {
+  _userPassword = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(şifre) {
+    var passwordToken, result, sayiString;
     return _regenerator["default"].wrap(function _callee9$(_context9) {
       while (1) switch (_context9.prev = _context9.next) {
         case 0:
-          _context9.next = 2;
-          return query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi);
-        case 2:
+          passwordToken = (0, _md["default"])(şifre);
+          _context9.next = 3;
+          return query("SELECT COUNT(*) as sayi FROM kullanici WHERE şifre = ?", passwordToken);
+        case 3:
           result = _context9.sent;
-          sayiString = JSON.parse(JSON.stringify(result)); //console.log(sayiString[0].sayi)
-          if (!sayiString[0].sayi) {
-            _context9.next = 8;
+          sayiString = JSON.parse(JSON.stringify(result));
+          if (!(sayiString[0].sayi == 1)) {
+            _context9.next = 9;
             break;
           }
           return _context9.abrupt("return", true);
-        case 8:
-          return _context9.abrupt("return", false);
         case 9:
+          return _context9.abrupt("return", false);
+        case 10:
         case "end":
           return _context9.stop();
       }
     }, _callee9);
   }));
-  return _userFind.apply(this, arguments);
-}
-function userEmail(_x3) {
-  return _userEmail.apply(this, arguments);
-}
-function _userEmail() {
-  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(email) {
-    var result, sayiString;
-    return _regenerator["default"].wrap(function _callee10$(_context10) {
-      while (1) switch (_context10.prev = _context10.next) {
-        case 0:
-          _context10.next = 2;
-          return query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email);
-        case 2:
-          result = _context10.sent;
-          sayiString = JSON.parse(JSON.stringify(result));
-          if (!(sayiString[0].sayi == 1)) {
-            _context10.next = 8;
-            break;
-          }
-          return _context10.abrupt("return", true);
-        case 8:
-          return _context10.abrupt("return", false);
-        case 9:
-        case "end":
-          return _context10.stop();
-      }
-    }, _callee10);
-  }));
-  return _userEmail.apply(this, arguments);
-}
-function userPassword(_x4) {
-  return _userPassword.apply(this, arguments);
-}
-function _userPassword() {
-  _userPassword = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee11(şifre) {
-    var passwordToken, result, sayiString;
-    return _regenerator["default"].wrap(function _callee11$(_context11) {
-      while (1) switch (_context11.prev = _context11.next) {
-        case 0:
-          passwordToken = (0, _md["default"])(şifre);
-          _context11.next = 3;
-          return query("SELECT COUNT(*) as sayi FROM kullanici WHERE şifre = ?", passwordToken);
-        case 3:
-          result = _context11.sent;
-          sayiString = JSON.parse(JSON.stringify(result));
-          if (!(sayiString[0].sayi == 1)) {
-            _context11.next = 9;
-            break;
-          }
-          return _context11.abrupt("return", true);
-        case 9:
-          return _context11.abrupt("return", false);
-        case 10:
-        case "end":
-          return _context11.stop();
-      }
-    }, _callee11);
-  }));
   return _userPassword.apply(this, arguments);
 }
 router.post("/signup", /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(req, res) {
-    var kullaniciAdi, sifre, email, isUserExist, isEmailExist, passwordToken;
+    var kullaniciAdi, sifre, email, getUserInfo, userInfo, isUserExist, isEmailExist, passwordToken;
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
           kullaniciAdi = req.body.kullaniciAdi;
           sifre = req.body.sifre;
           email = req.body.email;
-          _context.next = 5;
-          return userFind(kullaniciAdi);
-        case 5:
+          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+          userInfo = new getUserInfo(kullaniciAdi);
+          _context.next = 7;
+          return userInfo.userFind(kullaniciAdi);
+        case 7:
           isUserExist = _context.sent;
-          _context.next = 8;
+          _context.next = 10;
           return userEmail(email);
-        case 8:
+        case 10:
           isEmailExist = _context.sent;
           passwordToken = (0, _md["default"])(sifre);
           if (isUserExist == false) {
@@ -177,13 +129,13 @@ router.post("/signup", /*#__PURE__*/function () {
               message: "Böyle bir kullanici adi vardir"
             });
           }
-        case 11:
+        case 13:
         case "end":
           return _context.stop();
       }
     }, _callee);
   }));
-  return function (_x5, _x6) {
+  return function (_x3, _x4) {
     return _ref.apply(this, arguments);
   };
 }());
@@ -196,20 +148,22 @@ router.post("/signup", /*#__PURE__*/function () {
 
 router.get("/signin", /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
-    var kullaniciAdi, sifre, passwordToken, isUserExist, user, accessToken;
+    var kullaniciAdi, sifre, passwordToken, getUserInfo, userInfo, isUserExist, user, accessToken;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           kullaniciAdi = req.body.kullaniciAdi;
           sifre = req.body.sifre;
           passwordToken = (0, _md["default"])(sifre);
-          _context2.next = 5;
-          return userFind(kullaniciAdi);
-        case 5:
+          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+          userInfo = new getUserInfo(kullaniciAdi);
+          _context2.next = 7;
+          return userInfo.userFind(kullaniciAdi);
+        case 7:
           isUserExist = _context2.sent;
-          _context2.next = 8;
-          return userData(kullaniciAdi);
-        case 8:
+          _context2.next = 10;
+          return userInfo.userInfo(kullaniciAdi);
+        case 10:
           user = _context2.sent;
           if (isUserExist == true) {
             if (passwordToken == user[0].şifre) {
@@ -230,31 +184,33 @@ router.get("/signin", /*#__PURE__*/function () {
           } else {
             res.send("Böyle bir kullanici adi yoktur");
           }
-        case 10:
+        case 12:
         case "end":
           return _context2.stop();
       }
     }, _callee2);
   }));
-  return function (_x7, _x8) {
+  return function (_x5, _x6) {
     return _ref2.apply(this, arguments);
   };
 }());
 router.post("/forgetPasswordCode", /*#__PURE__*/function () {
   var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(req, res) {
-    var kullaniciAdi, email, isUserExist, isEmailExist;
+    var kullaniciAdi, email, getUserInfo, userInfo, isUserExist, isEmailExist;
     return _regenerator["default"].wrap(function _callee4$(_context4) {
       while (1) switch (_context4.prev = _context4.next) {
         case 0:
           kullaniciAdi = req.body.kullaniciAdi;
           email = req.body.email; // const yeniSifre = req.body.yeniSifre
-          _context4.next = 4;
-          return userFind(kullaniciAdi);
-        case 4:
+          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+          userInfo = new getUserInfo(kullaniciAdi);
+          _context4.next = 6;
+          return userInfo.userFind(kullaniciAdi);
+        case 6:
           isUserExist = _context4.sent;
-          _context4.next = 7;
+          _context4.next = 9;
           return userEmail(email);
-        case 7:
+        case 9:
           isEmailExist = _context4.sent;
           if (isUserExist == true) {
             baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
@@ -275,7 +231,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
                       }
                     }, _callee3);
                   }));
-                  return function codeUret(_x11, _x12) {
+                  return function codeUret(_x9, _x10) {
                     return _ref4.apply(this, arguments);
                   };
                 }();
@@ -295,7 +251,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
                 });
                 transporter.sendMail({
                   from: '"You" <kavalcinurihan@gmail.com>',
-                  to: email,
+                  to: "kavalcinurihan@gmail.com",
                   subject: "VERIFICATION CODE",
                   html: code
                 });
@@ -317,19 +273,19 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
               message: "Kullanici adi hatalidir"
             });
           }
-        case 9:
+        case 11:
         case "end":
           return _context4.stop();
       }
     }, _callee4);
   }));
-  return function (_x9, _x10) {
+  return function (_x7, _x8) {
     return _ref3.apply(this, arguments);
   };
 }());
 router.put("/forgetPassword", /*#__PURE__*/function () {
   var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(req, res) {
-    var kullaniciAdi, code, newPassword, codeToken, isUserExist, newPasswordToken;
+    var kullaniciAdi, code, newPassword, codeToken, getUserInfo, userInfo, isUserExist, newPasswordToken;
     return _regenerator["default"].wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
         case 0:
@@ -337,9 +293,11 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
           code = req.body.code;
           newPassword = req.body.newPassword;
           codeToken = (0, _md["default"])(code);
-          _context5.next = 6;
-          return userFind(kullaniciAdi);
-        case 6:
+          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+          userInfo = new getUserInfo(kullaniciAdi);
+          _context5.next = 8;
+          return userInfo.userFind(kullaniciAdi);
+        case 8:
           isUserExist = _context5.sent;
           newPasswordToken = (0, _md["default"])(newPassword);
           if (isUserExist == true) {
@@ -365,37 +323,39 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
           } else {
             res.send("Böyle bir kullanici adi yoktur");
           }
-        case 9:
+        case 11:
         case "end":
           return _context5.stop();
       }
     }, _callee5);
   }));
-  return function (_x13, _x14) {
+  return function (_x11, _x12) {
     return _ref5.apply(this, arguments);
   };
 }());
 router.post("/changePasswordCode", /*#__PURE__*/function () {
   var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res) {
-    var kullaniciAdi, oldPassword, email, oldPasswordToken, isUserExist, correctPassword, code, codeToken, transporter;
+    var kullaniciAdi, oldPassword, email, oldPasswordToken, getUserInfo, userInfo, isUserExist, correctPassword, code, codeToken, transporter;
     return _regenerator["default"].wrap(function _callee6$(_context6) {
       while (1) switch (_context6.prev = _context6.next) {
         case 0:
+          //DÜZELT ŞİFRE SIKINTILI
           kullaniciAdi = req.body.kullaniciAdi;
           oldPassword = req.body.oldPassword;
           email = req.body.email;
           oldPasswordToken = (0, _md["default"])(oldPassword);
-          _context6.next = 6;
-          return userFind(kullaniciAdi);
-        case 6:
+          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+          userInfo = new getUserInfo(kullaniciAdi);
+          _context6.next = 8;
+          return userInfo.userFind(kullaniciAdi);
+        case 8:
           isUserExist = _context6.sent;
-          _context6.next = 9;
+          _context6.next = 11;
           return userPassword(oldPassword);
-        case 9:
+        case 11:
           correctPassword = _context6.sent;
           code = "1001";
-          codeToken = (0, _md["default"])(code);
-          console.log(codeToken);
+          codeToken = (0, _md["default"])(code); //console.log(codeToken)
           if (isUserExist == true && correctPassword == true) {
             transporter = _nodemailer["default"].createTransport({
               host: "smtp.gmail.com",
@@ -419,28 +379,30 @@ router.post("/changePasswordCode", /*#__PURE__*/function () {
           } else {
             res.send("Yanliş kullanici adi ve ya şifre");
           }
-        case 14:
+        case 15:
         case "end":
           return _context6.stop();
       }
     }, _callee6);
   }));
-  return function (_x15, _x16) {
+  return function (_x13, _x14) {
     return _ref6.apply(this, arguments);
   };
 }());
 router.put("/changePassword", /*#__PURE__*/function () {
   var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(req, res) {
-    var kullaniciAdi, code, newPassword, isUserExist, codeToken, newPasswordToken;
+    var kullaniciAdi, code, newPassword, getUserInfo, userInfo, isUserExist, codeToken, newPasswordToken;
     return _regenerator["default"].wrap(function _callee7$(_context7) {
       while (1) switch (_context7.prev = _context7.next) {
         case 0:
           kullaniciAdi = req.body.kullaniciAdi;
           code = req.body.code;
           newPassword = req.body.newPassword;
-          _context7.next = 5;
-          return userFind(kullaniciAdi);
-        case 5:
+          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+          userInfo = new getUserInfo(kullaniciAdi);
+          _context7.next = 7;
+          return userInfo.userFind();
+        case 7:
           isUserExist = _context7.sent;
           codeToken = (0, _md["default"])(code);
           newPasswordToken = (0, _md["default"])(newPassword);
@@ -460,13 +422,13 @@ router.put("/changePassword", /*#__PURE__*/function () {
           } else {
             res.send("Böyle bir kullanici yoktur");
           }
-        case 9:
+        case 11:
         case "end":
           return _context7.stop();
       }
     }, _callee7);
   }));
-  return function (_x17, _x18) {
+  return function (_x15, _x16) {
     return _ref7.apply(this, arguments);
   };
 }());

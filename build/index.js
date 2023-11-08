@@ -28,9 +28,13 @@ app.listen(3000, function (err) {
     console.log("hata verdi");
   }
 });
-var getUserInfo = userModel.user;
+
+/* var getUserInfo = userModel.user
 var sifre = new getUserInfo("NurihanK");
-sifre.getUser();
+sifre.getUser(); 
+sifre.userFind();
+ */
+
 app.use("/kullanici", _kullaniciRouter["default"]);
 app.use("/authorized", _authorizedRouter["default"]);
 app.use("/adminLogin", _adminLoginRouter["default"]);
