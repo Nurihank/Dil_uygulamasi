@@ -18,7 +18,7 @@ var userModel = require("../model/userModel");
 var baglanti = _mysql["default"].createConnection({
   host: "localhost",
   user: "root",
-  password: "15935738a",
+  password: "nurihan38",
   database: "dil_uygulamasi"
 });
 baglanti.connect(function (err) {
@@ -139,13 +139,6 @@ router.post("/signup", /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }());
-
-/* router.get("/deneme",async(req,res)=>{
-    var dene = await user("NurihanK")
-    res.send(dene[0].kullaniciAdi)
-
-}) */
-
 router.get("/signin", /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
     var kullaniciAdi, sifre, passwordToken, getUserInfo, userInfo, isUserExist, user, accessToken;
@@ -179,10 +172,16 @@ router.get("/signin", /*#__PURE__*/function () {
                 accesToken: accessToken
               });
             } else {
-              res.send("Kullanici adi ve ya şifre hatalidir");
+              res.json({
+                status: "FAILED",
+                message: "Kullanici adi ve ya şifre hatalidir"
+              });
             }
           } else {
-            res.send("Böyle bir kullanici adi yoktur");
+            res.send({
+              status: "FAILED",
+              message: "Kullanici adi ve ya şifre hatalidir"
+            });
           }
         case 12:
         case "end":
@@ -196,7 +195,7 @@ router.get("/signin", /*#__PURE__*/function () {
 }());
 router.post("/forgetPasswordCode", /*#__PURE__*/function () {
   var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(req, res) {
-    var kullaniciAdi, email, getUserInfo, userInfo, isUserExist, isEmailExist;
+    var kullaniciAdi, email, getUserInfo, userInfo, isUserExist, user;
     return _regenerator["default"].wrap(function _callee4$(_context4) {
       while (1) switch (_context4.prev = _context4.next) {
         case 0:
@@ -209,13 +208,13 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
         case 6:
           isUserExist = _context4.sent;
           _context4.next = 9;
-          return userEmail(email);
+          return userInfo.userInfo(kullaniciAdi);
         case 9:
-          isEmailExist = _context4.sent;
+          user = _context4.sent;
           if (isUserExist == true) {
             baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
               var emailMatch = JSON.parse(JSON.stringify(result));
-              if (emailMatch[0].email == email) {
+              if (user[0].email == email) {
                 var codeUret = /*#__PURE__*/function () {
                   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(min, max) {
                     var sayi;
@@ -252,6 +251,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
                 transporter.sendMail({
                   from: '"You" <kavalcinurihan@gmail.com>',
                   to: "kavalcinurihan@gmail.com",
+                  //email yapılacak
                   subject: "VERIFICATION CODE",
                   html: code
                 });
@@ -312,16 +312,22 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
                     if (err) {
                       throw err;
                     } else {
-                      res.send("Şifre değiştirildi");
+                      res.send({
+                        message: "Şifre değiştirildi"
+                      });
                     }
                   });
                 } else {
-                  res.send("Yanlis ve ya eksik kod");
+                  res.json({
+                    message: "Yanlis veya eksik kod"
+                  });
                 }
               }
             });
           } else {
-            res.send("Böyle bir kullanici adi yoktur");
+            res.json({
+              message: "Kullanici adi hatali veya eksiktir"
+            });
           }
         case 11:
         case "end":
@@ -335,7 +341,7 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
 }());
 router.post("/changePasswordCode", /*#__PURE__*/function () {
   var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res) {
-    var kullaniciAdi, oldPassword, email, oldPasswordToken, getUserInfo, userInfo, isUserExist, correctPassword, code, codeToken, transporter;
+    var kullaniciAdi, oldPassword, email, oldPasswordToken, getUserInfo, userInfo, isUserExist, user, code, codeToken, transporter;
     return _regenerator["default"].wrap(function _callee6$(_context6) {
       while (1) switch (_context6.prev = _context6.next) {
         case 0:
@@ -351,12 +357,12 @@ router.post("/changePasswordCode", /*#__PURE__*/function () {
         case 8:
           isUserExist = _context6.sent;
           _context6.next = 11;
-          return userPassword(oldPassword);
+          return userInfo.userInfo(kullaniciAdi);
         case 11:
-          correctPassword = _context6.sent;
+          user = _context6.sent;
           code = "1001";
-          codeToken = (0, _md["default"])(code); //console.log(codeToken)
-          if (isUserExist == true && correctPassword == true) {
+          codeToken = (0, _md["default"])(code);
+          if (isUserExist == true && user[0].şifre == oldPassword) {
             transporter = _nodemailer["default"].createTransport({
               host: "smtp.gmail.com",
               port: 465,
@@ -377,7 +383,9 @@ router.post("/changePasswordCode", /*#__PURE__*/function () {
             });
             baglanti.query("UPDATE kullanici SET changePasswordToken = ? WHERE kullaniciAdi = ? ", [codeToken, kullaniciAdi]);
           } else {
-            res.send("Yanliş kullanici adi ve ya şifre");
+            res.json({
+              message: "Yanliş kullanici adi ve ya şifre"
+            });
           }
         case 15:
         case "end":
@@ -414,13 +422,19 @@ router.put("/changePassword", /*#__PURE__*/function () {
                     throw err;
                   }
                 });
-                res.send("Sifre degistirilmistir");
+                res.json({
+                  message: "Sifre degistirilmistir"
+                });
               } else {
-                res.send("Yanlis ve ya eksik kod");
+                res.json({
+                  message: "Yanlis ve ya eksik kod"
+                });
               }
             });
           } else {
-            res.send("Böyle bir kullanici yoktur");
+            res.send({
+              message: "Böyle bir kullanici yoktur"
+            });
           }
         case 11:
         case "end":

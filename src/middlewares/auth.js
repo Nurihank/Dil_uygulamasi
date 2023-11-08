@@ -4,7 +4,7 @@ import mysql from "mysql";
 var con = mysql.createConnection({
     host:"localhost",
     user:"root",
-    password:"15935738a",
+    password:"nurihan38",
     database:"dil_uygulamasi"
 })
 

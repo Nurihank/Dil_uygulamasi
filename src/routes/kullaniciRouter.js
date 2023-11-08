@@ -11,7 +11,7 @@ var userModel = require ("../model/userModel")
 var baglanti = mysql.createConnection({
     host:"localhost",
     user:"root",
-    password:"15935738a",
+    password:"nurihan38",
     database:"dil_uygulamasi"
     })
 
@@ -95,11 +95,6 @@ router.post("/signup",async(req,res)=>{
     }
 })    
 
-/* router.get("/deneme",async(req,res)=>{
-    var dene = await user("NurihanK")
-    res.send(dene[0].kullaniciAdi)
-
-}) */
 
 router.get("/signin",async (req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi;
@@ -123,10 +118,17 @@ router.get("/signin",async (req,res)=>{
             baglanti.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ",[accessToken,kullaniciAdi])
             res.json({message:"Basarili bir sekilde giris yaptiniz",accesToken:accessToken})
         }else{
-            res.send("Kullanici adi ve ya şifre hatalidir")
+            res.json({
+                status:"FAILED",
+                message:"Kullanici adi ve ya şifre hatalidir"
+            })
+            
         }
     }else{
-        res.send("Böyle bir kullanici adi yoktur")
+        res.send({
+            status: "FAILED",
+            message: "Kullanici adi ve ya şifre hatalidir"
+        })
 
     }
 
@@ -144,14 +146,14 @@ router.post("/forgetPasswordCode",async(req,res)=>{
     var userInfo = new getUserInfo(kullaniciAdi)
 
     var isUserExist = await userInfo.userFind(kullaniciAdi)
-    var isEmailExist = await userEmail(email)   
-
+    var user = await userInfo.userInfo(kullaniciAdi)
+    
     
     if(isUserExist == true){
 
         baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,(err,result)=>{
             var emailMatch = JSON.parse(JSON.stringify(result))
-            if(emailMatch[0].email == email){
+            if(user[0].email == email){
 
                 async function codeUret(min,max){
                     var sayi = ""
@@ -175,7 +177,7 @@ router.post("/forgetPasswordCode",async(req,res)=>{
                 })
                 transporter.sendMail({
                     from:'"You" <kavalcinurihan@gmail.com>',
-                    to:"kavalcinurihan@gmail.com",
+                    to:"kavalcinurihan@gmail.com", //email yapılacak
                     subject:"VERIFICATION CODE",
                     html:code,
                 })
@@ -229,17 +231,19 @@ router.put("/forgetPassword",async(req,res)=>{
                         throw err
                     }
                     else{
-                        res.send("Şifre değiştirildi")
+                        res.send({ message: "Şifre değiştirildi" })
                     }
                 })
             }
             else{
-                res.send("Yanlis ve ya eksik kod")
+                res.json({message:"Yanlis veya eksik kod"})
             }
         }
     })}
     else{
-        res.send("Böyle bir kullanici adi yoktur")
+        res.json({
+            message:"Kullanici adi hatali veya eksiktir"
+        })
     }
 })
 
@@ -254,12 +258,12 @@ router.post("/changePasswordCode",async(req,res)=>{  //DÜZELT ŞİFRE SIKINTILI
     var userInfo = new getUserInfo(kullaniciAdi)
 
     var isUserExist = await userInfo.userFind(kullaniciAdi)
-    var correctPassword = await userPassword(oldPassword)
+    var user = await userInfo.userInfo(kullaniciAdi)
 
     var code = "1001"
     var codeToken = md5(code)
-    //console.log(codeToken)
-    if(isUserExist == true && correctPassword == true){
+    
+    if(isUserExist == true && user[0].şifre == oldPassword){
         let transporter = nodemailer.createTransport({
             host:"smtp.gmail.com",
             port:465,
@@ -281,7 +285,7 @@ router.post("/changePasswordCode",async(req,res)=>{  //DÜZELT ŞİFRE SIKINTILI
         baglanti.query("UPDATE kullanici SET changePasswordToken = ? WHERE kullaniciAdi = ? ",[codeToken,kullaniciAdi])
     }
     else{
-        res.send("Yanliş kullanici adi ve ya şifre")
+        res.json({message : "Yanliş kullanici adi ve ya şifre"})
     }
 })
 
@@ -305,14 +309,14 @@ router.put("/changePassword",async(req,res)=>{
                         throw err
                     }
                 })
-                res.send("Sifre degistirilmistir")
+                res.json({message : "Sifre degistirilmistir"})
             }
             else{
-                res.send("Yanlis ve ya eksik kod")
+                res.json({message : "Yanlis ve ya eksik kod"})
             }
         })
     }else{
-        res.send("Böyle bir kullanici yoktur")
+        res.send({message : "Böyle bir kullanici yoktur"})
     }
 })
 
