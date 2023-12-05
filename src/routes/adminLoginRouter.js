@@ -1,14 +1,18 @@
 const router = require("express").Router();  //routerları export etmek için  
 import mysql from "mysql" 
-
 import md5 from "md5";
 const jwt = require("jsonwebtoken");
 
+var db =  require("../model/database")
+var db = db.database
+var getDb = new db()
+
+
 var con = mysql.createConnection({
-    host:"localhost",
-    user:"root",
-    password:"15935738a",
-    database:"dil_uygulamasi"
+    host:getDb.getHost,
+    user:getDb.getUser,
+    password:getDb.getPassword,
+    database:getDb.getDataBase
 })
 
 con.connect((err) =>{

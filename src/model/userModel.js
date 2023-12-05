@@ -1,12 +1,15 @@
 import { json } from "body-parser";
 import mysql from "mysql" 
 import util from "util"
+var db =  require("./database")
+var db = db.database
+var getDb = new db()
 
 var con = mysql.createConnection({
-    host:"localhost",
-    user:"root",
-    database:"dil_uygulamasi",
-    password:"15935738a"
+    host:getDb.getHost,
+    user:getDb.getUser,
+    password:getDb.getPassword,
+    database:getDb.getDataBase
 })
 
 con.connect((err)=>{

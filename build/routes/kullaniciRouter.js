@@ -15,11 +15,14 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 var router = require("express").Router(); //routerları export etmek için   
 
 var userModel = require("../model/userModel");
+var db = require("../model/database");
+var db = db.database;
+var getDb = new db();
 var baglanti = _mysql["default"].createConnection({
-  host: "localhost",
-  user: "root",
-  password: "15935738a",
-  database: "dil_uygulamasi"
+  host: getDb.getHost,
+  user: getDb.getUser,
+  password: getDb.getPassword,
+  database: getDb.getDataBase
 });
 baglanti.connect(function (err) {
   if (err) {
@@ -139,13 +142,6 @@ router.post("/signup", /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }());
-
-/* router.get("/deneme",async(req,res)=>{
-    var dene = await user("NurihanK")
-    res.send(dene[0].kullaniciAdi)
-
-}) */
-
 router.get("/signin", /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
     var kullaniciAdi, sifre, passwordToken, getUserInfo, userInfo, isUserExist, user, accessToken;

@@ -6,13 +6,15 @@ import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
 var userModel = require ("../model/userModel")
-
+var db =  require("../model/database")
+var db = db.database
+var getDb = new db()
 
 var baglanti = mysql.createConnection({
-    host:"localhost",
-    user:"root",
-    password:"15935738a",
-    database:"dil_uygulamasi"
+    host:getDb.getHost,
+    user:getDb.getUser,
+    password:getDb.getPassword,
+    database:getDb.getDataBase
     })
 
     baglanti.connect((err)=>{
@@ -94,12 +96,6 @@ router.post("/signup",async(req,res)=>{
         }) 
     }
 })    
-
-/* router.get("/deneme",async(req,res)=>{
-    var dene = await user("NurihanK")
-    res.send(dene[0].kullaniciAdi)
-
-}) */
 
 router.get("/signin",async (req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi;

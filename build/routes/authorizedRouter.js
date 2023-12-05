@@ -11,11 +11,14 @@ var _auth = _interopRequireDefault(require("../middlewares/auth.js"));
 var router = require("express").Router(); //routerları export etmek için   
 //sql bağlantısı kurmak için
 
+var db = require("../model/database");
+var db = db.database;
+var getDb = new db();
 var con = _mysql["default"].createConnection({
-  host: "localhost",
-  user: "root",
-  password: "15935738a",
-  database: "dil_uygulamasi"
+  host: getDb.getHost,
+  user: getDb.getUser,
+  password: getDb.getPassword,
+  database: getDb.getDataBase
 });
 con.connect(function (err) {
   if (err) {

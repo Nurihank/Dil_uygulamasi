@@ -6,9 +6,7 @@ import authorizedRouter from "./routes/authorizedRouter.js"
 import { networkInterfaces, userInfo } from "os";
 const jwt = require("jsonwebtoken")  //token oluşturmak için
 const crypto = require("crypto")
-import authMiddleware from "./middlewares/auth.js"
 import adminRouter from "./routes/adminLoginRouter.js"
-var userModel =  require("./model/userModel.js")
 
 
 const app = express();
@@ -33,121 +31,9 @@ sifre.getUser();
 sifre.userFind();
  */
 
+
+
 app.use("/kullanici",kullaniciRouter)
 app.use("/authorized",authorizedRouter)
 app.use("/adminLogin",adminRouter)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* app.post("/kullaniciEkle",async(req,res)=>{
-    const kullaniciAdi = req.body.kullaniciAdi
-    const sifre = req.body.sifre
-    const MeslekID =req.body.MeslekID
-    const SectigiDilID = req.body.SectigiDilID
-    const DilID = req.body.DilID
-    console.log(kullaniciAdi)
-
-    baglanti.query('INSERT INTO kullanici (kullaniciAdi,şifre,MeslekID,SectigiDilID,DilID) values(?,?,?,?,?)',[kullaniciAdi,sifre,MeslekID,SectigiDilID,DilID],(err,result)=> {
-        if(err){
-            console.log(err)
-        }else{
-            res.send("Post")
-        }
-
-    })
-})
-
-app.get("/fetchId/:id", (req, res) => {  //Id ye göre veri tabanından veri getirme
-
-    const fetchId = req.params.id
-    baglanti.query("SELECT * FROM kullanici where id=?", fetchId, (err, result) => {
-        res.send(result)
-        var jsonResult = JSON.stringify(result)
-        console.log(jsonResult)
-
-    })
-})
-
-app.get("/fetch", (req, res) => {  //veri tabanından veri getirme
-
-    baglanti.query("select kullaniciAdi from kullanici", (err, result, fields) => {  //kulaniciAdi sütununu getirdi
-        if (err) {
-            console.log(err)
-        }
-        else {
-            res.send(result) //postmane mesaj gönderir
-
-            var adi = JSON.parse(JSON.stringify(result))
-            console.log(adi[0]) //terminalde yazar 
-            console.log(adi[2])
-        }
-    })
-})
-
-app.delete("/deleteData/:id",(req,res)=>{
-    const id = req.params.id
-
-    baglanti.query("DELETE FROM KULLANİCİ WHERE id=?",id,(err,result)=>{
-        if(err){
-            console.log(err)
-        }else{
-            if(result.affectedRows==0){
-                res.send("id not present")
-            }else{
-                res.send("Data Deleted")
-            console.log(result)
-            }
-            
-        }
-    })
-})
-
-app.put("/update/:id",(req,res)=>{
-    const updateId = req.params.id
-    const kullaniciAdi = req.body.kullaniciAdi
-    const sifre = req.body.sifre
-    const MeslekID =req.body.MeslekID
-    const SectigiDilID = req.body.SectigiDilID
-    const DilID = req.body.DilID
-
-    baglanti.query("UPDATE kullanici SET kullaniciAdi=?,şifre=?,MeslekId=?,SectigiDilId=?,DilId=? WHERE id = ? ",[kullaniciAdi,sifre,MeslekID,SectigiDilID,DilID,updateId],(err)=>{
-        if(err){
-            throw err
-        }else{
-            baglanti.query("SELECT * FROM kullanici WHERE id = ?",updateId,(err,result)=>{
-                if(err){
-                    throw err
-                }else{
-                    res.send(result)
-                }
-            })
-        }
-    })
-})
- */
-
-
-
  

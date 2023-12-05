@@ -4,12 +4,15 @@ import express from "express";
 import util from "util"
 import { error } from "console";
 import authMiddleware from "../middlewares/auth.js"
+var db =  require("../model/database")
+var db = db.database
+var getDb = new db()
 
 var con = mysql.createConnection({
-    host:"localhost",
-    user:"root",
-    password:"15935738a",
-    database:"dil_uygulamasi"
+    host:getDb.getHost,
+    user:getDb.getUser,
+    password:getDb.getPassword,
+    database:getDb.getDataBase
 })
 
 con.connect((err)=>{
