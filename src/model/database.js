@@ -1,7 +1,30 @@
 'use strict'
-exports.database = function(){
-    this.getHost = "localhost"
-    this.getUser = "root"
-    this.getDataBase = "dil_uygulamasi"
-    this.getPassword = "15935738a"
-}    
+import mysql from "mysql" 
+
+
+
+module.exports = class Database{
+   
+
+    constructor() {
+       this.con = mysql.createConnection({
+            host:"localhost",
+            user:"root",
+            password:"15935738a",
+            database:"dil_uygulamasi"
+        });
+    }
+
+    connect(){
+        this.con.connect((err) =>{
+            if(err) { throw err }
+        });
+    }
+
+
+    getConnection(){
+        return this.con;
+    }
+
+
+}

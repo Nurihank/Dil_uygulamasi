@@ -1,30 +1,21 @@
 const router = require("express").Router();  //routerları export etmek için  
 import mysql from "mysql" 
 import md5 from "md5";
+import Database from "../model/denemedata";
 const jwt = require("jsonwebtoken");
 
-var db =  require("../model/database")
-var db = db.database
-var getDb = new db()
+var db = require("../model/database")
+var getDb = new db();
 
-
-var con = mysql.createConnection({
-    host:getDb.getHost,
-    user:getDb.getUser,
-    password:getDb.getPassword,
-    database:getDb.getDataBase
-})
-
-con.connect((err) =>{
-    if(err) { throw err }
-
-})
+getDb.connect();
 
 router.get("/signin",(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre
 
     var passwordToken = md5(sifre)
+
+    var con = getDb.getConnection();
 
     con.query("SELECT * FROM admin WHERE kullaniciAdi = ?",kullaniciAdi,(err,result)=>{
         if(err) throw err
@@ -42,6 +33,9 @@ router.get("/signin",(req,res)=>{
             con.query("UPDATE admin SET accesToken = ? , refreshToken = ? WHERE kullaniciAdi = ?",[accessToken,refreshToken,kullaniciAdi])
             res.json({accessToken:accessToken,refreshToken:refreshToken})         
         } 
+        else{
+            res.send("şifre hatalı")
+        }
     })   
 })
 

@@ -4,7 +4,8 @@ import express from "express";
 import util from "util"
 import { error } from "console";
 import authMiddleware from "../middlewares/auth.js"
-var db =  require("../model/database")
+
+/* var db =  require("../model/database")
 var db = db.database
 var getDb = new db()
 
@@ -22,12 +23,18 @@ con.connect((err)=>{
     else{
         console.log("Connection Successful")
     }
-})
+}) 
 
-const query = util.promisify(con.query).bind(con);
+const query = util.promisify(con.query).bind(con);*/
+
+var db = require("../model/database")
+var getDb = new db();
 
 
 async function languageFind(language){
+    var con = getDb.getConnection();
+    const query = util.promisify(con.query).bind(con);
+
     var result = await query("Select COUNT(*) as sayi FROM dil WHERE dil_adi = ?",language);
     
     if(result[0].sayi==1){
@@ -39,6 +46,9 @@ async function languageFind(language){
 }
 
 async function jobFind(meslek){
+    var con = getDb.getConnection();
+    const query = util.promisify(con.query).bind(con);
+
     var result = await query("Select COUNT(*) as sayi FROM meslek WHERE meslek = ?",meslek);
     
     if(result[0].sayi==1){
@@ -50,6 +60,9 @@ async function jobFind(meslek){
 }
 
 async function wordFind(word){
+    var con = getDb.getConnection();
+    const query = util.promisify(con.query).bind(con);
+    
     var result = await query("SELECT COUNT(*) as sayi FROM kelime WHERE kelime = ?",word)
     if(result[0].sayi){
         return true
@@ -60,6 +73,9 @@ async function wordFind(word){
 
 
 router.get("/language",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
+    
+    
     con.query("SELECT * FROM dil",(err,result)=>{
         if(err){
             throw err
@@ -69,6 +85,9 @@ router.get("/language",authMiddleware,(req,res)=>{
 })
 
 router.get("/language/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
+    
+    
     const id = req.params.id
 
     con.query("SELECT * FROM dil where id = ? ",id,(err,result)=>{

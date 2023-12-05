@@ -1,7 +1,7 @@
 import { json } from "body-parser";
 import mysql from "mysql" 
 import util from "util"
-var db =  require("./database")
+/* var db =  require("./database")
 var db = db.database
 var getDb = new db()
 
@@ -15,7 +15,7 @@ var con = mysql.createConnection({
 con.connect((err)=>{
     if(err)
         console.log("Hata")
-})
+}) */
 
 
 exports.user = function(kullaniciAdi){  

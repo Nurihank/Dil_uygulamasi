@@ -6,9 +6,12 @@ import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
 var userModel = require ("../model/userModel")
-var db =  require("../model/database")
+
+/* var db =  require("../model/database")
 var db = db.database
+
 var getDb = new db()
+
 
 var baglanti = mysql.createConnection({
     host:getDb.getHost,
@@ -26,7 +29,7 @@ var baglanti = mysql.createConnection({
     })
 
 
-const query = util.promisify(baglanti.query).bind(baglanti);  //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
+const query = util.promisify(baglanti.query).bind(baglanti); */  //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 
 
 

@@ -15,23 +15,30 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 var router = require("express").Router(); //routerları export etmek için   
 
 var userModel = require("../model/userModel");
-var db = require("../model/database");
-var db = db.database;
-var getDb = new db();
-var baglanti = _mysql["default"].createConnection({
-  host: getDb.getHost,
-  user: getDb.getUser,
-  password: getDb.getPassword,
-  database: getDb.getDataBase
-});
-baglanti.connect(function (err) {
-  if (err) {
-    throw err;
-  } else {
-    console.log("Connection Successful");
-  }
-});
-var query = _util["default"].promisify(baglanti.query).bind(baglanti); //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
+
+/* var db =  require("../model/database")
+var db = db.database
+
+var getDb = new db()
+
+
+var baglanti = mysql.createConnection({
+    host:getDb.getHost,
+    user:getDb.getUser,
+    password:getDb.getPassword,
+    database:getDb.getDataBase
+    })
+
+    baglanti.connect((err)=>{
+        if(err){
+            throw err
+        }else{
+            console.log("Connection Successful")
+        }
+    })
+
+
+const query = util.promisify(baglanti.query).bind(baglanti); */ //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 function userEmail(_x) {
   return _userEmail.apply(this, arguments);
 }

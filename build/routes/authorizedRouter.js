@@ -11,44 +11,53 @@ var _auth = _interopRequireDefault(require("../middlewares/auth.js"));
 var router = require("express").Router(); //routerları export etmek için   
 //sql bağlantısı kurmak için
 
+/* var db =  require("../model/database")
+var db = db.database
+var getDb = new db()
+
+var con = mysql.createConnection({
+    host:getDb.getHost,
+    user:getDb.getUser,
+    password:getDb.getPassword,
+    database:getDb.getDataBase
+})
+
+con.connect((err)=>{
+    if(err){
+        throw err
+    }
+    else{
+        console.log("Connection Successful")
+    }
+}) 
+
+const query = util.promisify(con.query).bind(con);*/
+
 var db = require("../model/database");
-var db = db.database;
 var getDb = new db();
-var con = _mysql["default"].createConnection({
-  host: getDb.getHost,
-  user: getDb.getUser,
-  password: getDb.getPassword,
-  database: getDb.getDataBase
-});
-con.connect(function (err) {
-  if (err) {
-    throw err;
-  } else {
-    console.log("Connection Successful");
-  }
-});
-var query = _util["default"].promisify(con.query).bind(con);
 function languageFind(_x) {
   return _languageFind.apply(this, arguments);
 }
 function _languageFind() {
   _languageFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(language) {
-    var result;
+    var con, query, result;
     return _regenerator["default"].wrap(function _callee7$(_context7) {
       while (1) switch (_context7.prev = _context7.next) {
         case 0:
-          _context7.next = 2;
+          con = getDb.getConnection();
+          query = _util["default"].promisify(con.query).bind(con);
+          _context7.next = 4;
           return query("Select COUNT(*) as sayi FROM dil WHERE dil_adi = ?", language);
-        case 2:
+        case 4:
           result = _context7.sent;
           if (!(result[0].sayi == 1)) {
-            _context7.next = 7;
+            _context7.next = 9;
             break;
           }
           return _context7.abrupt("return", true);
-        case 7:
+        case 9:
           return _context7.abrupt("return", false);
-        case 8:
+        case 10:
         case "end":
           return _context7.stop();
       }
@@ -61,22 +70,24 @@ function jobFind(_x2) {
 }
 function _jobFind() {
   _jobFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(meslek) {
-    var result;
+    var con, query, result;
     return _regenerator["default"].wrap(function _callee8$(_context8) {
       while (1) switch (_context8.prev = _context8.next) {
         case 0:
-          _context8.next = 2;
+          con = getDb.getConnection();
+          query = _util["default"].promisify(con.query).bind(con);
+          _context8.next = 4;
           return query("Select COUNT(*) as sayi FROM meslek WHERE meslek = ?", meslek);
-        case 2:
+        case 4:
           result = _context8.sent;
           if (!(result[0].sayi == 1)) {
-            _context8.next = 7;
+            _context8.next = 9;
             break;
           }
           return _context8.abrupt("return", true);
-        case 7:
+        case 9:
           return _context8.abrupt("return", false);
-        case 8:
+        case 10:
         case "end":
           return _context8.stop();
       }
@@ -89,22 +100,24 @@ function wordFind(_x3) {
 }
 function _wordFind() {
   _wordFind = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(word) {
-    var result;
+    var con, query, result;
     return _regenerator["default"].wrap(function _callee9$(_context9) {
       while (1) switch (_context9.prev = _context9.next) {
         case 0:
-          _context9.next = 2;
+          con = getDb.getConnection();
+          query = _util["default"].promisify(con.query).bind(con);
+          _context9.next = 4;
           return query("SELECT COUNT(*) as sayi FROM kelime WHERE kelime = ?", word);
-        case 2:
+        case 4:
           result = _context9.sent;
           if (!result[0].sayi) {
-            _context9.next = 7;
+            _context9.next = 9;
             break;
           }
           return _context9.abrupt("return", true);
-        case 7:
+        case 9:
           return _context9.abrupt("return", false);
-        case 8:
+        case 10:
         case "end":
           return _context9.stop();
       }
@@ -113,6 +126,7 @@ function _wordFind() {
   return _wordFind.apply(this, arguments);
 }
 router.get("/language", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   con.query("SELECT * FROM dil", function (err, result) {
     if (err) {
       throw err;
@@ -121,6 +135,7 @@ router.get("/language", _auth["default"], function (req, res) {
   });
 });
 router.get("/language/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   con.query("SELECT * FROM dil where id = ? ", id, function (err, result) {
     if (err) {
