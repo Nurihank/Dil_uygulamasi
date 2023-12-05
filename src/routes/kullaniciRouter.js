@@ -31,9 +31,12 @@ var baglanti = mysql.createConnection({
 
 const query = util.promisify(baglanti.query).bind(baglanti); */  //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 
-
+var db = require("../model/database")
+var getDb = new db();
 
 async function userEmail(email){ 
+    const query = util.promisify(baglanti.query).bind(baglanti);
+    var con = getDb.getConnection();
     var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?",email)
     
     var sayiString = JSON.parse(JSON.stringify(result))
@@ -44,22 +47,10 @@ async function userEmail(email){
         return false
     }
 }
-
-async function userPassword(şifre){
-    var passwordToken = md5(şifre)
-    var result = await query("SELECT COUNT(*) as sayi FROM kullanici WHERE şifre = ?",passwordToken)
-    var sayiString = JSON.parse(JSON.stringify(result))
-
-    if(sayiString[0].sayi == 1){
-        return true
-    }
-    else{
-        return false
-    }
-}
-
-
+ //burda con yerina baglantı yazmışiım onlarla beraber düzelt
 router.post("/signup",async(req,res)=>{
+    var con = getDb.getConnection();
+
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre
     const email = req.body.email
@@ -75,7 +66,7 @@ router.post("/signup",async(req,res)=>{
     var passwordToken = md5(sifre)
     if(isUserExist == false){      
         if(isEmailExist == false){
-            baglanti.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)",[kullaniciAdi,passwordToken,email],(err)=>{
+            con.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)",[kullaniciAdi,passwordToken,email],(err)=>{
                 if(err) throw err
 
                 res.json({
@@ -101,6 +92,8 @@ router.post("/signup",async(req,res)=>{
 })    
 
 router.get("/signin",async (req,res)=>{
+    var con = getDb.getConnection();
+
     const kullaniciAdi = req.body.kullaniciAdi;
     const sifre = req.body.sifre
    
@@ -119,7 +112,7 @@ router.get("/signin",async (req,res)=>{
             const accessToken = jwt.sign({kullaniciAdi:user[0].kullaniciAdi,email:user[0].email},
                 process.env.ACCESS_TOKEN_SECRET,
                 {expiresIn:"15m"})
-            baglanti.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ",[accessToken,kullaniciAdi])
+            con.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ",[accessToken,kullaniciAdi])
             res.json({message:"Basarili bir sekilde giris yaptiniz",accesToken:accessToken})
         }else{
             res.json({
@@ -142,6 +135,8 @@ router.get("/signin",async (req,res)=>{
 
 
 router.post("/forgetPasswordCode",async(req,res)=>{
+    var con = getDb.getConnection();
+
     const kullaniciAdi = req.body.kullaniciAdi
     const email = req.body.email;
    // const yeniSifre = req.body.yeniSifre
@@ -155,7 +150,7 @@ router.post("/forgetPasswordCode",async(req,res)=>{
     
     if(isUserExist == true){
 
-        baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,(err,result)=>{
+        con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,(err,result)=>{
             var emailMatch = JSON.parse(JSON.stringify(result))
             if(user[0].email == email){
 
@@ -185,7 +180,7 @@ router.post("/forgetPasswordCode",async(req,res)=>{
                     subject:"VERIFICATION CODE",
                     html:code,
                 })
-                baglanti.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ",[ codeToken,kullaniciAdi],(err)=>{
+                con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ",[ codeToken,kullaniciAdi],(err)=>{
                     if(err){
                         throw err
                     }
@@ -209,6 +204,8 @@ router.post("/forgetPasswordCode",async(req,res)=>{
 })
 
 router.put("/forgetPassword",async(req,res)=>{
+    var con = getDb.getConnection();
+
     const kullaniciAdi = req.body.kullaniciAdi
     const code = req.body.code;
     const newPassword = req.body.newPassword
@@ -221,7 +218,7 @@ router.put("/forgetPassword",async(req,res)=>{
     var isUserExist = await userInfo.userFind(kullaniciAdi)
     var newPasswordToken = md5(newPassword)
     if(isUserExist == true)
-    {baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",[kullaniciAdi],(err,result)=>{
+    {con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",[kullaniciAdi],(err,result)=>{
         if(err){
             throw err
         }
@@ -230,7 +227,7 @@ router.put("/forgetPassword",async(req,res)=>{
             var codeDtToken = result[0].forgetPasswordToken
 
             if(codeToken == codeDtToken){
-                baglanti.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ?",[newPasswordToken,kullaniciAdi],(err)=>{
+                con.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ?",[newPasswordToken,kullaniciAdi],(err)=>{
                     if(err){
                         throw err
                     }
@@ -252,6 +249,8 @@ router.put("/forgetPassword",async(req,res)=>{
 })
 
 router.post("/changePasswordCode",async(req,res)=>{  //DÜZELT ŞİFRE SIKINTILI
+    var con = getDb.getConnection();
+
     const kullaniciAdi = req.body.kullaniciAdi;
     const oldPassword = req.body.oldPassword
     const email = req.body.email

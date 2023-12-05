@@ -99,6 +99,7 @@ router.get("/language/:id",authMiddleware,(req,res)=>{
 })
 
 router.put("/language/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     const id = req.params.id
     const dilAdi = req.body.dilAdi;
 
@@ -115,6 +116,7 @@ router.put("/language/:id",authMiddleware,(req,res)=>{
     
 })
 router.post("/language",authMiddleware,async(req,res)=>{
+    var con = getDb.getConnection();
     const dil = req.body.dil
     const isLanguageExist = await languageFind(dil)
     
@@ -131,6 +133,7 @@ router.post("/language",authMiddleware,async(req,res)=>{
 })
 
 router.delete("/language",authMiddleware,async(req,res)=>{
+    var con = getDb.getConnection();
     const dil = req.body.dil
     const isLanguageExist = await languageFind(dil)
 
@@ -147,6 +150,7 @@ router.delete("/language",authMiddleware,async(req,res)=>{
 })
 
 router.get("/job",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     con.query("SELECT * FROM meslek",(err,result)=>{
         if(err){
             throw err
@@ -157,6 +161,7 @@ router.get("/job",authMiddleware,(req,res)=>{
 })
 
 router.get("/job/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     const id = req.params.id
     con.query("SELECT * FROM meslek where idMeslek = ?",id,(err,result)=>{
         if(err){
@@ -168,6 +173,7 @@ router.get("/job/:id",authMiddleware,(req,res)=>{
 })
 
 router.put("/job/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     const id = req.params.id
     const job = req.body.job
 
@@ -185,6 +191,7 @@ router.put("/job/:id",authMiddleware,(req,res)=>{
 })
 
 router.post("/job",authMiddleware,async(req,res)=>{
+    var con = getDb.getConnection();
     const job = req.body.job
     const isJobExist = await jobFind(job)
 
@@ -203,6 +210,7 @@ router.post("/job",authMiddleware,async(req,res)=>{
 })
 
 router.delete("/job",authMiddleware,async(req,res)=>{
+    var con = getDb.getConnection();
     const meslek = req.body.meslek
     const isJobExist = await jobFind(meslek)
 
@@ -219,12 +227,14 @@ router.delete("/job",authMiddleware,async(req,res)=>{
 })
 
 router.get("/word",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     con.query("SELECT * FROM kelime",(err,result)=>{
         res.send(result)
     })
 })
 
 router.get("/word/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     const id = req.params.id;
 
     con.query("SELECT * FROM kelime Where id = ?",id,(err,result)=>{
@@ -233,6 +243,7 @@ router.get("/word/:id",authMiddleware,(req,res)=>{
 })
 
 router.put("/word/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     const id = req.params.id;
     const kategori_id = req.body.kategori_id
     const kelime = req.body.kelime
@@ -251,6 +262,7 @@ router.put("/word/:id",authMiddleware,(req,res)=>{
 })
 
 router.post("/word",authMiddleware,async(req,res)=>{
+    var con = getDb.getConnection();
     const kelime = req.body.kelime
     const kategori_id = req.body.kategori_id
 
@@ -272,6 +284,7 @@ router.post("/word",authMiddleware,async(req,res)=>{
 })
 
 router.delete("/word",authMiddleware,async(req,res)=>{
+    var con = getDb.getConnection();
     const kelime = req.body.kelime
     const isWordExist = await wordFind(kelime)
 
@@ -288,6 +301,7 @@ router.delete("/word",authMiddleware,async(req,res)=>{
 })
 
 router.get("/category",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     con.query("SELECT * FROM kategori",(err,result)=>{
         if(err){
             throw err
@@ -298,6 +312,7 @@ router.get("/category",authMiddleware,(req,res)=>{
 })
 
 router.get("/category/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     const id = req.params.id
     
     con.query("SELECT * FROM kategori WHERE id = ?",id,(err,result)=>{
@@ -310,6 +325,7 @@ router.get("/category/:id",authMiddleware,(req,res)=>{
 })
 
 router.put("/category/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     const id = req.params.id
     const kategori = req.body.kategori
     const meslek_id = req.body.meslek_id
@@ -327,6 +343,7 @@ router.put("/category/:id",authMiddleware,(req,res)=>{
 })
 
 router.post("/category",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
     const kategori = req.body.kategori
     const meslek_id = req.body.meslek_id
 

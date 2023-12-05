@@ -145,6 +145,7 @@ router.get("/language/:id", _auth["default"], function (req, res) {
   });
 });
 router.put("/language/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   var dilAdi = req.body.dilAdi;
   if (dilAdi != null) {
@@ -158,14 +159,15 @@ router.put("/language/:id", _auth["default"], function (req, res) {
 });
 router.post("/language", _auth["default"], /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(req, res) {
-    var dil, isLanguageExist;
+    var con, dil, isLanguageExist;
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
+          con = getDb.getConnection();
           dil = req.body.dil;
-          _context.next = 3;
+          _context.next = 4;
           return languageFind(dil);
-        case 3:
+        case 4:
           isLanguageExist = _context.sent;
           if (isLanguageExist == true) {
             res.send("Böyle bir dil vardir");
@@ -177,7 +179,7 @@ router.post("/language", _auth["default"], /*#__PURE__*/function () {
               res.send("Dil eklendi");
             });
           }
-        case 5:
+        case 6:
         case "end":
           return _context.stop();
       }
@@ -189,14 +191,15 @@ router.post("/language", _auth["default"], /*#__PURE__*/function () {
 }());
 router["delete"]("/language", _auth["default"], /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
-    var dil, isLanguageExist;
+    var con, dil, isLanguageExist;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
+          con = getDb.getConnection();
           dil = req.body.dil;
-          _context2.next = 3;
+          _context2.next = 4;
           return languageFind(dil);
-        case 3:
+        case 4:
           isLanguageExist = _context2.sent;
           if (isLanguageExist == true) {
             con.query("DELETE FROM dil WHERE dil_adi = ? ", dil, function (err) {
@@ -208,7 +211,7 @@ router["delete"]("/language", _auth["default"], /*#__PURE__*/function () {
           } else {
             res.send("Böyle bir dil bulunamadi");
           }
-        case 5:
+        case 6:
         case "end":
           return _context2.stop();
       }
@@ -219,6 +222,7 @@ router["delete"]("/language", _auth["default"], /*#__PURE__*/function () {
   };
 }());
 router.get("/job", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   con.query("SELECT * FROM meslek", function (err, result) {
     if (err) {
       throw err;
@@ -228,6 +232,7 @@ router.get("/job", _auth["default"], function (req, res) {
   });
 });
 router.get("/job/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   con.query("SELECT * FROM meslek where idMeslek = ?", id, function (err, result) {
     if (err) {
@@ -238,6 +243,7 @@ router.get("/job/:id", _auth["default"], function (req, res) {
   });
 });
 router.put("/job/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   var job = req.body.job;
   if (job != null) {
@@ -251,14 +257,15 @@ router.put("/job/:id", _auth["default"], function (req, res) {
 });
 router.post("/job", _auth["default"], /*#__PURE__*/function () {
   var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(req, res) {
-    var job, isJobExist;
+    var con, job, isJobExist;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) switch (_context3.prev = _context3.next) {
         case 0:
+          con = getDb.getConnection();
           job = req.body.job;
-          _context3.next = 3;
+          _context3.next = 4;
           return jobFind(job);
-        case 3:
+        case 4:
           isJobExist = _context3.sent;
           if (isJobExist == true) {
             res.send("Böyle bir meslek vardir");
@@ -270,7 +277,7 @@ router.post("/job", _auth["default"], /*#__PURE__*/function () {
               res.send("Meslek eklendi");
             });
           }
-        case 5:
+        case 6:
         case "end":
           return _context3.stop();
       }
@@ -282,14 +289,15 @@ router.post("/job", _auth["default"], /*#__PURE__*/function () {
 }());
 router["delete"]("/job", _auth["default"], /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(req, res) {
-    var meslek, isJobExist;
+    var con, meslek, isJobExist;
     return _regenerator["default"].wrap(function _callee4$(_context4) {
       while (1) switch (_context4.prev = _context4.next) {
         case 0:
+          con = getDb.getConnection();
           meslek = req.body.meslek;
-          _context4.next = 3;
+          _context4.next = 4;
           return jobFind(meslek);
-        case 3:
+        case 4:
           isJobExist = _context4.sent;
           if (isJobExist == true) {
             con.query("DELETE FROM meslek WHERE meslek = ? ", meslek, function (err) {
@@ -301,7 +309,7 @@ router["delete"]("/job", _auth["default"], /*#__PURE__*/function () {
           } else {
             res.send("Böyle bir meslek bulunamadi");
           }
-        case 5:
+        case 6:
         case "end":
           return _context4.stop();
       }
@@ -312,17 +320,20 @@ router["delete"]("/job", _auth["default"], /*#__PURE__*/function () {
   };
 }());
 router.get("/word", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   con.query("SELECT * FROM kelime", function (err, result) {
     res.send(result);
   });
 });
 router.get("/word/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   con.query("SELECT * FROM kelime Where id = ?", id, function (err, result) {
     res.send(result);
   });
 });
 router.put("/word/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   var kategori_id = req.body.kategori_id;
   var kelime = req.body.kelime;
@@ -337,15 +348,16 @@ router.put("/word/:id", _auth["default"], function (req, res) {
 });
 router.post("/word", _auth["default"], /*#__PURE__*/function () {
   var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(req, res) {
-    var kelime, kategori_id, isWordExist;
+    var con, kelime, kategori_id, isWordExist;
     return _regenerator["default"].wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
         case 0:
+          con = getDb.getConnection();
           kelime = req.body.kelime;
           kategori_id = req.body.kategori_id;
-          _context5.next = 4;
+          _context5.next = 5;
           return wordFind(kelime);
-        case 4:
+        case 5:
           isWordExist = _context5.sent;
           if (isWordExist == true) {
             res.send("Böyle bir kelime vardir");
@@ -358,7 +370,7 @@ router.post("/word", _auth["default"], /*#__PURE__*/function () {
               }
             });
           }
-        case 6:
+        case 7:
         case "end":
           return _context5.stop();
       }
@@ -370,14 +382,15 @@ router.post("/word", _auth["default"], /*#__PURE__*/function () {
 }());
 router["delete"]("/word", _auth["default"], /*#__PURE__*/function () {
   var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res) {
-    var kelime, isWordExist;
+    var con, kelime, isWordExist;
     return _regenerator["default"].wrap(function _callee6$(_context6) {
       while (1) switch (_context6.prev = _context6.next) {
         case 0:
+          con = getDb.getConnection();
           kelime = req.body.kelime;
-          _context6.next = 3;
+          _context6.next = 4;
           return wordFind(kelime);
-        case 3:
+        case 4:
           isWordExist = _context6.sent;
           if (isWordExist == true) {
             con.query("DELETE FROM kelime WHERE kelime = ? ", kelime, function (err) {
@@ -389,7 +402,7 @@ router["delete"]("/word", _auth["default"], /*#__PURE__*/function () {
           } else {
             res.send("Böyle bir kelime bulunamadi");
           }
-        case 5:
+        case 6:
         case "end":
           return _context6.stop();
       }
@@ -400,6 +413,7 @@ router["delete"]("/word", _auth["default"], /*#__PURE__*/function () {
   };
 }());
 router.get("/category", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   con.query("SELECT * FROM kategori", function (err, result) {
     if (err) {
       throw err;
@@ -409,6 +423,7 @@ router.get("/category", _auth["default"], function (req, res) {
   });
 });
 router.get("/category/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   con.query("SELECT * FROM kategori WHERE id = ?", id, function (err, result) {
     if (err) {
@@ -419,6 +434,7 @@ router.get("/category/:id", _auth["default"], function (req, res) {
   });
 });
 router.put("/category/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   var kategori = req.body.kategori;
   var meslek_id = req.body.meslek_id;
@@ -432,6 +448,7 @@ router.put("/category/:id", _auth["default"], function (req, res) {
   }
 });
 router.post("/category", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var kategori = req.body.kategori;
   var meslek_id = req.body.meslek_id;
   con.query("INSERT INTO kategori (kategori,meslek_id) values (?,?)", [kategori, meslek_id], function (err, result) {
