@@ -1,6 +1,12 @@
 import jwt from "jsonwebtoken"
 import mysql from "mysql";
 
+var db = require("../model/database")  //database modelini çağırdık
+var getDb = new db();  //objemizi oluşturduk
+
+getDb.connect();  //veri tabanı bağlantısını yaptık
+
+/* 
 var con = mysql.createConnection({
     host:"localhost",
     user:"root",
@@ -10,13 +16,16 @@ var con = mysql.createConnection({
 
 con.connect((err) =>{
     if(err) { throw err }
-})
+}) */
 
 var admin = "admin"
 
 export const authMiddleware = (req, res, next) => {  // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
     //Bearer = token başta bu halde ondan split dedik bu headeri ikiye bölcek
     //const token = req.headers["authorization"]?.split(' ')[1]
+
+    var con = getDb.getConnection();  //burda da bağlantıyı getirdik
+
     con.query("SELECT * FROM admin WHERE kullaniciAdi = ?",admin,(err,result)=>{
         if(err) throw err
 

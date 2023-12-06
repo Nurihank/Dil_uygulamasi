@@ -11,30 +11,9 @@ var _auth = _interopRequireDefault(require("../middlewares/auth.js"));
 var router = require("express").Router(); //routerları export etmek için   
 //sql bağlantısı kurmak için
 
-/* var db =  require("../model/database")
-var db = db.database
-var getDb = new db()
-
-var con = mysql.createConnection({
-    host:getDb.getHost,
-    user:getDb.getUser,
-    password:getDb.getPassword,
-    database:getDb.getDataBase
-})
-
-con.connect((err)=>{
-    if(err){
-        throw err
-    }
-    else{
-        console.log("Connection Successful")
-    }
-}) 
-
-const query = util.promisify(con.query).bind(con);*/
-
 var db = require("../model/database");
 var getDb = new db();
+getDb.connect();
 function languageFind(_x) {
   return _languageFind.apply(this, arguments);
 }
@@ -289,18 +268,18 @@ router.post("/job", _auth["default"], /*#__PURE__*/function () {
 }());
 router["delete"]("/job", _auth["default"], /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(req, res) {
-    var con, meslek, isJobExist;
+    var con, job, isJobExist;
     return _regenerator["default"].wrap(function _callee4$(_context4) {
       while (1) switch (_context4.prev = _context4.next) {
         case 0:
           con = getDb.getConnection();
-          meslek = req.body.meslek;
+          job = req.body.job;
           _context4.next = 4;
-          return jobFind(meslek);
+          return jobFind(job);
         case 4:
           isJobExist = _context4.sent;
           if (isJobExist == true) {
-            con.query("DELETE FROM meslek WHERE meslek = ? ", meslek, function (err) {
+            con.query("DELETE FROM meslek WHERE meslek = ? ", job, function (err) {
               if (err) {
                 throw err;
               }
@@ -459,6 +438,7 @@ router.post("/category", _auth["default"], function (req, res) {
   });
 });
 router["delete"]("/category/:id", _auth["default"], function (req, res) {
+  var con = getDb.getConnection();
   var id = req.params.id;
   con.query("DELETE FROM kategori WHERE id = ? ", id, function (err) {
     if (err) {

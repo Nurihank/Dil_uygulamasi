@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 
 var db = require("../model/database")
 var getDb = new db();
-
 getDb.connect();
 
 router.get("/signin",(req,res)=>{

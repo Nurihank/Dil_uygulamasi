@@ -1,25 +1,14 @@
 import { json } from "body-parser";
 import mysql from "mysql" 
 import util from "util"
-/* var db =  require("./database")
-var db = db.database
+
+var db =  require("./database")
 var getDb = new db()
-
-var con = mysql.createConnection({
-    host:getDb.getHost,
-    user:getDb.getUser,
-    password:getDb.getPassword,
-    database:getDb.getDataBase
-})
-
-con.connect((err)=>{
-    if(err)
-        console.log("Hata")
-}) */
+getDb.connect();
 
 
 exports.user = function(kullaniciAdi){  
-
+    var con = getDb.getConnection();
     const query = util.promisify(con.query).bind(con);  //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 
     this.userInfo = async function(){

@@ -5,31 +5,9 @@ import util from "util"
 import { error } from "console";
 import authMiddleware from "../middlewares/auth.js"
 
-/* var db =  require("../model/database")
-var db = db.database
-var getDb = new db()
-
-var con = mysql.createConnection({
-    host:getDb.getHost,
-    user:getDb.getUser,
-    password:getDb.getPassword,
-    database:getDb.getDataBase
-})
-
-con.connect((err)=>{
-    if(err){
-        throw err
-    }
-    else{
-        console.log("Connection Successful")
-    }
-}) 
-
-const query = util.promisify(con.query).bind(con);*/
-
 var db = require("../model/database")
 var getDb = new db();
-
+getDb.connect()
 
 async function languageFind(language){
     var con = getDb.getConnection();
@@ -211,11 +189,11 @@ router.post("/job",authMiddleware,async(req,res)=>{
 
 router.delete("/job",authMiddleware,async(req,res)=>{
     var con = getDb.getConnection();
-    const meslek = req.body.meslek
-    const isJobExist = await jobFind(meslek)
+    const job = req.body.job
+    const isJobExist = await jobFind(job)
 
     if(isJobExist == true){
-        con.query("DELETE FROM meslek WHERE meslek = ? ",meslek,(err)=>{
+        con.query("DELETE FROM meslek WHERE meslek = ? ",job,(err)=>{
             if(err){
                 throw err
             }
@@ -356,6 +334,8 @@ router.post("/category",authMiddleware,(req,res)=>{
 })
 
 router.delete("/category/:id",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection();
+
     const id = req.params.id
 
     con.query("DELETE FROM kategori WHERE id = ? ",id,(err)=>{

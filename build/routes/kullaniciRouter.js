@@ -15,57 +15,33 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 var router = require("express").Router(); //routerları export etmek için   
 
 var userModel = require("../model/userModel");
-
-/* var db =  require("../model/database")
-var db = db.database
-
-var getDb = new db()
-
-
-var baglanti = mysql.createConnection({
-    host:getDb.getHost,
-    user:getDb.getUser,
-    password:getDb.getPassword,
-    database:getDb.getDataBase
-    })
-
-    baglanti.connect((err)=>{
-        if(err){
-            throw err
-        }else{
-            console.log("Connection Successful")
-        }
-    })
-
-
-const query = util.promisify(baglanti.query).bind(baglanti); */ //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
-
 var db = require("../model/database");
 var getDb = new db();
+getDb.connect();
+var con = getDb.getConnection();
+var query = _util["default"].promisify(con.query).bind(con); //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 function userEmail(_x) {
   return _userEmail.apply(this, arguments);
-} //burda con yerina baglantı yazmışiım onlarla beraber düzelt
+}
 function _userEmail() {
   _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(email) {
-    var query, con, result, sayiString;
+    var result, sayiString;
     return _regenerator["default"].wrap(function _callee8$(_context8) {
       while (1) switch (_context8.prev = _context8.next) {
         case 0:
-          query = _util["default"].promisify(baglanti.query).bind(baglanti);
-          con = getDb.getConnection();
-          _context8.next = 4;
+          _context8.next = 2;
           return query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email);
-        case 4:
+        case 2:
           result = _context8.sent;
           sayiString = JSON.parse(JSON.stringify(result));
           if (!(sayiString[0].sayi == 1)) {
-            _context8.next = 10;
+            _context8.next = 8;
             break;
           }
           return _context8.abrupt("return", true);
-        case 10:
+        case 8:
           return _context8.abrupt("return", false);
-        case 11:
+        case 9:
         case "end":
           return _context8.stop();
       }
@@ -201,7 +177,6 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
           user = _context4.sent;
           if (isUserExist == true) {
             con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
-              var emailMatch = JSON.parse(JSON.stringify(result));
               if (user[0].email == email) {
                 var codeUret = /*#__PURE__*/function () {
                   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(min, max) {
@@ -238,8 +213,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
                 });
                 transporter.sendMail({
                   from: '"You" <kavalcinurihan@gmail.com>',
-                  to: "kavalcinurihan@gmail.com",
-                  //email yapılacak
+                  to: email,
                   subject: "VERIFICATION CODE",
                   html: code
                 });
@@ -334,7 +308,6 @@ router.post("/changePasswordCode", /*#__PURE__*/function () {
     return _regenerator["default"].wrap(function _callee6$(_context6) {
       while (1) switch (_context6.prev = _context6.next) {
         case 0:
-          //DÜZELT ŞİFRE SIKINTILI
           con = getDb.getConnection();
           kullaniciAdi = req.body.kullaniciAdi;
           oldPassword = req.body.oldPassword;
@@ -352,7 +325,7 @@ router.post("/changePasswordCode", /*#__PURE__*/function () {
           user = _context6.sent;
           code = "1001";
           codeToken = (0, _md["default"])(code);
-          if (isUserExist == true && user[0].şifre == oldPassword) {
+          if (isUserExist == true && user[0].şifre == oldPasswordToken) {
             transporter = _nodemailer["default"].createTransport({
               host: "smtp.gmail.com",
               port: 465,
@@ -371,7 +344,7 @@ router.post("/changePasswordCode", /*#__PURE__*/function () {
               subject: "VERIFICATION CODE",
               html: code
             });
-            baglanti.query("UPDATE kullanici SET changePasswordToken = ? WHERE kullaniciAdi = ? ", [codeToken, kullaniciAdi]);
+            con.query("UPDATE kullanici SET changePasswordToken = ? WHERE kullaniciAdi = ? ", [codeToken, kullaniciAdi]);
           } else {
             res.json({
               message: "Yanliş kullanici adi ve ya şifre"
@@ -389,25 +362,26 @@ router.post("/changePasswordCode", /*#__PURE__*/function () {
 }());
 router.put("/changePassword", /*#__PURE__*/function () {
   var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(req, res) {
-    var kullaniciAdi, code, newPassword, getUserInfo, userInfo, isUserExist, codeToken, newPasswordToken;
+    var con, kullaniciAdi, code, newPassword, getUserInfo, userInfo, isUserExist, codeToken, newPasswordToken;
     return _regenerator["default"].wrap(function _callee7$(_context7) {
       while (1) switch (_context7.prev = _context7.next) {
         case 0:
+          con = getDb.getConnection();
           kullaniciAdi = req.body.kullaniciAdi;
           code = req.body.code;
           newPassword = req.body.newPassword;
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
-          _context7.next = 7;
+          _context7.next = 8;
           return userInfo.userFind();
-        case 7:
+        case 8:
           isUserExist = _context7.sent;
           codeToken = (0, _md["default"])(code);
           newPasswordToken = (0, _md["default"])(newPassword);
           if (isUserExist == true) {
-            baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ? ", [kullaniciAdi], function (err, result) {
+            con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ? ", [kullaniciAdi], function (err, result) {
               if (result[0].changePasswordToken == codeToken) {
-                baglanti.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ? ", [newPasswordToken, kullaniciAdi], function (err) {
+                con.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ? ", [newPasswordToken, kullaniciAdi], function (err) {
                   if (err) {
                     throw err;
                   }
@@ -426,7 +400,7 @@ router.put("/changePassword", /*#__PURE__*/function () {
               message: "Böyle bir kullanici yoktur"
             });
           }
-        case 11:
+        case 12:
         case "end":
           return _context7.stop();
       }

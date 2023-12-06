@@ -6,23 +6,11 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 var _bodyParser = require("body-parser");
 var _mysql = _interopRequireDefault(require("mysql"));
 var _util = _interopRequireDefault(require("util"));
-/* var db =  require("./database")
-var db = db.database
-var getDb = new db()
-
-var con = mysql.createConnection({
-    host:getDb.getHost,
-    user:getDb.getUser,
-    password:getDb.getPassword,
-    database:getDb.getDataBase
-})
-
-con.connect((err)=>{
-    if(err)
-        console.log("Hata")
-}) */
-
+var db = require("./database");
+var getDb = new db();
+getDb.connect();
 exports.user = function (kullaniciAdi) {
+  var con = getDb.getConnection();
   var query = _util["default"].promisify(con.query).bind(con); //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 
   this.userInfo = /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {

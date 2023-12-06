@@ -7,36 +7,18 @@ import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
 var userModel = require ("../model/userModel")
 
-/* var db =  require("../model/database")
-var db = db.database
 
-var getDb = new db()
-
-
-var baglanti = mysql.createConnection({
-    host:getDb.getHost,
-    user:getDb.getUser,
-    password:getDb.getPassword,
-    database:getDb.getDataBase
-    })
-
-    baglanti.connect((err)=>{
-        if(err){
-            throw err
-        }else{
-            console.log("Connection Successful")
-        }
-    })
-
-
-const query = util.promisify(baglanti.query).bind(baglanti); */  //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
+  
 
 var db = require("../model/database")
 var getDb = new db();
+getDb.connect();
+var con = getDb.getConnection();
+const query = util.promisify(con.query).bind(con);   //mysql in sürümü asenkron awaiti desteklemediği için böyle bir kod yazdık
 
 async function userEmail(email){ 
-    const query = util.promisify(baglanti.query).bind(baglanti);
-    var con = getDb.getConnection();
+    
+    
     var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?",email)
     
     var sayiString = JSON.parse(JSON.stringify(result))
@@ -47,7 +29,7 @@ async function userEmail(email){
         return false
     }
 }
- //burda con yerina baglantı yazmışiım onlarla beraber düzelt
+
 router.post("/signup",async(req,res)=>{
     var con = getDb.getConnection();
 
@@ -151,7 +133,6 @@ router.post("/forgetPasswordCode",async(req,res)=>{
     if(isUserExist == true){
 
         con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,(err,result)=>{
-            var emailMatch = JSON.parse(JSON.stringify(result))
             if(user[0].email == email){
 
                 async function codeUret(min,max){
@@ -176,7 +157,7 @@ router.post("/forgetPasswordCode",async(req,res)=>{
                 })
                 transporter.sendMail({
                     from:'"You" <kavalcinurihan@gmail.com>',
-                    to:"kavalcinurihan@gmail.com", //email yapılacak
+                    to:email,
                     subject:"VERIFICATION CODE",
                     html:code,
                 })
@@ -248,7 +229,7 @@ router.put("/forgetPassword",async(req,res)=>{
     }
 })
 
-router.post("/changePasswordCode",async(req,res)=>{  //DÜZELT ŞİFRE SIKINTILI
+router.post("/changePasswordCode",async(req,res)=>{ 
     var con = getDb.getConnection();
 
     const kullaniciAdi = req.body.kullaniciAdi;
@@ -266,7 +247,7 @@ router.post("/changePasswordCode",async(req,res)=>{  //DÜZELT ŞİFRE SIKINTILI
     var code = "1001"
     var codeToken = md5(code)
     
-    if(isUserExist == true && user[0].şifre == oldPassword){
+    if(isUserExist == true && user[0].şifre == oldPasswordToken){
         let transporter = nodemailer.createTransport({
             host:"smtp.gmail.com",
             port:465,
@@ -285,7 +266,7 @@ router.post("/changePasswordCode",async(req,res)=>{  //DÜZELT ŞİFRE SIKINTILI
             subject:"VERIFICATION CODE",
             html:code,
         })
-        baglanti.query("UPDATE kullanici SET changePasswordToken = ? WHERE kullaniciAdi = ? ",[codeToken,kullaniciAdi])
+        con.query("UPDATE kullanici SET changePasswordToken = ? WHERE kullaniciAdi = ? ",[codeToken,kullaniciAdi])
     }
     else{
         res.json({message : "Yanliş kullanici adi ve ya şifre"})
@@ -293,6 +274,7 @@ router.post("/changePasswordCode",async(req,res)=>{  //DÜZELT ŞİFRE SIKINTILI
 })
 
 router.put("/changePassword",async(req,res)=>{
+    var con = getDb.getConnection();
     const kullaniciAdi = req.body.kullaniciAdi
     const code = req.body.code;
     const newPassword = req.body.newPassword
@@ -305,9 +287,9 @@ router.put("/changePassword",async(req,res)=>{
     var newPasswordToken = md5(newPassword)
 
     if(isUserExist == true){
-        baglanti.query("SELECT * FROM kullanici WHERE kullaniciAdi = ? " ,[kullaniciAdi],(err,result)=>{
+        con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ? " ,[kullaniciAdi],(err,result)=>{
             if(result[0].changePasswordToken == codeToken){
-                baglanti.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ? ",[newPasswordToken,kullaniciAdi],(err)=>{
+                con.query("UPDATE kullanici SET şifre = ? WHERE kullaniciAdi = ? ",[newPasswordToken,kullaniciAdi],(err)=>{
                     if(err){
                         throw err
                     }
