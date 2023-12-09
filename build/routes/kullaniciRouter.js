@@ -10,11 +10,14 @@ var _bodyParser = _interopRequireWildcard(require("body-parser"));
 var _md = _interopRequireDefault(require("md5"));
 var _nodemailer = _interopRequireDefault(require("nodemailer"));
 var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
+var _auth = require("../middlewares/auth");
+var _console = require("console");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var router = require("express").Router(); //routerları export etmek için   
 
 var userModel = require("../model/userModel");
+var userMiddleware = require("../middlewares/user");
 var db = require("../model/database");
 var getDb = new db();
 getDb.connect();
@@ -410,4 +413,16 @@ router.put("/changePassword", /*#__PURE__*/function () {
     return _ref7.apply(this, arguments);
   };
 }());
+router.put("/language", function (req, res) {
+  var con = getDb.getConnection();
+  var kullaniciAdi = req.body.kullaniciAdi;
+  var language = req.body.language;
+  var userMW = new userMiddleware(kullaniciAdi);
+  console.log(userMW);
+  if (!userMW) {
+    res.send("Giriş yapman gerekir");
+  } else {
+    res.send("asd");
+  }
+});
 module.exports = router;

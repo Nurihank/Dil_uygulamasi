@@ -5,8 +5,10 @@ import bodyParser, { json } from "body-parser";
 import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
+import { authMiddleware } from "../middlewares/auth";
+import { Console } from "console";
 var userModel = require ("../model/userModel")
-
+var userMiddleware = require("../middlewares/user")
 
   
 
@@ -78,7 +80,7 @@ router.get("/signin",async (req,res)=>{
 
     const kullaniciAdi = req.body.kullaniciAdi;
     const sifre = req.body.sifre
-   
+
     var passwordToken = md5(sifre)
 
     var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
@@ -305,6 +307,22 @@ router.put("/changePassword",async(req,res)=>{
     }
 })
 
+router.put("/language",(req,res)=>{
+    
+    var con = getDb.getConnection()
 
+    const kullaniciAdi = req.body.kullaniciAdi;
+    const language = req.body.language;
+    
+    var userMW = new userMiddleware(kullaniciAdi)
+    console.log(userMW)
+    if(!userMW){
+        res.send("Giriş yapman gerekir")
+    }
+    else{
+        res.send("asd")
+    }
+    
+})
 
 module.exports = router

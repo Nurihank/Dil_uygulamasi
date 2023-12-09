@@ -12,18 +12,6 @@ var getDb = new db(); //objemizi oluşturduk
 
 getDb.connect(); //veri tabanı bağlantısını yaptık
 
-/* 
-var con = mysql.createConnection({
-    host:"localhost",
-    user:"root",
-    password:"15935738a",
-    database:"dil_uygulamasi"
-})
-
-con.connect((err) =>{
-    if(err) { throw err }
-}) */
-
 var admin = "admin";
 var authMiddleware = function authMiddleware(req, res, next) {
   // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
