@@ -24,17 +24,18 @@ var authMiddleware = function authMiddleware(req, res, next) {
     if (err) throw err;
     var token = result[0].accesToken;
     if (!token) {
+      //hiç giriş yapmadıysa bu hatayı verir 
       return res.status(401).json({
         message: "giriş yapin"
       }); //token yoksa 401 yani bu işlemi gerçekleştiemeizsin diyo
     }
 
     _jsonwebtoken["default"].verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, user) {
-      //tokeni doğruluyo 
       if (err) {
         // burdaki token veritabanından gelcek
         return res.status(400).json(err);
-      }
+      } //tokenin süresi geçtiyse hata verir
+
       next();
     });
   });

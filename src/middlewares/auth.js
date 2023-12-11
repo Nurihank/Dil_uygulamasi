@@ -19,13 +19,13 @@ export const authMiddleware = (req, res, next) => {  // yetkisi olan birinin eri
 
         var token = result[0].accesToken
 
-        if (!token) {
+        if (!token) {  //hiç giriş yapmadıysa bu hatayı verir 
             return res.status(401).json({ message: "giriş yapin" }) //token yoksa 401 yani bu işlemi gerçekleştiemeizsin diyo
         }
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => { //tokeni doğruluyo 
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => { 
             if (err) {  // burdaki token veritabanından gelcek
                 return res.status(400).json(err)
-            }
+            }  //tokenin süresi geçtiyse hata verir
             
             next();
         })

@@ -307,21 +307,21 @@ router.put("/changePassword",async(req,res)=>{
     }
 })
 
-router.put("/language",(req,res)=>{
+router.put("/language",async(req,res)=>{
     
     var con = getDb.getConnection()
 
     const kullaniciAdi = req.body.kullaniciAdi;
     const language = req.body.language;
     
-    var userMW = new userMiddleware(kullaniciAdi)
-    console.log(userMW)
-    if(!userMW){
-        res.send("Giriş yapman gerekir")
-    }
-    else{
-        res.send("asd")
-    }
+    var userMW = userMiddleware.userMiddleware
+    var Mw = new userMW(kullaniciAdi)
+    
+    var check = await Mw.tokenVerify();
+    console.log(check)
+
+    
+    
     
 })
 

@@ -1,32 +1,30 @@
-import { get } from "express/lib/response";
 import jwt from "jsonwebtoken"
+import util from "util"
 
 var db = require("../model/database")
-var getDB = new db();
+var getDb = new db();
+getDb.connect();
 
-getDB.connect();
-var con = getDB.getConnection()
-
-module.exports = class userMiddleware{
+exports.userMiddleware = function(kullaniciAdi){
+    var con = getDb.getConnection();
+    const query = util.promisify(con.query).bind(con);
 
     
-    constructor(kullaniciAdi){
-        con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,(err,result,res)=>{
+    
+    this.tokenVerify = async function(){
 
-            var token = result[0].accesToken;
-            //console.log(token)
-            if(!token){
-                return "giriş yap"
+        var result = await query("SELECT * FROM kullanici WHERE kullaniciAdi = ? ", kullaniciAdi)
+        var token = result[0].accesToken
+
+        console.log(token)
+        if (!token) {
+            console.log("asf")
+        }
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+            if (err) {
+                console.log("sdsas")
             }
-    
-            jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,user)=>{
-                if(err){
-                    return "giriş yap"
-                }
-    
-                        
-            })
+
         })
     }
-    
 }
