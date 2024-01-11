@@ -19,16 +19,14 @@ exports.user = function(kullaniciAdi){
     this.userFind = async function() {
       var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi);
       var sayiString = JSON.parse(JSON.stringify(result))
-     
-      if(sayiString[0].sayi){
+        
+      if(sayiString[0].sayi == 1){
           return true
       }
       else{
           return false
       }
-    }
-    
+    }    
 }
-
 
 

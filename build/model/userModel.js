@@ -39,7 +39,7 @@ exports.user = function (kullaniciAdi) {
         case 2:
           result = _context2.sent;
           sayiString = JSON.parse(JSON.stringify(result));
-          if (!sayiString[0].sayi) {
+          if (!(sayiString[0].sayi == 1)) {
             _context2.next = 8;
             break;
           }

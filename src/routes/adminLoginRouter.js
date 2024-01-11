@@ -1,7 +1,6 @@
 const router = require("express").Router();  //routerları export etmek için  
 import mysql from "mysql" 
 import md5 from "md5";
-import Database from "../model/denemedata";
 const jwt = require("jsonwebtoken");
 
 var db = require("../model/database")

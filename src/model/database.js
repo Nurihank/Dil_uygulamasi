@@ -4,8 +4,7 @@ import mysql from "mysql"
 
 
 module.exports = class Database{
-   
-
+    
     constructor() {
        this.con = mysql.createConnection({
             host:"localhost",

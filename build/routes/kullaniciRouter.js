@@ -178,6 +178,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
           return userInfo.userInfo(kullaniciAdi);
         case 10:
           user = _context4.sent;
+          userMiddleware.userMiddleware(kullaniciAdi);
           if (isUserExist == true) {
             con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
               if (user[0].email == email) {
@@ -238,7 +239,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
               message: "Kullanici adi hatalidir"
             });
           }
-        case 12:
+        case 13:
         case "end":
           return _context4.stop();
       }

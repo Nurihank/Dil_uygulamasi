@@ -3,7 +3,6 @@
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _mysql = _interopRequireDefault(require("mysql"));
 var _md = _interopRequireDefault(require("md5"));
-var _denemedata = _interopRequireDefault(require("../model/denemedata"));
 var router = require("express").Router(); //routerları export etmek için  
 
 var jwt = require("jsonwebtoken");

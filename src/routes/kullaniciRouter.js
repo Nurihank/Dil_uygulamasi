@@ -10,7 +10,7 @@ import { Console } from "console";
 var userModel = require ("../model/userModel")
 var userMiddleware = require("../middlewares/user")
 
-  
+
 
 var db = require("../model/database")
 var getDb = new db();
@@ -41,7 +41,6 @@ router.post("/signup",async(req,res)=>{
 
     var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
     var userInfo = new getUserInfo(kullaniciAdi)
-
 
     var isUserExist = await userInfo.userFind(kullaniciAdi);
     var isEmailExist = await userEmail(email)
@@ -132,6 +131,9 @@ router.post("/forgetPasswordCode",async(req,res)=>{
     var user = await userInfo.userInfo(kullaniciAdi)
     
     
+    userMiddleware.userMiddleware(kullaniciAdi)
+    
+
     if(isUserExist == true){
 
         con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",kullaniciAdi,(err,result)=>{
