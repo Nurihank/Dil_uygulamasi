@@ -17,7 +17,6 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 var router = require("express").Router(); //routerları export etmek için   
 
 var userModel = require("../model/userModel");
-var userMiddleware = require("../middlewares/user");
 var db = require("../model/database");
 var getDb = new db();
 getDb.connect();
@@ -178,7 +177,6 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
           return userInfo.userInfo(kullaniciAdi);
         case 10:
           user = _context4.sent;
-          userMiddleware.userMiddleware(kullaniciAdi);
           if (isUserExist == true) {
             con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
               if (user[0].email == email) {
@@ -239,7 +237,7 @@ router.post("/forgetPasswordCode", /*#__PURE__*/function () {
               message: "Kullanici adi hatalidir"
             });
           }
-        case 13:
+        case 12:
         case "end":
           return _context4.stop();
       }

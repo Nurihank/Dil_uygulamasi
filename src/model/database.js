@@ -13,17 +13,12 @@ module.exports = class Database{
             database:"dil_uygulamasi"
         });
     }
-
     connect(){
         this.con.connect((err) =>{
             if(err) { throw err }
         });
     }
-
-
     getConnection(){
         return this.con;
     }
-
-
 }
