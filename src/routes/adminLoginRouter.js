@@ -18,11 +18,13 @@ router.get("/signin",(req,res)=>{
     con.query("SELECT * FROM admin WHERE kullaniciAdi = ?",kullaniciAdi,(err,result)=>{
         if(err) throw err
         
-        if(passwordToken == result[0].sifre){
+        //girişte sıkıntı var hallet 
+        if((passwordToken == result[0].sifre) && (kullaniciAdi == result[0].kullaniciAdi)){   
 
             const accessToken = jwt.sign({kullaniciAdi:kullaniciAdi},
                 process.env.ACCESS_TOKEN_SECRET,
                 {expiresIn:"10m"})
+
 
             const refreshToken = jwt.sign({kullaniciAdi:kullaniciAdi},
                 process.env.REFRESH_TOKEN_SECRET,

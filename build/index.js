@@ -9,6 +9,9 @@ var _os = require("os");
 var _adminLoginRouter = _interopRequireDefault(require("./routes/adminLoginRouter.js"));
 require('dotenv').config(); //tokenlerin gözükmesi için yazdık bunu
 
+/* var cors = require('cors');
+app.use(cors()); */
+
 var app = (0, _express["default"])();
 app.use(_bodyParser["default"].json());
 app.use(_bodyParser["default"].urlencoded({

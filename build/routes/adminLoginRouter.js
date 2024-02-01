@@ -17,6 +17,8 @@ router.get("/signin", function (req, res) {
   con.query("SELECT * FROM admin WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
     if (err) throw err;
     if (passwordToken == result[0].sifre) {
+      //kullaniciAdi düzeltcen
+
       var accessToken = jwt.sign({
         kullaniciAdi: kullaniciAdi
       }, process.env.ACCESS_TOKEN_SECRET, {

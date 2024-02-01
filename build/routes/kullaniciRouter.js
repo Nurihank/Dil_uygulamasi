@@ -26,28 +26,28 @@ function userEmail(_x) {
   return _userEmail.apply(this, arguments);
 }
 function _userEmail() {
-  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(email) {
+  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(email) {
     var result, sayiString;
-    return _regenerator["default"].wrap(function _callee9$(_context9) {
-      while (1) switch (_context9.prev = _context9.next) {
+    return _regenerator["default"].wrap(function _callee8$(_context8) {
+      while (1) switch (_context8.prev = _context8.next) {
         case 0:
-          _context9.next = 2;
+          _context8.next = 2;
           return query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email);
         case 2:
-          result = _context9.sent;
+          result = _context8.sent;
           sayiString = JSON.parse(JSON.stringify(result));
           if (!(sayiString[0].sayi == 1)) {
-            _context9.next = 8;
+            _context8.next = 8;
             break;
           }
-          return _context9.abrupt("return", true);
+          return _context8.abrupt("return", true);
         case 8:
-          return _context9.abrupt("return", false);
+          return _context8.abrupt("return", false);
         case 9:
         case "end":
-          return _context9.stop();
+          return _context8.stop();
       }
-    }, _callee9);
+    }, _callee8);
   }));
   return _userEmail.apply(this, arguments);
 }
@@ -410,32 +410,6 @@ router.put("/changePassword", /*#__PURE__*/function () {
   }));
   return function (_x14, _x15) {
     return _ref7.apply(this, arguments);
-  };
-}());
-router.put("/language", /*#__PURE__*/function () {
-  var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(req, res) {
-    var con, kullaniciAdi, language, userMW, Mw, check;
-    return _regenerator["default"].wrap(function _callee8$(_context8) {
-      while (1) switch (_context8.prev = _context8.next) {
-        case 0:
-          con = getDb.getConnection();
-          kullaniciAdi = req.body.kullaniciAdi;
-          language = req.body.language;
-          userMW = userMiddleware.userMiddleware;
-          Mw = new userMW(kullaniciAdi);
-          _context8.next = 7;
-          return Mw.tokenVerify();
-        case 7:
-          check = _context8.sent;
-          console.log(check);
-        case 9:
-        case "end":
-          return _context8.stop();
-      }
-    }, _callee8);
-  }));
-  return function (_x16, _x17) {
-    return _ref8.apply(this, arguments);
   };
 }());
 module.exports = router;
