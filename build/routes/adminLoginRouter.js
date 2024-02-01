@@ -25,6 +25,9 @@ router.get("/signin", function (req, res) {
       }, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "10m"
       });
+      //burda giriş yapınca oluşan accesToken postmande direkt authorizationa gidiyor
+      //https://stackoverflow.com/questions/49785592/bearer-token-in-postman
+
       var refreshToken = jwt.sign({
         kullaniciAdi: kullaniciAdi
       }, process.env.REFRESH_TOKEN_SECRET, {
@@ -36,7 +39,9 @@ router.get("/signin", function (req, res) {
         refreshToken: refreshToken
       });
     } else {
-      res.send("şifre hatalı");
+      res.json({
+        message: "şifre hatali"
+      });
     }
   });
 });

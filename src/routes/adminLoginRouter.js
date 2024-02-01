@@ -24,7 +24,8 @@ router.get("/signin",(req,res)=>{
             const accessToken = jwt.sign({kullaniciAdi:kullaniciAdi},
                 process.env.ACCESS_TOKEN_SECRET,
                 {expiresIn:"10m"})
-
+                //burda giriş yapınca oluşan accesToken postmande direkt authorizationa gidiyor
+                //https://stackoverflow.com/questions/49785592/bearer-token-in-postman
 
             const refreshToken = jwt.sign({kullaniciAdi:kullaniciAdi},
                 process.env.REFRESH_TOKEN_SECRET,
@@ -34,7 +35,7 @@ router.get("/signin",(req,res)=>{
             res.json({accessToken:accessToken,refreshToken:refreshToken})         
         } 
         else{
-            res.send("şifre hatalı")
+            res.json({message:"şifre hatali"})
         }
     })   
 })
