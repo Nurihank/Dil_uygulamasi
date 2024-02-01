@@ -14,11 +14,12 @@ router.get("/signin", function (req, res) {
   var sifre = req.body.sifre;
   var passwordToken = (0, _md["default"])(sifre);
   var con = getDb.getConnection();
+  //kullanıcı hatasını kontrol eden bir kod yaz unutma
   con.query("SELECT * FROM admin WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
     if (err) throw err;
-    if (passwordToken == result[0].sifre) {
-      //kullaniciAdi düzeltcen
 
+    //girişte sıkıntı var hallet 
+    if (passwordToken == result[0].sifre) {
       var accessToken = jwt.sign({
         kullaniciAdi: kullaniciAdi
       }, process.env.ACCESS_TOKEN_SECRET, {
