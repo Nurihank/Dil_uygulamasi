@@ -1,12 +1,10 @@
 const router = require("express").Router(); //routerları export etmek için   
-import mysql from "mysql"
 import util from "util"
-import bodyParser, { json } from "body-parser";
+const userMiddleware = require("../middlewares/user")
 import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
-import { authMiddleware } from "../middlewares/auth";
-import { Console } from "console";
+
 var userModel = require ("../model/userModel")
 
 
@@ -61,8 +59,7 @@ router.post("/signup",async(req,res)=>{
                 status:"FAILED",
                 message:"Böyle bir e posta vardir"
             })
-        }
-        
+        }     
     }
     else{
         res.json({
@@ -94,7 +91,7 @@ router.get("/signin",async (req,res)=>{
                 process.env.ACCESS_TOKEN_SECRET,
                 {expiresIn:"15m"})
             con.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ",[accessToken,kullaniciAdi])
-            res.json({message:"Basarili bir sekilde giris yaptiniz",accesToken:accessToken})
+            res.json({message:"Basarili bir sekilde giris yaptiniz",accessToken:accessToken})
         }else{
             res.json({
                 status:"FAILED",
@@ -228,7 +225,7 @@ router.put("/forgetPassword",async(req,res)=>{
     }
 })
 
-router.post("/changePasswordCode",async(req,res)=>{ 
+router.post("/changePasswordCode",userMiddleware,async(req,res)=>{ 
     var con = getDb.getConnection();
 
     const kullaniciAdi = req.body.kullaniciAdi;
@@ -272,7 +269,7 @@ router.post("/changePasswordCode",async(req,res)=>{
     }
 })
 
-router.put("/changePassword",async(req,res)=>{
+router.put("/changePassword",userMiddleware,async(req,res)=>{
     var con = getDb.getConnection();
     const kullaniciAdi = req.body.kullaniciAdi
     const code = req.body.code;

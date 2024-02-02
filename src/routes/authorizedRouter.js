@@ -1,6 +1,4 @@
 const router = require("express").Router();//routerları export etmek için   
-import mysql from "mysql" //sql bağlantısı kurmak için
-import express from "express";
 import util from "util"
 import { error } from "console";
 import authMiddleware from "../middlewares/auth.js"
@@ -255,10 +253,8 @@ router.post("/word",authMiddleware,async(req,res)=>{
             }else{
                 res.send("Kelime eklendi")
             }
-        })
-        
+        }) 
     }
-
 })
 
 router.delete("/word",authMiddleware,async(req,res)=>{

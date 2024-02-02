@@ -3,13 +3,10 @@
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
-var _mysql = _interopRequireDefault(require("mysql"));
-var _express = _interopRequireDefault(require("express"));
 var _util = _interopRequireDefault(require("util"));
 var _console = require("console");
 var _auth = _interopRequireDefault(require("../middlewares/auth.js"));
 var router = require("express").Router(); //routerları export etmek için   
-//sql bağlantısı kurmak için
 
 var db = require("../model/database");
 var getDb = new db();

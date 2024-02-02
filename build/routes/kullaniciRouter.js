@@ -1,21 +1,15 @@
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-var _typeof = require("@babel/runtime/helpers/typeof");
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
-var _mysql = _interopRequireDefault(require("mysql"));
 var _util = _interopRequireDefault(require("util"));
-var _bodyParser = _interopRequireWildcard(require("body-parser"));
 var _md = _interopRequireDefault(require("md5"));
 var _nodemailer = _interopRequireDefault(require("nodemailer"));
 var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
-var _auth = require("../middlewares/auth");
-var _console = require("console");
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var router = require("express").Router(); //routerları export etmek için   
 
+var userMiddleware = require("../middlewares/user");
 var userModel = require("../model/userModel");
 var db = require("../model/database");
 var getDb = new db();
@@ -134,7 +128,7 @@ router.get("/signin", /*#__PURE__*/function () {
               con.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ", [accessToken, kullaniciAdi]);
               res.json({
                 message: "Basarili bir sekilde giris yaptiniz",
-                accesToken: accessToken
+                accessToken: accessToken
               });
             } else {
               res.json({
@@ -304,7 +298,7 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
     return _ref5.apply(this, arguments);
   };
 }());
-router.post("/changePasswordCode", /*#__PURE__*/function () {
+router.post("/changePasswordCode", userMiddleware, /*#__PURE__*/function () {
   var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res) {
     var con, kullaniciAdi, oldPassword, email, oldPasswordToken, getUserInfo, userInfo, isUserExist, user, code, codeToken, transporter;
     return _regenerator["default"].wrap(function _callee6$(_context6) {
@@ -362,7 +356,7 @@ router.post("/changePasswordCode", /*#__PURE__*/function () {
     return _ref6.apply(this, arguments);
   };
 }());
-router.put("/changePassword", /*#__PURE__*/function () {
+router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
   var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(req, res) {
     var con, kullaniciAdi, code, newPassword, getUserInfo, userInfo, isUserExist, codeToken, newPasswordToken;
     return _regenerator["default"].wrap(function _callee7$(_context7) {
