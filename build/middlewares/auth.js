@@ -18,7 +18,7 @@ var authMiddleware = function authMiddleware(req, res, next) {
   // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
   //Bearer = token başta bu halde ondan split dedik bu headeri ikiye bölcek
   var requestToken = (_req$headers$authoriz = (_req$headers$authoriz2 = req.headers["authorization"]) === null || _req$headers$authoriz2 === void 0 ? void 0 : _req$headers$authoriz2.split(' ')[1]) !== null && _req$headers$authoriz !== void 0 ? _req$headers$authoriz : null;
-  console.log(requestToken);
+  // console.log(requestToken)
   var con = getDb.getConnection(); //burda da bağlantıyı getirdik
 
   con.query("SELECT * FROM admin WHERE kullaniciAdi = ?", admin, function (err, result) {

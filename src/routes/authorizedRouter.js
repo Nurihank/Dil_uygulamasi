@@ -342,5 +342,28 @@ router.delete("/category/:id",authMiddleware,(req,res)=>{
     })
 })
 
+router.get("/user",authMiddleware,(req,res)=>{
+    var con = getDb.getConnection()
+
+    con.query("SELECT * FROM kullanici",(err,result)=>{
+        if(err){
+            throw err
+        }
+        res.send(result)
+    })
+})
+
+router.get("/user/:id",authMiddleware,(req,res)=>{
+    const id = req.params.id
+    var con = getDb.getConnection()
+
+    con.query("SELECT * FROM kullanici WHERE id = ?",[id],(err,result)=>{
+        if(err){
+            throw err
+        }
+        res.send(result)
+    })
+
+})
 
 module.exports = router

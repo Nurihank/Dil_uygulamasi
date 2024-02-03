@@ -9,7 +9,7 @@ getDb.connect();  //veri tabanı bağlantısını yaptık
 export const userMiddleware = (req, res, next) => {  // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
     //Bearer = token başta bu halde ondan split dedik bu headeri ikiye bölcek
     const requestToken = req.headers["authorization"]?.split(' ')[1] ?? null;
-    console.log(requestToken)
+  //  console.log(requestToken)
     var con = getDb.getConnection();  //burda da bağlantıyı getirdik
     
     if(requestToken == null ){

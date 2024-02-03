@@ -23,8 +23,8 @@ router.get("/signin", function (req, res) {
       var accessToken = jwt.sign({
         kullaniciAdi: kullaniciAdi
       }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "10m"
-      });
+        expiresIn: "2d"
+      }); //2d yaptım ama normalde 60m
       //burda giriş yapınca oluşan accesToken postmande direkt authorizationa gidiyor
       //https://stackoverflow.com/questions/49785592/bearer-token-in-postman
 
