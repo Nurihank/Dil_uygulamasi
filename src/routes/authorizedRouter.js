@@ -352,9 +352,21 @@ router.get("/user",authMiddleware,(req,res)=>{
         res.send(result)
     })
 })
-
 router.get("/user/:id",authMiddleware,(req,res)=>{
     const id = req.params.id
+    var con = getDb.getConnection()
+
+    con.query("SELECT * FROM kullanici WHERE id = ?",[id],(err,result)=>{
+        if(err){
+            throw err
+        }
+        res.send(result)
+    })
+
+})
+
+router.get("/userId",authMiddleware,(req,res)=>{
+    const id = req.headers.id
     var con = getDb.getConnection()
 
     con.query("SELECT * FROM kullanici WHERE id = ?",[id],(err,result)=>{
