@@ -365,17 +365,5 @@ router.get("/user/:id",authMiddleware,(req,res)=>{
 
 })
 
-router.get("/userId",authMiddleware,(req,res)=>{
-    const id = req.headers.id
-    var con = getDb.getConnection()
-
-    con.query("SELECT * FROM kullanici WHERE id = ?",[id],(err,result)=>{
-        if(err){
-            throw err
-        }
-        res.send(result)
-    })
-
-})
 
 module.exports = router
