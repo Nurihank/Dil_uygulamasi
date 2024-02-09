@@ -54,7 +54,8 @@ router.post("/signup", /*#__PURE__*/function () {
           con = getDb.getConnection();
           kullaniciAdi = req.body.kullaniciAdi;
           sifre = req.body.sifre;
-          email = req.body.email;
+          email = req.body.email; //react nativeden post isteği gönderirken direkt gönderirsen body ile alabilirsin 
+          //ama ör:mahir { } ile gönderirsen req.body.mahir.kullaniciAdi ile erişirsin
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
           _context.next = 8;
@@ -104,18 +105,19 @@ router.get("/signin", /*#__PURE__*/function () {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           con = getDb.getConnection();
-          kullaniciAdi = req.body.kullaniciAdi;
-          sifre = req.body.sifre;
+          kullaniciAdi = req.query.kullaniciAdi;
+          sifre = req.query.sifre; //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
+          console.log(req.query);
           passwordToken = (0, _md["default"])(sifre);
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
-          _context2.next = 8;
+          _context2.next = 9;
           return userInfo.userFind(kullaniciAdi);
-        case 8:
+        case 9:
           isUserExist = _context2.sent;
-          _context2.next = 11;
+          _context2.next = 12;
           return userInfo.userInfo(kullaniciAdi);
-        case 11:
+        case 12:
           user = _context2.sent;
           if (isUserExist == true) {
             if (passwordToken == user[0].şifre) {
@@ -142,7 +144,7 @@ router.get("/signin", /*#__PURE__*/function () {
               message: "Kullanici adi ve ya şifre hatalidir"
             });
           }
-        case 13:
+        case 14:
         case "end":
           return _context2.stop();
       }
@@ -406,4 +408,19 @@ router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
     return _ref7.apply(this, arguments);
   };
 }());
+router["delete"]("/userDeneme", function (req, res) {
+  var kullaniciAdi = req.query.kullaniciAdi;
+  //react nativeden delete gönderirken params ile gönderip query ile alırız aynı get gibi
+  var con = getDb.getConnection();
+  //  console.log(req)
+  con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", [kullaniciAdi], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json({
+      message: result
+    });
+    console.log(result);
+  });
+});
 module.exports = router;

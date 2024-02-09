@@ -342,7 +342,7 @@ router.delete("/category/:id",authMiddleware,(req,res)=>{
     })
 })
 
-router.get("/user",authMiddleware,(req,res)=>{
+router.get("/user",(req,res)=>{
     var con = getDb.getConnection()
 
     con.query("SELECT * FROM kullanici",(err,result)=>{
@@ -352,7 +352,7 @@ router.get("/user",authMiddleware,(req,res)=>{
         res.send(result)
     })
 })
-router.get("/user/:id",authMiddleware,(req,res)=>{
+router.get("/user/:id",(req,res)=>{
     const id = req.params.id
     var con = getDb.getConnection()
 
@@ -364,6 +364,7 @@ router.get("/user/:id",authMiddleware,(req,res)=>{
     })
 
 })
+
 
 
 module.exports = router

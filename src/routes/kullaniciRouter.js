@@ -34,6 +34,8 @@ router.post("/signup",async(req,res)=>{
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre
     const email = req.body.email
+    //react nativeden post isteği gönderirken direkt gönderirsen body ile alabilirsin 
+    //ama ör:mahir { } ile gönderirsen req.body.mahir.kullaniciAdi ile erişirsin
 
     var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
     var userInfo = new getUserInfo(kullaniciAdi)
@@ -72,8 +74,10 @@ router.post("/signup",async(req,res)=>{
 router.get("/signin",async (req,res)=>{
     var con = getDb.getConnection();
 
-    const kullaniciAdi = req.body.kullaniciAdi;
-    const sifre = req.body.sifre
+    const kullaniciAdi = req.query.kullaniciAdi;
+    const sifre = req.query.sifre   
+    //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
+    console.log(req.query)
 
     var passwordToken = md5(sifre)
 
@@ -299,6 +303,24 @@ router.put("/changePassword",userMiddleware,async(req,res)=>{
     }else{
         res.send({message : "Böyle bir kullanici yoktur"})
     }
+})
+
+
+router.delete("/userDeneme",(req,res)=>{
+    
+    const kullaniciAdi = req.query.kullaniciAdi
+    //react nativeden delete gönderirken params ile gönderip query ile alırız aynı get gibi
+    var con = getDb.getConnection()
+  //  console.log(req)
+    con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",[kullaniciAdi],(err,result)=>{
+        if(err){
+            throw err
+        }
+        res.json({message:result})
+        console.log(result)
+        
+    })
+
 })
 
 

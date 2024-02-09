@@ -444,7 +444,7 @@ router["delete"]("/category/:id", _auth["default"], function (req, res) {
     res.send("Basarili bir sekilde silindi");
   });
 });
-router.get("/user", _auth["default"], function (req, res) {
+router.get("/user", function (req, res) {
   var con = getDb.getConnection();
   con.query("SELECT * FROM kullanici", function (err, result) {
     if (err) {
@@ -453,7 +453,7 @@ router.get("/user", _auth["default"], function (req, res) {
     res.send(result);
   });
 });
-router.get("/user/:id", _auth["default"], function (req, res) {
+router.get("/user/:id", function (req, res) {
   var id = req.params.id;
   var con = getDb.getConnection();
   con.query("SELECT * FROM kullanici WHERE id = ?", [id], function (err, result) {
