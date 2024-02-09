@@ -306,12 +306,28 @@ router.put("/changePassword",userMiddleware,async(req,res)=>{
 })
 
 
-router.delete("/userDeneme",(req,res)=>{
+router.get("/userDeneme",(req,res)=>{
     
-    const kullaniciAdi = req.query.kullaniciAdi
-    //react nativeden delete gönderirken params ile gönderip query ile alırız aynı get gibi
+    //const kullaniciAdi = req.query.kullaniciAdi
+   
     var con = getDb.getConnection()
-  //  console.log(req)
+    console.log(req.query)
+    con.query("SELECT * FROM kullanici",(err,result)=>{
+        if(err){
+            throw err
+        }
+        res.json({message:result})
+        console.log(result)
+        
+    })
+
+})
+router.get("/userDeneme/:kullaniciAdi",(req,res)=>{
+    
+    const kullaniciAdi = req.params.kullaniciAdi
+   console.log(kullaniciAdi)
+    var con = getDb.getConnection()
+    console.log(req.query)
     con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?",[kullaniciAdi],(err,result)=>{
         if(err){
             throw err
@@ -322,6 +338,7 @@ router.delete("/userDeneme",(req,res)=>{
     })
 
 })
+
 
 
 module.exports = router

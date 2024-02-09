@@ -408,11 +408,26 @@ router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
     return _ref7.apply(this, arguments);
   };
 }());
-router["delete"]("/userDeneme", function (req, res) {
-  var kullaniciAdi = req.query.kullaniciAdi;
-  //react nativeden delete gönderirken params ile gönderip query ile alırız aynı get gibi
+router.get("/userDeneme", function (req, res) {
+  //const kullaniciAdi = req.query.kullaniciAdi
+
   var con = getDb.getConnection();
-  //  console.log(req)
+  console.log(req.query);
+  con.query("SELECT * FROM kullanici", function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json({
+      message: result
+    });
+    console.log(result);
+  });
+});
+router.get("/userDeneme/:kullaniciAdi", function (req, res) {
+  var kullaniciAdi = req.params.kullaniciAdi;
+  console.log(kullaniciAdi);
+  var con = getDb.getConnection();
+  console.log(req.query);
   con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", [kullaniciAdi], function (err, result) {
     if (err) {
       throw err;
