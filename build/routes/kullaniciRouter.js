@@ -66,6 +66,7 @@ router.post("/signup", /*#__PURE__*/function () {
           return userEmail(email);
         case 11:
           isEmailExist = _context.sent;
+          console.log(req.body);
           passwordToken = (0, _md["default"])(sifre);
           if (isUserExist == false) {
             if (isEmailExist == false) {
@@ -88,7 +89,7 @@ router.post("/signup", /*#__PURE__*/function () {
               message: "Böyle bir kullanici adi vardir"
             });
           }
-        case 14:
+        case 15:
         case "end":
           return _context.stop();
       }
@@ -122,6 +123,7 @@ router.get("/signin", /*#__PURE__*/function () {
           if (isUserExist == true) {
             if (passwordToken == user[0].şifre) {
               accessToken = _jsonwebtoken["default"].sign({
+                id: user[0].id,
                 kullaniciAdi: user[0].kullaniciAdi,
                 email: user[0].email
               }, process.env.ACCESS_TOKEN_SECRET, {
@@ -130,7 +132,9 @@ router.get("/signin", /*#__PURE__*/function () {
               con.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ", [accessToken, kullaniciAdi]);
               res.json({
                 message: "Basarili bir sekilde giris yaptiniz",
-                accessToken: accessToken
+                accessToken: accessToken,
+                status: "SUCCES",
+                id: user[0].id
               });
             } else {
               res.json({
@@ -408,34 +412,25 @@ router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
     return _ref7.apply(this, arguments);
   };
 }());
-router.get("/userDeneme", function (req, res) {
-  //const kullaniciAdi = req.query.kullaniciAdi
-
+router.post("/meslekSecim", function (req, res) {
+  var meslek = req.body.meslek;
+  var id = req.body.id;
   var con = getDb.getConnection();
-  console.log(req.query);
-  con.query("SELECT * FROM kullanici", function (err, result) {
+  con.query("SELECT * FROM meslek WHERE meslek = ? ", [meslek], function (err, result) {
     if (err) {
       throw err;
     }
-    res.json({
-      message: result
-    });
-    console.log(result);
+    con.query("UPDATE kullanici SET MeslekID = ? WHERE kullaniciAdi = ? ", [result[0].idMeslek, id]);
   });
 });
-router.get("/userDeneme/:kullaniciAdi", function (req, res) {
-  var kullaniciAdi = req.params.kullaniciAdi;
-  console.log(kullaniciAdi);
+router.get("/user/:id", function (req, res) {
+  var id = req.params.id;
   var con = getDb.getConnection();
-  console.log(req.query);
-  con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", [kullaniciAdi], function (err, result) {
+  con.query("SELECT * FROM kullanici WHERE id = ?", [id], function (err, result) {
     if (err) {
       throw err;
     }
-    res.json({
-      message: result
-    });
-    console.log(result);
+    res.send(result);
   });
 });
 module.exports = router;

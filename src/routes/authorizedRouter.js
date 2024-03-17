@@ -355,7 +355,7 @@ router.get("/user",(req,res)=>{
 router.get("/user/:id",(req,res)=>{
     const id = req.params.id
     var con = getDb.getConnection()
-
+    consoleç
     con.query("SELECT * FROM kullanici WHERE id = ?",[id],(err,result)=>{
         if(err){
             throw err

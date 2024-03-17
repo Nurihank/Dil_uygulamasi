@@ -456,6 +456,7 @@ router.get("/user", function (req, res) {
 router.get("/user/:id", function (req, res) {
   var id = req.params.id;
   var con = getDb.getConnection();
+  consoleç;
   con.query("SELECT * FROM kullanici WHERE id = ?", [id], function (err, result) {
     if (err) {
       throw err;
