@@ -48,7 +48,7 @@ router.post("/signup", async (req, res) => {
         if (isEmailExist == false) {
             con.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)", [kullaniciAdi, passwordToken, email], (err) => {
                 if (err) throw err
-
+                
                 res.json({
                     status: "SUCCES",
                     message: "Başarili bir şekilde kayit oldun"
