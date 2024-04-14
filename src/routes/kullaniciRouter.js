@@ -364,7 +364,7 @@ router.post("/dilSecim", (req, res) => {
     console.log(id)
     console.log(dil)
 
-    con.query("UPDATE kullanici SET MeslekID = ? WHERE id = ? ", [dil, id], (err, result) => {
+    con.query("UPDATE kullanici SET DilID = ? WHERE id = ? ", [dil, id], (err, result) => {
         if (err) {
             throw err
         }
@@ -389,8 +389,6 @@ router.post("/sectigiDilSecim", (req, res) => {
     const id = req.body.id
     var con = getDb.getConnection()
 
-    console.log(id)
-    console.log(dil)
 
     con.query("UPDATE kullanici SET SectigiDilID = ? WHERE id = ? ", [sectigiDil, id], (err, result) => {
         if (err) {
