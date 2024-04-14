@@ -48,7 +48,7 @@ router.post("/signup", async (req, res) => {
         if (isEmailExist == false) {
             con.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)", [kullaniciAdi, passwordToken, email], (err) => {
                 if (err) throw err
-                
+
                 res.json({
                     status: "SUCCES",
                     message: "Başarili bir şekilde kayit oldun"
@@ -305,27 +305,111 @@ router.put("/changePassword", userMiddleware, async (req, res) => {
     }
 })
 
-router.post("/meslekSecim",(req,res)=>{
+router.get("/meslek", (req, res) => {
+
+    var con = getDb.getConnection()
+
+
+    con.query("SELECT * FROM meslek", (err, result) => {
+        console.log(result)
+        res.json({ result })
+    })
+
+
+})
+
+/* router.get("/meslek", (req, res) => {
+    const meslek = req.query.meslek
+    var con = getDb.getConnection()
+
+    con.query("SELECT * FROM meslek WHERE meslek = ?", [meslek], (err, result) => {
+        console.log(result)
+        res.json({ result })
+    })
+}) */
+
+router.post("/meslekSecim", (req, res) => {
     const meslek = req.body.meslek
     const id = req.body.id
     var con = getDb.getConnection()
-   
-    con.query("SELECT * FROM meslek WHERE meslek = ? ",[meslek],(err,result)=>{
-        if(err){
+
+    console.log(id)
+    console.log(meslek)
+
+    con.query("UPDATE kullanici SET MeslekID = ? WHERE id = ? ", [meslek, id], (err, result) => {
+        if (err) {
             throw err
         }
-        con.query("UPDATE kullanici SET MeslekID = ? WHERE kullaniciAdi = ? ", [result[0].idMeslek,id])
+
+        res.json({ STATUS: "SUCCES" })
+
+    })
+})
+
+router.get("/dil", (req, res) => {
+
+    var con = getDb.getConnection()
+
+    con.query("SELECT * FROM dil", (err, result) => {
+        console.log(result)
+        res.json({ result })
+    })
+})
+
+router.post("/dilSecim", (req, res) => {
+    const dil = req.body.dil
+    const id = req.body.id
+    var con = getDb.getConnection()
+
+    console.log(id)
+    console.log(dil)
+
+    con.query("UPDATE kullanici SET MeslekID = ? WHERE id = ? ", [dil, id], (err, result) => {
+        if (err) {
+            throw err
+        }
+
+        res.json({ STATUS: "SUCCES" })
+
+    })
+})
+
+router.get("/sectigiDil", (req, res) => {
+
+    var con = getDb.getConnection()
+
+    con.query("SELECT * FROM dil", (err, result) => {
+        console.log(result)
+        res.json({ result })
+    })
+})
+
+router.post("/sectigiDilSecim", (req, res) => {
+    const sectigiDil = req.body.sectigiDil
+    const id = req.body.id
+    var con = getDb.getConnection()
+
+    console.log(id)
+    console.log(dil)
+
+    con.query("UPDATE kullanici SET SectigiDilID = ? WHERE id = ? ", [sectigiDil, id], (err, result) => {
+        if (err) {
+            throw err
+        }
+
+        res.json({ STATUS: "SUCCES" })
+
     })
 })
 
 router.get("/user/:id", (req, res) => {
     const id = req.params.id
     var con = getDb.getConnection()
-    
+
     con.query("SELECT * FROM kullanici WHERE id = ?", [id], (err, result) => {
         if (err) {
             throw err
-        }     
+        }
         res.send(result)
     })
 

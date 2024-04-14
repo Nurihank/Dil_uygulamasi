@@ -412,15 +412,87 @@ router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
     return _ref7.apply(this, arguments);
   };
 }());
+router.get("/meslek", function (req, res) {
+  var con = getDb.getConnection();
+  con.query("SELECT * FROM meslek", function (err, result) {
+    console.log(result);
+    res.json({
+      result: result
+    });
+  });
+});
+
+/* router.get("/meslek", (req, res) => {
+    const meslek = req.query.meslek
+    var con = getDb.getConnection()
+
+    con.query("SELECT * FROM meslek WHERE meslek = ?", [meslek], (err, result) => {
+        console.log(result)
+        res.json({ result })
+    })
+}) */
+
 router.post("/meslekSecim", function (req, res) {
   var meslek = req.body.meslek;
   var id = req.body.id;
   var con = getDb.getConnection();
-  con.query("SELECT * FROM meslek WHERE meslek = ? ", [meslek], function (err, result) {
+  console.log(id);
+  console.log(meslek);
+  con.query("UPDATE kullanici SET MeslekID = ? WHERE id = ? ", [meslek, id], function (err, result) {
     if (err) {
       throw err;
     }
-    con.query("UPDATE kullanici SET MeslekID = ? WHERE kullaniciAdi = ? ", [result[0].idMeslek, id]);
+    res.json({
+      STATUS: "SUCCES"
+    });
+  });
+});
+router.get("/dil", function (req, res) {
+  var con = getDb.getConnection();
+  con.query("SELECT * FROM dil", function (err, result) {
+    console.log(result);
+    res.json({
+      result: result
+    });
+  });
+});
+router.post("/dilSecim", function (req, res) {
+  var dil = req.body.dil;
+  var id = req.body.id;
+  var con = getDb.getConnection();
+  console.log(id);
+  console.log(dil);
+  con.query("UPDATE kullanici SET MeslekID = ? WHERE id = ? ", [dil, id], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json({
+      STATUS: "SUCCES"
+    });
+  });
+});
+router.get("/sectigiDil", function (req, res) {
+  var con = getDb.getConnection();
+  con.query("SELECT * FROM dil", function (err, result) {
+    console.log(result);
+    res.json({
+      result: result
+    });
+  });
+});
+router.post("/sectigiDilSecim", function (req, res) {
+  var sectigiDil = req.body.sectigiDil;
+  var id = req.body.id;
+  var con = getDb.getConnection();
+  console.log(id);
+  console.log(dil);
+  con.query("UPDATE kullanici SET SectigiDilID = ? WHERE id = ? ", [sectigiDil, id], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json({
+      STATUS: "SUCCES"
+    });
   });
 });
 router.get("/user/:id", function (req, res) {
