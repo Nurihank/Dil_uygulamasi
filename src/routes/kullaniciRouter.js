@@ -115,72 +115,83 @@ router.get("/signin", async (req, res) => {
 
 
 
-router.post("/forgetPasswordCode", async (req, res) => {
+router.get("/forgetPasswordCode", async (req, res) => {
     var con = getDb.getConnection();
 
-    const kullaniciAdi = req.body.kullaniciAdi
-    const email = req.body.email;
+    const kullaniciAdi = req.query.kullaniciAdi
+    const email = req.query.email;
     // const yeniSifre = req.body.yeniSifre
-
+    console.log(kullaniciAdi + "  asdasd " + email)
     var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
     var userInfo = new getUserInfo(kullaniciAdi)
 
     var isUserExist = await userInfo.userFind(kullaniciAdi)
     var user = await userInfo.userInfo(kullaniciAdi)
 
-
-    if (isUserExist == true) {
-
-        con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, (err, result) => {
-            if (user[0].email == email) {
-
-                async function codeUret(min, max) {
-                    var sayi = ""
-                    var sayi = Math.floor(Math.random() * (max - min)) + min
-                    return sayi
-                }
-                var code = "1000"
-                var codeToken = md5(code)
-
-                let transporter = nodemailer.createTransport({
-                    host: "smtp.gmail.com",
-                    port: 465,
-                    secure: true,
-                    auth: {
-                        user: 'kavalcinurihan@gmail.com',
-                        pass: 'lfxtfgzyiserimdn'
-                    },
-                    postman: res.json({
-                        message: "Code gönderildi"
-                    })
-                })
-                transporter.sendMail({
-                    from: '"You" <kavalcinurihan@gmail.com>',
-                    to: email,
-                    subject: "VERIFICATION CODE",
-                    html: code,
-                })
-                con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ", [codeToken, kullaniciAdi], (err) => {
-                    if (err) {
-                        throw err
-                    }
-                    else {
-                    }
-                })
-            }
-            else {
-                res.json({
-                    succes: "FAILED",
-                    message: "Kullanici adi ve email eşleşmiyo"
-                })
-            }
+    if (kullaniciAdi == "" || email == "") {
+        res.json({
+            status: "FAILED"
         })
     } else {
-        res.json({
-            status: "FAILED",
-            message: "Kullanici adi hatalidir"
-        })
+        if (isUserExist == true) {
+
+            con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, (err, result) => {
+                if (user[0].email == email) {
+
+                    async function codeUret(min, max) {
+                        var sayi = ""
+                        var sayi = Math.floor(Math.random() * (max - min)) + min
+                        return sayi
+                    }
+                    var code = "1000"
+                    var codeToken = md5(code)
+
+                    let transporter = nodemailer.createTransport({
+                        host: "smtp.gmail.com",
+                        port: 465,
+                        secure: true,
+                        auth: {
+                            user: 'kavalcinurihan@gmail.com',
+                            pass: 'lfxtfgzyiserimdn'
+                        },
+                        postman: res.json({
+                            message: "Code gönderildi"
+                        })
+                    })
+                    transporter.sendMail({
+                        from: '"You" <kavalcinurihan@gmail.com>',
+                        to: email,
+                        subject: "VERIFICATION CODE",
+                        html: code,
+                    })
+
+                    con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ", [codeToken, kullaniciAdi], (err) => {
+
+                        if (err) {
+
+                            throw err
+                        }
+
+                        else {
+
+                        }
+                    })
+                }
+                else {
+                    res.json({
+                        status: "FAILED",
+                        message: "Kullanici adi ve email eşleşmiyo"
+                    })
+                }
+            })
+        } else {
+            res.json({
+                status: "FAILED",
+                message: "Kullanici adi hatalidir"
+            })
+        }
     }
+
 })
 
 router.put("/forgetPassword", async (req, res) => {
@@ -412,5 +423,36 @@ router.get("/user/:id", (req, res) => {
     })
 
 })
+
+router.post("/DilSeviyesi", (req, res) => {
+    var con = getDb.getConnection()
+
+    const dilSeviyesi = req.body.sectigiDil
+    const id = req.body.id
+
+    con.query("Update kullanici SET dilSeviyesi = ? WHERE id = ?", [dilSeviyesi, id], (err, result) => {
+        if (err) throw err
+
+        res.json({
+            status: "SUCCES"
+        })
+    })
+})
+
+router.post("/NedenOgreniyor", (req, res) => {
+    var con = getDb.getConnection()
+
+    const nedenOgreniyor = req.body.nedenOgreniyor
+    const id = req.body.id
+
+    con.query("Update kullanici SET nedenOgreniyor = ? WHERE id = ?", [nedenOgreniyor, id], (err, result) => {
+        if (err) throw err
+
+        res.json({
+            status: "SUCCES"
+        })
+    })
+})
+
 
 module.exports = router

@@ -158,86 +158,93 @@ router.get("/signin", /*#__PURE__*/function () {
     return _ref2.apply(this, arguments);
   };
 }());
-router.post("/forgetPasswordCode", /*#__PURE__*/function () {
+router.get("/forgetPasswordCode", /*#__PURE__*/function () {
   var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(req, res) {
     var con, kullaniciAdi, email, getUserInfo, userInfo, isUserExist, user;
     return _regenerator["default"].wrap(function _callee4$(_context4) {
       while (1) switch (_context4.prev = _context4.next) {
         case 0:
           con = getDb.getConnection();
-          kullaniciAdi = req.body.kullaniciAdi;
-          email = req.body.email; // const yeniSifre = req.body.yeniSifre
+          kullaniciAdi = req.query.kullaniciAdi;
+          email = req.query.email; // const yeniSifre = req.body.yeniSifre
+          console.log(kullaniciAdi + "  asdasd " + email);
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
-          _context4.next = 7;
+          _context4.next = 8;
           return userInfo.userFind(kullaniciAdi);
-        case 7:
+        case 8:
           isUserExist = _context4.sent;
-          _context4.next = 10;
+          _context4.next = 11;
           return userInfo.userInfo(kullaniciAdi);
-        case 10:
+        case 11:
           user = _context4.sent;
-          if (isUserExist == true) {
-            con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
-              if (user[0].email == email) {
-                var codeUret = /*#__PURE__*/function () {
-                  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(min, max) {
-                    var sayi;
-                    return _regenerator["default"].wrap(function _callee3$(_context3) {
-                      while (1) switch (_context3.prev = _context3.next) {
-                        case 0:
-                          sayi = "";
-                          sayi = Math.floor(Math.random() * (max - min)) + min;
-                          return _context3.abrupt("return", sayi);
-                        case 3:
-                        case "end":
-                          return _context3.stop();
-                      }
-                    }, _callee3);
-                  }));
-                  return function codeUret(_x8, _x9) {
-                    return _ref4.apply(this, arguments);
-                  };
-                }();
-                var code = "1000";
-                var codeToken = (0, _md["default"])(code);
-                var transporter = _nodemailer["default"].createTransport({
-                  host: "smtp.gmail.com",
-                  port: 465,
-                  secure: true,
-                  auth: {
-                    user: 'kavalcinurihan@gmail.com',
-                    pass: 'lfxtfgzyiserimdn'
-                  },
-                  postman: res.json({
-                    message: "Code gönderildi"
-                  })
-                });
-                transporter.sendMail({
-                  from: '"You" <kavalcinurihan@gmail.com>',
-                  to: email,
-                  subject: "VERIFICATION CODE",
-                  html: code
-                });
-                con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ", [codeToken, kullaniciAdi], function (err) {
-                  if (err) {
-                    throw err;
-                  } else {}
-                });
-              } else {
-                res.json({
-                  succes: "FAILED",
-                  message: "Kullanici adi ve email eşleşmiyo"
-                });
-              }
+          if (kullaniciAdi == "" || email == "") {
+            res.json({
+              status: "FAILED"
             });
           } else {
-            res.json({
-              status: "FAILED",
-              message: "Kullanici adi hatalidir"
-            });
+            if (isUserExist == true) {
+              con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
+                if (user[0].email == email) {
+                  var codeUret = /*#__PURE__*/function () {
+                    var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(min, max) {
+                      var sayi;
+                      return _regenerator["default"].wrap(function _callee3$(_context3) {
+                        while (1) switch (_context3.prev = _context3.next) {
+                          case 0:
+                            sayi = "";
+                            sayi = Math.floor(Math.random() * (max - min)) + min;
+                            return _context3.abrupt("return", sayi);
+                          case 3:
+                          case "end":
+                            return _context3.stop();
+                        }
+                      }, _callee3);
+                    }));
+                    return function codeUret(_x8, _x9) {
+                      return _ref4.apply(this, arguments);
+                    };
+                  }();
+                  var code = "1000";
+                  var codeToken = (0, _md["default"])(code);
+                  var transporter = _nodemailer["default"].createTransport({
+                    host: "smtp.gmail.com",
+                    port: 465,
+                    secure: true,
+                    auth: {
+                      user: 'kavalcinurihan@gmail.com',
+                      pass: 'lfxtfgzyiserimdn'
+                    },
+                    postman: res.json({
+                      message: "Code gönderildi"
+                    })
+                  });
+                  transporter.sendMail({
+                    from: '"You" <kavalcinurihan@gmail.com>',
+                    to: email,
+                    subject: "VERIFICATION CODE",
+                    html: code
+                  });
+                  con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ", [codeToken, kullaniciAdi], function (err) {
+                    if (err) {
+                      throw err;
+                    } else {}
+                  });
+                } else {
+                  res.json({
+                    status: "FAILED",
+                    message: "Kullanici adi ve email eşleşmiyo"
+                  });
+                }
+              });
+            } else {
+              res.json({
+                status: "FAILED",
+                message: "Kullanici adi hatalidir"
+              });
+            }
           }
-        case 12:
+        case 13:
         case "end":
           return _context4.stop();
       }
@@ -501,6 +508,28 @@ router.get("/user/:id", function (req, res) {
       throw err;
     }
     res.send(result);
+  });
+});
+router.post("/DilSeviyesi", function (req, res) {
+  var con = getDb.getConnection();
+  var dilSeviyesi = req.body.sectigiDil;
+  var id = req.body.id;
+  con.query("Update kullanici SET dilSeviyesi = ? WHERE id = ?", [dilSeviyesi, id], function (err, result) {
+    if (err) throw err;
+    res.json({
+      status: "SUCCES"
+    });
+  });
+});
+router.post("/NedenOgreniyor", function (req, res) {
+  var con = getDb.getConnection();
+  var nedenOgreniyor = req.body.nedenOgreniyor;
+  var id = req.body.id;
+  con.query("Update kullanici SET nedenOgreniyor = ? WHERE id = ?", [nedenOgreniyor, id], function (err, result) {
+    if (err) throw err;
+    res.json({
+      status: "SUCCES"
+    });
   });
 });
 module.exports = router;
