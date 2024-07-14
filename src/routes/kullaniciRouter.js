@@ -29,7 +29,7 @@ async function userEmail(email) {
 
 router.post("/signup", async (req, res) => {
     var con = getDb.getConnection();
-
+    console.log("asdasdsd")
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre
     const email = req.body.email
@@ -319,7 +319,7 @@ router.put("/changePassword", userMiddleware, async (req, res) => {
 router.get("/meslek", (req, res) => {
 
     var con = getDb.getConnection()
-
+    console.log("bruaa")
 
     con.query("SELECT * FROM meslek", (err, result) => {
         console.log(result)
@@ -340,6 +340,7 @@ router.get("/meslek", (req, res) => {
 }) */
 
 router.post("/meslekSecim", (req, res) => {
+    console.log("şuraa")
     const meslek = req.body.meslek
     const id = req.body.id
     var con = getDb.getConnection()
@@ -385,15 +386,6 @@ router.post("/dilSecim", (req, res) => {
     })
 })
 
-router.get("/sectigiDil", (req, res) => {
-
-    var con = getDb.getConnection()
-
-    con.query("SELECT * FROM dil", (err, result) => {
-        console.log(result)
-        res.json({ result })
-    })
-})
 
 router.post("/sectigiDilSecim", (req, res) => {
     const sectigiDil = req.body.sectigiDil
@@ -454,5 +446,44 @@ router.post("/NedenOgreniyor", (req, res) => {
     })
 })
 
+router.get("/KullaniciBilgileri/:id", (req, res) => {
+    const id = req.params.id
+    var con = getDb.getConnection();
+
+    let kullaniciAdi = null;
+    let email = null;
+    let meslek = null;
+    let dil = null;
+    let OgrenilecekDil = null;
+
+    var user = [
+        {
+            id: id,
+            kullaniciAdi: kullaniciAdi,
+            email: email,
+            meslek: meslek,
+            dil: dil,
+            OgrenilecekDil: OgrenilecekDil
+        }
+    ]
+
+    con.query("SELECT kullaniciAdi ,meslek,email FROM kullanici INNER JOIN meslek ON kullanici.MeslekID = meslek.idMeslek WHERE kullanici.id = ?", [id], (err, result) => {
+        console.log(result[0].meslek)
+        user[0].meslek = result[0].meslek
+        user[0].kullaniciAdi = result[0].kullaniciAdi
+        user[0].email = result[0].email
+
+        con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.id WHERE kullanici.id = ?", [id], (err, result) => {
+            user[0].dil = result[0].dil_adi
+
+            con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.id WHERE kullanici.id = ?", [id], (err, result) => {
+                user[0].OgrenilecekDil = result[0].dil_adi
+
+                res.json({ user })
+            })
+
+        })
+    })
+})
 
 module.exports = router

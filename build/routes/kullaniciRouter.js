@@ -52,19 +52,20 @@ router.post("/signup", /*#__PURE__*/function () {
       while (1) switch (_context.prev = _context.next) {
         case 0:
           con = getDb.getConnection();
+          console.log("asdasdsd");
           kullaniciAdi = req.body.kullaniciAdi;
           sifre = req.body.sifre;
           email = req.body.email; //react nativeden post isteği gönderirken direkt gönderirsen body ile alabilirsin 
           //ama ör:mahir { } ile gönderirsen req.body.mahir.kullaniciAdi ile erişirsin
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
-          _context.next = 8;
+          _context.next = 9;
           return userInfo.userFind(kullaniciAdi);
-        case 8:
+        case 9:
           isUserExist = _context.sent;
-          _context.next = 11;
+          _context.next = 12;
           return userEmail(email);
-        case 11:
+        case 12:
           isEmailExist = _context.sent;
           console.log(req.body);
           passwordToken = (0, _md["default"])(sifre);
@@ -89,7 +90,7 @@ router.post("/signup", /*#__PURE__*/function () {
               message: "Böyle bir kullanici adi vardir"
             });
           }
-        case 15:
+        case 16:
         case "end":
           return _context.stop();
       }
@@ -421,6 +422,7 @@ router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
 }());
 router.get("/meslek", function (req, res) {
   var con = getDb.getConnection();
+  console.log("bruaa");
   con.query("SELECT * FROM meslek", function (err, result) {
     console.log(result);
     res.json({
@@ -440,6 +442,7 @@ router.get("/meslek", function (req, res) {
 }) */
 
 router.post("/meslekSecim", function (req, res) {
+  console.log("şuraa");
   var meslek = req.body.meslek;
   var id = req.body.id;
   var con = getDb.getConnection();
@@ -475,15 +478,6 @@ router.post("/dilSecim", function (req, res) {
     }
     res.json({
       STATUS: "SUCCES"
-    });
-  });
-});
-router.get("/sectigiDil", function (req, res) {
-  var con = getDb.getConnection();
-  con.query("SELECT * FROM dil", function (err, result) {
-    console.log(result);
-    res.json({
-      result: result
     });
   });
 });
@@ -529,6 +523,38 @@ router.post("/NedenOgreniyor", function (req, res) {
     if (err) throw err;
     res.json({
       status: "SUCCES"
+    });
+  });
+});
+router.get("/KullaniciBilgileri/:id", function (req, res) {
+  var id = req.params.id;
+  var con = getDb.getConnection();
+  var kullaniciAdi = null;
+  var email = null;
+  var meslek = null;
+  var dil = null;
+  var OgrenilecekDil = null;
+  var user = [{
+    id: id,
+    kullaniciAdi: kullaniciAdi,
+    email: email,
+    meslek: meslek,
+    dil: dil,
+    OgrenilecekDil: OgrenilecekDil
+  }];
+  con.query("SELECT kullaniciAdi ,meslek,email FROM kullanici INNER JOIN meslek ON kullanici.MeslekID = meslek.idMeslek WHERE kullanici.id = ?", [id], function (err, result) {
+    console.log(result[0].meslek);
+    user[0].meslek = result[0].meslek;
+    user[0].kullaniciAdi = result[0].kullaniciAdi;
+    user[0].email = result[0].email;
+    con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.id WHERE kullanici.id = ?", [id], function (err, result) {
+      user[0].dil = result[0].dil_adi;
+      con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.id WHERE kullanici.id = ?", [id], function (err, result) {
+        user[0].OgrenilecekDil = result[0].dil_adi;
+        res.json({
+          user: user
+        });
+      });
     });
   });
 });
