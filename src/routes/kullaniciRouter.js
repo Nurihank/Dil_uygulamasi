@@ -29,7 +29,7 @@ async function userEmail(email) {
 
 router.post("/signup", async (req, res) => {
     var con = getDb.getConnection();
-    console.log("asdasdsd")
+
     const kullaniciAdi = req.body.kullaniciAdi
     const sifre = req.body.sifre
     const email = req.body.email
@@ -41,7 +41,6 @@ router.post("/signup", async (req, res) => {
 
     var isUserExist = await userInfo.userFind(kullaniciAdi);
     var isEmailExist = await userEmail(email)
-    console.log(req.body)
 
     var passwordToken = md5(sifre)
     if (isUserExist == false) {
@@ -76,7 +75,6 @@ router.get("/signin", async (req, res) => {
     const kullaniciAdi = req.query.kullaniciAdi;
     const sifre = req.query.sifre
     //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
-    console.log(req.query)
 
     var passwordToken = md5(sifre)
 
@@ -120,8 +118,7 @@ router.get("/forgetPasswordCode", async (req, res) => {
 
     const kullaniciAdi = req.query.kullaniciAdi
     const email = req.query.email;
-    // const yeniSifre = req.body.yeniSifre
-    console.log(kullaniciAdi + "  asdasd " + email)
+
     var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
     var userInfo = new getUserInfo(kullaniciAdi)
 
@@ -317,36 +314,23 @@ router.put("/changePassword", userMiddleware, async (req, res) => {
 })
 
 router.get("/meslek", (req, res) => {
-
     var con = getDb.getConnection()
-    console.log("bruaa")
 
     con.query("SELECT * FROM meslek", (err, result) => {
-        console.log(result)
+
         res.json({ result })
     })
 
 
 })
 
-/* router.get("/meslek", (req, res) => {
-    const meslek = req.query.meslek
-    var con = getDb.getConnection()
-
-    con.query("SELECT * FROM meslek WHERE meslek = ?", [meslek], (err, result) => {
-        console.log(result)
-        res.json({ result })
-    })
-}) */
-
 router.post("/meslekSecim", (req, res) => {
-    console.log("şuraa")
+
     const meslek = req.body.meslek
     const id = req.body.id
     var con = getDb.getConnection()
 
-    console.log(id)
-    console.log(meslek)
+
 
     con.query("UPDATE kullanici SET MeslekID = ? WHERE id = ? ", [meslek, id], (err, result) => {
         if (err) {
@@ -363,7 +347,6 @@ router.get("/dil", (req, res) => {
     var con = getDb.getConnection()
 
     con.query("SELECT * FROM dil", (err, result) => {
-        console.log(result)
         res.json({ result })
     })
 })
@@ -373,14 +356,10 @@ router.post("/dilSecim", (req, res) => {
     const id = req.body.id
     var con = getDb.getConnection()
 
-    console.log(id)
-    console.log(dil)
-
     con.query("UPDATE kullanici SET DilID = ? WHERE id = ? ", [dil, id], (err, result) => {
         if (err) {
             throw err
         }
-
         res.json({ STATUS: "SUCCES" })
 
     })
@@ -446,8 +425,9 @@ router.post("/NedenOgreniyor", (req, res) => {
     })
 })
 
-router.get("/KullaniciBilgileri/:id", (req, res) => {
-    const id = req.params.id
+router.get("/KullaniciBilgileri", (req, res) => {
+    const id = req.query.id
+
     var con = getDb.getConnection();
 
     let kullaniciAdi = null;
@@ -468,11 +448,10 @@ router.get("/KullaniciBilgileri/:id", (req, res) => {
     ]
 
     con.query("SELECT kullaniciAdi ,meslek,email FROM kullanici INNER JOIN meslek ON kullanici.MeslekID = meslek.idMeslek WHERE kullanici.id = ?", [id], (err, result) => {
-        console.log(result[0].meslek)
+        console.log(result)
         user[0].meslek = result[0].meslek
         user[0].kullaniciAdi = result[0].kullaniciAdi
         user[0].email = result[0].email
-
         con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.id WHERE kullanici.id = ?", [id], (err, result) => {
             user[0].dil = result[0].dil_adi
 
