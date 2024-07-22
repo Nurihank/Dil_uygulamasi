@@ -425,44 +425,64 @@ router.post("/NedenOgreniyor", (req, res) => {
     })
 })
 
-router.get("/KullaniciBilgileri", (req, res) => {
-    const id = req.query.id
-
+router.get("/KullaniciBilgileri", function (req, res) {
+    var id = req.query.id;
+    if (!id) {
+        return res.status(400).json({ error: "ID is required" });
+    }
     var con = getDb.getConnection();
+    var kullaniciAdi = null;
+    var email = null;
+    var meslek = null;
+    var dil = null;
+    var OgrenilecekDil = null;
+    var user = [{
+        id: id,
+        kullaniciAdi: kullaniciAdi,
+        email: email,
+        meslek: meslek,
+        dil: dil,
+        OgrenilecekDil: OgrenilecekDil
+    }];
 
-    let kullaniciAdi = null;
-    let email = null;
-    let meslek = null;
-    let dil = null;
-    let OgrenilecekDil = null;
+    con.query("SELECT kullaniciAdi, meslek, email FROM kullanici INNER JOIN meslek ON kullanici.MeslekID = meslek.idMeslek WHERE kullanici.id = ?", [id], function (err, result) {
+        if (err) {
 
-    var user = [
-        {
-            id: id,
-            kullaniciAdi: kullaniciAdi,
-            email: email,
-            meslek: meslek,
-            dil: dil,
-            OgrenilecekDil: OgrenilecekDil
+            return res.status(500).json({ error: "Database query failed" });
+            
         }
-    ]
+        if (result.length === 0) {
+   
+            return res.status(404).json({ error: "User not found" });
+        }
 
-    con.query("SELECT kullaniciAdi ,meslek,email FROM kullanici INNER JOIN meslek ON kullanici.MeslekID = meslek.idMeslek WHERE kullanici.id = ?", [id], (err, result) => {
-        console.log(result)
-        user[0].meslek = result[0].meslek
-        user[0].kullaniciAdi = result[0].kullaniciAdi
-        user[0].email = result[0].email
-        con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.id WHERE kullanici.id = ?", [id], (err, result) => {
-            user[0].dil = result[0].dil_adi
+        user[0].meslek = result[0].meslek;
+        user[0].kullaniciAdi = result[0].kullaniciAdi;
+        user[0].email = result[0].email;
 
-            con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.id WHERE kullanici.id = ?", [id], (err, result) => {
-                user[0].OgrenilecekDil = result[0].dil_adi
+        con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.id WHERE kullanici.id = ?", [id], function (err, result) {
+            if (err) {
+                return res.status(500).json({ error: "Database query failed" });
+            }
+            if (result.length === 0) {
+                return res.status(404).json({ error: "Language not found" });
+            }
+           
+            user[0].dil = result[0].dil_adi;
 
-                res.json({ user })
-            })
+            con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.id WHERE kullanici.id = ?", [id], function (err, result) {
+                if (err) {
+                    return res.status(500).json({ error: "Database query failed" });
+                }
+                if (result.length === 0) {
+                    return res.status(404).json({ error: "Selected language not found" });
+                }
+                user[0].OgrenilecekDil = result[0].dil_adi;
+                res.json({ user: user });
+            });
+        });
+    });
+});
 
-        })
-    })
-})
 
 module.exports = router
