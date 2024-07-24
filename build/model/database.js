@@ -10,7 +10,7 @@ module.exports = /*#__PURE__*/function () {
     this.con = _mysql["default"].createConnection({
       host: "localhost",
       user: "root",
-      password: "nurihan38",
+      password: "Team2010",
       database: "dil_uygulamasi"
     });
   }

@@ -12,22 +12,26 @@ var getDb = new db(); //objemizi oluşturduk
 getDb.connect(); //veri tabanı bağlantısını yaptık
 
 var userMiddleware = function userMiddleware(req, res, next) {
-  var _req$headers$authoriz, _req$headers$authoriz2;
   // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
-  //Bearer = token başta bu halde ondan split dedik bu headeri ikiye bölcek
-  var requestToken = (_req$headers$authoriz = (_req$headers$authoriz2 = req.headers["authorization"]) === null || _req$headers$authoriz2 === void 0 ? void 0 : _req$headers$authoriz2.split(' ')[1]) !== null && _req$headers$authoriz !== void 0 ? _req$headers$authoriz : null;
-  //  console.log(requestToken)
-  var con = getDb.getConnection(); //burda da bağlantıyı getirdik
-
-  if (requestToken == null) {
+  var authHeader = req.headers["authorization"] || req.headers["Authorization"];
+  console.log(authHeader);
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(403).json({
-      message: "Token Gereklidir"
+      message: "Token gereklidir"
     });
   }
-  _jsonwebtoken["default"].verify(requestToken, process.env.ACCESS_TOKEN_SECRET, function (err) {
-    if (err)
-      //tokenin süresi geçtiyse hata vercek
-      return res.status(400).json(err);
+  //veri tabanı kontrolüde şart yoksa her token her kullanıcıyı açar
+  var token = authHeader.split(" ")[1];
+  console.log(token);
+  _jsonwebtoken["default"].verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(401).json({
+        message: "Token doğrulama hatası",
+        error: err.message
+      });
+    }
+    req.user = decoded; // Opsiyonel: İsteğe kullanıcı bilgisini ekleyin
+
     next();
   });
 };

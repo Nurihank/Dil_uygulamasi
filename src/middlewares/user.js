@@ -7,19 +7,22 @@ getDb.connect();  //veri tabanı bağlantısını yaptık
 
 
 export const userMiddleware = (req, res, next) => {  // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
-    //Bearer = token başta bu halde ondan split dedik bu headeri ikiye bölcek
-    const requestToken = req.headers["authorization"]?.split(' ')[1] ?? null;
-  //  console.log(requestToken)
-    var con = getDb.getConnection();  //burda da bağlantıyı getirdik
-    
-    if(requestToken == null ){
-            return res.status(403).json({ message: "Token Gereklidir" })
+    const authHeader = req.headers["authorization"] || req.headers["Authorization"];
+    console.log(authHeader)
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(403).json({ message: "Token gereklidir" });
+    }
+//veri tabanı kontrolüde şart yoksa her token her kullanıcıyı açar
+    const token = authHeader.split(" ")[1];
+    console.log(token)
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ message: "Token doğrulama hatası", error: err.message });
         }
-    jwt.verify(requestToken,process.env.ACCESS_TOKEN_SECRET,(err)=>{
-        if(err)  //tokenin süresi geçtiyse hata vercek
-            return res.status(400).json(err)
+        
+        req.user = decoded; // Opsiyonel: İsteğe kullanıcı bilgisini ekleyin
 
-        next()   
-    })    
+        next();
+    });
 }
 module.exports = userMiddleware;

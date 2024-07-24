@@ -100,7 +100,7 @@ router.post("/signup", /*#__PURE__*/function () {
 }());
 router.get("/signin", /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
-    var con, kullaniciAdi, sifre, passwordToken, getUserInfo, userInfo, isUserExist, user, accessToken;
+    var con, kullaniciAdi, sifre, passwordToken, getUserInfo, userInfo, isUserExist, user, accessToken, refreshToken;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
@@ -125,12 +125,20 @@ router.get("/signin", /*#__PURE__*/function () {
                 kullaniciAdi: user[0].kullaniciAdi,
                 email: user[0].email
               }, process.env.ACCESS_TOKEN_SECRET, {
-                expiresIn: "15m"
+                expiresIn: "5m"
+              });
+              refreshToken = _jsonwebtoken["default"].sign({
+                id: user[0].id,
+                kullaniciAdi: user[0].kullaniciAdi,
+                email: user[0].email
+              }, process.env.REFRESH_TOKEN_SECRET, {
+                expiresIn: "2m"
               });
               con.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ", [accessToken, kullaniciAdi]);
               res.json({
                 message: "Basarili bir sekilde giris yaptiniz",
                 accessToken: accessToken,
+                refreshToken: refreshToken,
                 status: "SUCCES",
                 id: user[0].id
               });
@@ -503,7 +511,7 @@ router.post("/NedenOgreniyor", function (req, res) {
     });
   });
 });
-router.get("/KullaniciBilgileri", function (req, res) {
+router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
   var id = req.query.id;
   if (!id) {
     return res.status(400).json({
