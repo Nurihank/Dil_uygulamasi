@@ -1,28 +1,42 @@
-import jwt from "jsonwebtoken"
+const jwt = require('jsonwebtoken');
 
 var db = require("../model/database")  //database modelini çağırdık
 var getDb = new db();  //objemizi oluşturduk
 
 getDb.connect();  //veri tabanı bağlantısını yaptık
 
+const userMiddleware = (req, res, next) => {
+    
+    //database kontrolüde yapcaz UNUTMA
+    
+    const requestToken = req.headers["authorization"] || req.headers["Authorization"];
 
-export const userMiddleware = (req, res, next) => {  // yetkisi olan birinin erişebilmesi için bu middleware yi yazdık
-    const authHeader = req.headers["authorization"] || req.headers["Authorization"];
-    console.log(authHeader)
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!requestToken) {
         return res.status(403).json({ message: "Token gereklidir" });
     }
-//veri tabanı kontrolüde şart yoksa her token her kullanıcıyı açar
-    const token = authHeader.split(" ")[1];
-    console.log(token)
+
+    let token = requestToken.substring(7); // "Bearer " uzunluğu 7
+    if (token.startsWith('"') && token.endsWith('"')) {
+        token = token.substring(1, token.length - 1); // Başındaki ve sonundaki tırnak işaretlerini kaldır
+    }   
+    
+    console.log("token = "+token)
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
-            return res.status(401).json({ message: "Token doğrulama hatası", error: err.message });
+            if (err.name === 'TokenExpiredError') {
+                return res.status(401).json({ message: "Token süresi dolmuş" });
+            } else {
+                return res.status(401).json({ message: "Token doğrulama hatası", error: err.message });
+            }
         }
-        
-        req.user = decoded; // Opsiyonel: İsteğe kullanıcı bilgisini ekleyin
 
-        next();
+        req.user = decoded;
+
+        next(); 
     });
-}
+
+
+};
+
 module.exports = userMiddleware;
+

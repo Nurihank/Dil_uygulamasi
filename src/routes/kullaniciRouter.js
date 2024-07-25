@@ -88,12 +88,12 @@ router.get("/signin", async (req, res) => {
     if (isUserExist == true) {
         if (passwordToken == user[0].şifre) {
 
-            const accessToken = jwt.sign({ id: user[0].id, kullaniciAdi: user[0].kullaniciAdi, email: user[0].email },
+            const accessToken = jwt.sign({ id: user[0].id },
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: "5m" })
-            const refreshToken = jwt.sign({ id: user[0].id, kullaniciAdi: user[0].kullaniciAdi, email: user[0].email },
+                { expiresIn: "30s" })
+            const refreshToken = jwt.sign({ id: user[0].id },
                 process.env.REFRESH_TOKEN_SECRET,
-                { expiresIn: "2m" })
+                { expiresIn: "10m" })
             con.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ", [accessToken, kullaniciAdi])
             res.json({ message: "Basarili bir sekilde giris yaptiniz", accessToken: accessToken,refreshToken : refreshToken, status: "SUCCES", id: user[0].id })
         } else {
@@ -489,5 +489,18 @@ router.get("/KullaniciBilgileri",userMiddleware, function (req, res) {
     });
 });
 
+router.put("/NewAccessToken",(req,res)=>{
+    var con = getDb.getConnection();
+    console.log("wadsad")
+    var id = req.body.id
+    console.log("id = "+id)
+    const accessToken = jwt.sign({ id: id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "30s" })
+        con.query("UPDATE kullanici SET accesToken = ? WHERE id = ? ", [accessToken, id],(err,result)=>{
+            if(err)  throw err;
 
+            res.json({accessToken:accessToken})
+        })
+})
 module.exports = router
