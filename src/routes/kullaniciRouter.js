@@ -4,6 +4,7 @@ const userMiddleware = require("../middlewares/user")
 import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
+import { Router } from "express";
 
 var userModel = require("../model/userModel")
 
@@ -491,7 +492,6 @@ router.get("/KullaniciBilgileri",userMiddleware, function (req, res) {
 
 router.put("/NewAccessToken",(req,res)=>{
     var con = getDb.getConnection();
-    console.log("wadsad")
     var id = req.body.id
     console.log("id = "+id)
     const accessToken = jwt.sign({ id: id },
@@ -503,4 +503,40 @@ router.put("/NewAccessToken",(req,res)=>{
             res.json({accessToken:accessToken})
         })
 })
+
+router.post("/Takvim",(req,res)=>{
+    var con = getDb.getConnection();
+    const { kullaniciID, tarih } = req.body;
+
+    console.log(tarih)
+    con.query("INSERT INTO Takvim (KullaniciID,Tarih) Values(?,?)",[kullaniciID,tarih],(err,result)=>{
+        if(err) throw err;
+
+        res.json({message:"Başariyla Eklendi"})
+    })
+
+
+})
+
+router.get("/Takvim",(req,res)=>{
+    const kullaniciID = req.query.kullaniciID
+    if (!kullaniciID) {
+        return res.status(400).json({ error: "Kullanıcı ID'si gereklidir." });
+    }
+
+    // Veritabanı bağlantısını sağla
+    const con = getDb.getConnection();
+
+    // Veritabanı sorgusunu yap
+    con.query("SELECT Tarih FROM Takvim WHERE KullaniciID = ?", [kullaniciID], (err, result) => {
+        if (err) {
+            console.error("Sorgu hatası:", err);
+            return res.status(500).json({ error: "Veritabanı hatası." });
+        }
+
+        // Yanıtı gönder
+        res.json(result);
+    });
+})
+
 module.exports = router

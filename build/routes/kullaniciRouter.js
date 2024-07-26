@@ -7,6 +7,7 @@ var _util = _interopRequireDefault(require("util"));
 var _md = _interopRequireDefault(require("md5"));
 var _nodemailer = _interopRequireDefault(require("nodemailer"));
 var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
+var _express = require("express");
 var router = require("express").Router(); //routerları export etmek için   
 
 var userMiddleware = require("../middlewares/user");
@@ -575,7 +576,6 @@ router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
 });
 router.put("/NewAccessToken", function (req, res) {
   var con = getDb.getConnection();
-  console.log("wadsad");
   var id = req.body.id;
   console.log("id = " + id);
   var accessToken = _jsonwebtoken["default"].sign({
@@ -588,6 +588,43 @@ router.put("/NewAccessToken", function (req, res) {
     res.json({
       accessToken: accessToken
     });
+  });
+});
+router.post("/Takvim", function (req, res) {
+  var con = getDb.getConnection();
+  var _req$body = req.body,
+    kullaniciID = _req$body.kullaniciID,
+    tarih = _req$body.tarih;
+  console.log(tarih);
+  con.query("INSERT INTO Takvim (KullaniciID,Tarih) Values(?,?)", [kullaniciID, tarih], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: "Başariyla Eklendi"
+    });
+  });
+});
+router.get("/Takvim", function (req, res) {
+  var kullaniciID = req.query.kullaniciID;
+  if (!kullaniciID) {
+    return res.status(400).json({
+      error: "Kullanıcı ID'si gereklidir."
+    });
+  }
+
+  // Veritabanı bağlantısını sağla
+  var con = getDb.getConnection();
+
+  // Veritabanı sorgusunu yap
+  con.query("SELECT Tarih FROM Takvim WHERE KullaniciID = ?", [kullaniciID], function (err, result) {
+    if (err) {
+      console.error("Sorgu hatası:", err);
+      return res.status(500).json({
+        error: "Veritabanı hatası."
+      });
+    }
+
+    // Yanıtı gönder
+    res.json(result);
   });
 });
 module.exports = router;
