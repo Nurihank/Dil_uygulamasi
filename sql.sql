@@ -43,6 +43,82 @@ INSERT INTO `admin` VALUES (1,'admin','14bdff06ee49403514e698d9a45c4533','eyJhbG
 UNLOCK TABLES;
 
 --
+-- Table structure for table `anakelimeler`
+--
+
+DROP TABLE IF EXISTS `anakelimeler`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `anakelimeler` (
+  `AnaKelimelerID` int NOT NULL AUTO_INCREMENT,
+  `KelimeID` int DEFAULT NULL,
+  `DilID` int DEFAULT NULL,
+  `Value` varchar(45) DEFAULT NULL,
+  `MeslekID` int DEFAULT NULL,
+  PRIMARY KEY (`AnaKelimelerID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `anakelimeler`
+--
+
+LOCK TABLES `anakelimeler` WRITE;
+/*!40000 ALTER TABLE `anakelimeler` DISABLE KEYS */;
+/*!40000 ALTER TABLE `anakelimeler` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `bolum`
+--
+
+DROP TABLE IF EXISTS `bolum`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bolum` (
+  `BolumID` int NOT NULL AUTO_INCREMENT,
+  `SezonID` int DEFAULT NULL,
+  `CeviriID` int DEFAULT NULL,
+  PRIMARY KEY (`BolumID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bolum`
+--
+
+LOCK TABLES `bolum` WRITE;
+/*!40000 ALTER TABLE `bolum` DISABLE KEYS */;
+/*!40000 ALTER TABLE `bolum` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ceviriler`
+--
+
+DROP TABLE IF EXISTS `ceviriler`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ceviriler` (
+  `CevirilerID` int NOT NULL AUTO_INCREMENT,
+  `AnaDilID` int DEFAULT NULL,
+  `HangiDilID` int DEFAULT NULL,
+  `AnaKelimeID` int DEFAULT NULL,
+  `Ceviri` int DEFAULT NULL,
+  PRIMARY KEY (`CevirilerID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ceviriler`
+--
+
+LOCK TABLES `ceviriler` WRITE;
+/*!40000 ALTER TABLE `ceviriler` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ceviriler` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `dil`
 --
 
@@ -50,10 +126,12 @@ DROP TABLE IF EXISTS `dil`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `dil` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `dil_adi` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `DilID` int NOT NULL AUTO_INCREMENT,
+  `DilAdi` varchar(45) DEFAULT NULL,
+  `LocalName` varchar(45) DEFAULT NULL,
+  `ISO` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`DilID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,32 +140,7 @@ CREATE TABLE `dil` (
 
 LOCK TABLES `dil` WRITE;
 /*!40000 ALTER TABLE `dil` DISABLE KEYS */;
-INSERT INTO `dil` VALUES (1,'Turkce'),(2,'Ingilizce'),(3,'Almanca'),(4,'Arapça'),(5,'Fransızca');
 /*!40000 ALTER TABLE `dil` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `dil_ceviri`
---
-
-DROP TABLE IF EXISTS `dil_ceviri`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `dil_ceviri` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `dil_id` int DEFAULT NULL,
-  `ceviri` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `dil_ceviri`
---
-
-LOCK TABLES `dil_ceviri` WRITE;
-/*!40000 ALTER TABLE `dil_ceviri` DISABLE KEYS */;
-/*!40000 ALTER TABLE `dil_ceviri` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -141,53 +194,27 @@ LOCK TABLES `kategori_ceviri` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `kelime`
+-- Table structure for table `kelimeler`
 --
 
-DROP TABLE IF EXISTS `kelime`;
+DROP TABLE IF EXISTS `kelimeler`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `kelime` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `kategori_id` int DEFAULT NULL,
-  `kelime` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `kelime`
---
-
-LOCK TABLES `kelime` WRITE;
-/*!40000 ALTER TABLE `kelime` DISABLE KEYS */;
-INSERT INTO `kelime` VALUES (1,2,'bilgisayar'),(2,1,'uçak'),(3,3,'yazılım');
-/*!40000 ALTER TABLE `kelime` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `kelime_ceviri`
---
-
-DROP TABLE IF EXISTS `kelime_ceviri`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `kelime_ceviri` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `kelime_id` int DEFAULT NULL,
-  `dil_id` int DEFAULT NULL,
-  `ceviri` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+CREATE TABLE `kelimeler` (
+  `KelimelerID` int NOT NULL AUTO_INCREMENT,
+  `BolumID` int DEFAULT NULL,
+  `CeviriID` int DEFAULT NULL,
+  PRIMARY KEY (`KelimelerID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `kelime_ceviri`
+-- Dumping data for table `kelimeler`
 --
 
-LOCK TABLES `kelime_ceviri` WRITE;
-/*!40000 ALTER TABLE `kelime_ceviri` DISABLE KEYS */;
-/*!40000 ALTER TABLE `kelime_ceviri` ENABLE KEYS */;
+LOCK TABLES `kelimeler` WRITE;
+/*!40000 ALTER TABLE `kelimeler` DISABLE KEYS */;
+/*!40000 ALTER TABLE `kelimeler` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -210,7 +237,7 @@ CREATE TABLE `kullanici` (
   `accesToken` varchar(255) DEFAULT NULL,
   `refreshToken` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=117 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -219,7 +246,7 @@ CREATE TABLE `kullanici` (
 
 LOCK TABLES `kullanici` WRITE;
 /*!40000 ALTER TABLE `kullanici` DISABLE KEYS */;
-INSERT INTO `kullanici` VALUES (101,'NurihanK','01c96beddb172095388e43835bdb7145',NULL,2,NULL,'nnk123',NULL,NULL,NULL,NULL),(108,'NurihanK31','e35cf7b66449df565f93c607d5a81d09',NULL,NULL,NULL,'nrhnASD',NULL,NULL,NULL,NULL),(109,'nunu','2f8c3ab806a42e79c774cb09b41a53c8',NULL,NULL,NULL,'nunu',NULL,NULL,NULL,NULL),(114,'nk123','25f9e794323b453885f5181f1b624d0b',NULL,NULL,NULL,'nurihan@gmail.com',NULL,NULL,NULL,NULL),(115,'nurihankavalcı','14bdff06ee49403514e698d9a45c4533',NULL,NULL,NULL,'kavalcinurihan@gmail.com','a9b7ba70783b617e9998dc4dd82eb3c5','b8c37e33defde51cf91e1e03e51657da','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrdWxsYW5pY2lBZGkiOiJudXJpaGFua2F2YWxjxLEiLCJlbWFpbCI6ImthdmFsY2ludXJpaGFuQGdtYWlsLmNvbSIsImlhdCI6MTcwMjEzMDMzMCwiZXhwIjoxNzAyMTMwMzkwfQ.IvG8O78aDmslJFBjDxLFPk6lKwQA5L_RtzLkRmI73vE',NULL);
+INSERT INTO `kullanici` VALUES (101,'NurihanK','01c96beddb172095388e43835bdb7145',NULL,2,NULL,'nnk123',NULL,NULL,NULL,NULL),(108,'NurihanK31','e35cf7b66449df565f93c607d5a81d09',NULL,NULL,NULL,'nrhnASD',NULL,NULL,NULL,NULL),(109,'nunu','2f8c3ab806a42e79c774cb09b41a53c8',NULL,NULL,NULL,'nunu',NULL,NULL,NULL,NULL),(114,'nk123','25f9e794323b453885f5181f1b624d0b',NULL,NULL,NULL,'nurihan@gmail.com',NULL,NULL,NULL,NULL),(115,'nurihankavalcı','14bdff06ee49403514e698d9a45c4533',NULL,NULL,NULL,'kavalcinurihan@gmail.com','a9b7ba70783b617e9998dc4dd82eb3c5','b8c37e33defde51cf91e1e03e51657da','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrdWxsYW5pY2lBZGkiOiJudXJpaGFua2F2YWxjxLEiLCJlbWFpbCI6ImthdmFsY2ludXJpaGFuQGdtYWlsLmNvbSIsImlhdCI6MTcwMjEzMDMzMCwiZXhwIjoxNzAyMTMwMzkwfQ.IvG8O78aDmslJFBjDxLFPk6lKwQA5L_RtzLkRmI73vE',NULL),(116,'12','c20ad4d76fe97759aa27a0c99bff6710',1,2,1,'12',NULL,NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTE2LCJpYXQiOjE3MjM1NzYxNjksImV4cCI6MTcyMzU3NjE5OX0.vu0NiaEYCnd7z4ZgGg1n2Ob4wcfSvpMETYkmei2E9m0',NULL);
 /*!40000 ALTER TABLE `kullanici` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -271,6 +298,54 @@ LOCK TABLES `meslek_ceviri` WRITE;
 /*!40000 ALTER TABLE `meslek_ceviri` DISABLE KEYS */;
 /*!40000 ALTER TABLE `meslek_ceviri` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `seviye`
+--
+
+DROP TABLE IF EXISTS `seviye`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `seviye` (
+  `SeviyeID` int NOT NULL AUTO_INCREMENT,
+  `SeviyeAdi` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`SeviyeID`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `seviye`
+--
+
+LOCK TABLES `seviye` WRITE;
+/*!40000 ALTER TABLE `seviye` DISABLE KEYS */;
+INSERT INTO `seviye` VALUES (1,'A1'),(2,'A2'),(3,'B1'),(4,'B2'),(5,'C1'),(6,'C2');
+/*!40000 ALTER TABLE `seviye` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sezon`
+--
+
+DROP TABLE IF EXISTS `sezon`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sezon` (
+  `SezonID` int NOT NULL AUTO_INCREMENT,
+  `SeviyeID` int DEFAULT NULL,
+  `CeviriID` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`SezonID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sezon`
+--
+
+LOCK TABLES `sezon` WRITE;
+/*!40000 ALTER TABLE `sezon` DISABLE KEYS */;
+/*!40000 ALTER TABLE `sezon` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -281,4 +356,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-12-09 17:20:01
+-- Dump completed on 2024-08-13 22:39:28
