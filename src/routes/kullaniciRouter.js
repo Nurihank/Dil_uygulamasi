@@ -374,7 +374,7 @@ router.post("/sectigiDilSecim", (req, res) => {
     const sectigiDil = req.body.sectigiDil
     const id = req.body.id
     var con = getDb.getConnection()
-
+    console.log(id)
 
     con.query("UPDATE kullanici SET SectigiDilID = ? WHERE id = ? ", [sectigiDil, id], (err, result) => {
         if (err) {
@@ -466,24 +466,24 @@ router.get("/KullaniciBilgileri",userMiddleware, function (req, res) {
         user[0].kullaniciAdi = result[0].kullaniciAdi;
         user[0].email = result[0].email;
 
-        con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.id WHERE kullanici.id = ?", [id], function (err, result) {
+        con.query("SELECT LocalName FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.DilID WHERE kullanici.id = ?", [id], function (err, result) {
             if (err) {
-                return res.status(500).json({ error: "Database query failed" });
+                return res.status(500).json({ error: "Database query failedd" });
             }
             if (result.length === 0) {
                 return res.status(404).json({ error: "Language not found" });
             }
            
-            user[0].dil = result[0].dil_adi;
+            user[0].dil = result[0].LocalName;
 
-            con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.id WHERE kullanici.id = ?", [id], function (err, result) {
+            con.query("SELECT LocalName FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.DilID WHERE kullanici.id = ?", [id], function (err, result) {
                 if (err) {
-                    return res.status(500).json({ error: "Database query failed" });
+                    return res.status(500).json({ error: "Database query faileddd" });
                 }
                 if (result.length === 0) {
                     return res.status(404).json({ error: "Selected language not found" });
                 }
-                user[0].OgrenilecekDil = result[0].dil_adi;
+                user[0].OgrenilecekDil = result[0].LocalName;
                 res.json({ user: user });
             });
         });
@@ -504,7 +504,7 @@ router.put("/NewAccessToken",(req,res)=>{
         })
 })
 
-router.post("/Takvim",(req,res)=>{
+/* router.post("/Takvim",(req,res)=>{
     var con = getDb.getConnection();
     const { kullaniciID, tarih } = req.body;
 
@@ -537,6 +537,20 @@ router.get("/Takvim",(req,res)=>{
         // Yanıtı gönder
         res.json(result);
     });
+}) */
+
+router.get("/Seviye",(req,res)=>{
+    var con = getDb.getConnection()
+
+    con.query("SELECT * FROM seviye",(err,result)=>{
+        if(err){
+            throw err;
+        }
+        res.json(result);
+    })
 })
 
+router.get("/Sezon",(req,res)=>{
+    const 
+})
 module.exports = router

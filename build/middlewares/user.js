@@ -20,6 +20,7 @@ var userMiddleware = function userMiddleware(req, res, next) {
     token = token.substring(1, token.length - 1); // Başındaki ve sonundaki tırnak işaretlerini kaldır
   }
 
+  console.log(token);
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
     if (err) {
       if (err.name === 'TokenExpiredError') {

@@ -467,6 +467,7 @@ router.post("/sectigiDilSecim", function (req, res) {
   var sectigiDil = req.body.sectigiDil;
   var id = req.body.id;
   var con = getDb.getConnection();
+  console.log(id);
   con.query("UPDATE kullanici SET SectigiDilID = ? WHERE id = ? ", [sectigiDil, id], function (err, result) {
     if (err) {
       throw err;
@@ -543,10 +544,10 @@ router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
     user[0].meslek = result[0].meslek;
     user[0].kullaniciAdi = result[0].kullaniciAdi;
     user[0].email = result[0].email;
-    con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.id WHERE kullanici.id = ?", [id], function (err, result) {
+    con.query("SELECT LocalName FROM kullanici INNER JOIN dil ON kullanici.DilID = dil.DilID WHERE kullanici.id = ?", [id], function (err, result) {
       if (err) {
         return res.status(500).json({
-          error: "Database query failed"
+          error: "Database query failedd"
         });
       }
       if (result.length === 0) {
@@ -554,11 +555,11 @@ router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
           error: "Language not found"
         });
       }
-      user[0].dil = result[0].dil_adi;
-      con.query("SELECT dil_adi FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.id WHERE kullanici.id = ?", [id], function (err, result) {
+      user[0].dil = result[0].LocalName;
+      con.query("SELECT LocalName FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.DilID WHERE kullanici.id = ?", [id], function (err, result) {
         if (err) {
           return res.status(500).json({
-            error: "Database query failed"
+            error: "Database query faileddd"
           });
         }
         if (result.length === 0) {
@@ -566,7 +567,7 @@ router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
             error: "Selected language not found"
           });
         }
-        user[0].OgrenilecekDil = result[0].dil_adi;
+        user[0].OgrenilecekDil = result[0].LocalName;
         res.json({
           user: user
         });
@@ -590,41 +591,50 @@ router.put("/NewAccessToken", function (req, res) {
     });
   });
 });
-router.post("/Takvim", function (req, res) {
-  var con = getDb.getConnection();
-  var _req$body = req.body,
-    kullaniciID = _req$body.kullaniciID,
-    tarih = _req$body.tarih;
-  console.log(tarih);
-  con.query("INSERT INTO Takvim (KullaniciID,Tarih) Values(?,?)", [kullaniciID, tarih], function (err, result) {
-    if (err) throw err;
-    res.json({
-      message: "Başariyla Eklendi"
-    });
-  });
-});
-router.get("/Takvim", function (req, res) {
-  var kullaniciID = req.query.kullaniciID;
-  if (!kullaniciID) {
-    return res.status(400).json({
-      error: "Kullanıcı ID'si gereklidir."
-    });
-  }
 
-  // Veritabanı bağlantısını sağla
-  var con = getDb.getConnection();
+/* router.post("/Takvim",(req,res)=>{
+    var con = getDb.getConnection();
+    const { kullaniciID, tarih } = req.body;
 
-  // Veritabanı sorgusunu yap
-  con.query("SELECT Tarih FROM Takvim WHERE KullaniciID = ?", [kullaniciID], function (err, result) {
-    if (err) {
-      console.error("Sorgu hatası:", err);
-      return res.status(500).json({
-        error: "Veritabanı hatası."
-      });
+    console.log(tarih)
+    con.query("INSERT INTO Takvim (KullaniciID,Tarih) Values(?,?)",[kullaniciID,tarih],(err,result)=>{
+        if(err) throw err;
+
+        res.json({message:"Başariyla Eklendi"})
+    })
+
+
+})
+
+router.get("/Takvim",(req,res)=>{
+    const kullaniciID = req.query.kullaniciID
+    if (!kullaniciID) {
+        return res.status(400).json({ error: "Kullanıcı ID'si gereklidir." });
     }
 
-    // Yanıtı gönder
+    // Veritabanı bağlantısını sağla
+    const con = getDb.getConnection();
+
+    // Veritabanı sorgusunu yap
+    con.query("SELECT Tarih FROM Takvim WHERE KullaniciID = ?", [kullaniciID], (err, result) => {
+        if (err) {
+            console.error("Sorgu hatası:", err);
+            return res.status(500).json({ error: "Veritabanı hatası." });
+        }
+
+        // Yanıtı gönder
+        res.json(result);
+    });
+}) */
+
+router.get("/Seviye", function (req, res) {
+  var con = getDb.getConnection();
+  con.query("SELECT * FROM seviye", function (err, result) {
+    if (err) {
+      throw err;
+    }
     res.json(result);
   });
 });
+router.get("/Sezon", function (req, res) {});
 module.exports = router;
