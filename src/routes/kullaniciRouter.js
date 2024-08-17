@@ -429,6 +429,23 @@ router.post("/NedenOgreniyor", (req, res) => {
     })
 })
 
+router.get("/Kullanici",(req,res)=>{
+    var id = req.query.id
+    if (!id) {
+        return res.status(400).json({ error: "ID is required" });
+    }
+    var con = getDb.getConnection();
+
+    con.query("SELECT * FROM kullanici WHERE id = ?",[id],(err,result)=>{
+        if(err){
+            throw err
+        }
+
+        res.json(result)
+    })
+
+})
+
 router.get("/KullaniciBilgileri",userMiddleware, function (req, res) {
 
     var id = req.query.id;
@@ -504,40 +521,6 @@ router.put("/NewAccessToken",(req,res)=>{
         })
 })
 
-/* router.post("/Takvim",(req,res)=>{
-    var con = getDb.getConnection();
-    const { kullaniciID, tarih } = req.body;
-
-    console.log(tarih)
-    con.query("INSERT INTO Takvim (KullaniciID,Tarih) Values(?,?)",[kullaniciID,tarih],(err,result)=>{
-        if(err) throw err;
-
-        res.json({message:"Başariyla Eklendi"})
-    })
-
-
-})
-
-router.get("/Takvim",(req,res)=>{
-    const kullaniciID = req.query.kullaniciID
-    if (!kullaniciID) {
-        return res.status(400).json({ error: "Kullanıcı ID'si gereklidir." });
-    }
-
-    // Veritabanı bağlantısını sağla
-    const con = getDb.getConnection();
-
-    // Veritabanı sorgusunu yap
-    con.query("SELECT Tarih FROM Takvim WHERE KullaniciID = ?", [kullaniciID], (err, result) => {
-        if (err) {
-            console.error("Sorgu hatası:", err);
-            return res.status(500).json({ error: "Veritabanı hatası." });
-        }
-
-        // Yanıtı gönder
-        res.json(result);
-    });
-}) */
 
 router.get("/Seviye",(req,res)=>{
     var con = getDb.getConnection()
@@ -551,6 +534,17 @@ router.get("/Seviye",(req,res)=>{
 })
 
 router.get("/Sezon",(req,res)=>{
-    const 
+    const SeviyeID = req.query.SeviyeID
+    const HangiDilID = req.query.HangiDilID
+
+    var con = getDb.getConnection();
+
+    con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ?",[SeviyeID,HangiDilID],(err,result)=>{
+                if(err){
+                    throw err
+                }
+
+                res.json(result)
+            })
 })
 module.exports = router

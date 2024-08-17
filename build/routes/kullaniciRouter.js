@@ -509,6 +509,21 @@ router.post("/NedenOgreniyor", function (req, res) {
     });
   });
 });
+router.get("/Kullanici", function (req, res) {
+  var id = req.query.id;
+  if (!id) {
+    return res.status(400).json({
+      error: "ID is required"
+    });
+  }
+  var con = getDb.getConnection();
+  con.query("SELECT * FROM kullanici WHERE id = ?", [id], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json(result);
+  });
+});
 router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
   var id = req.query.id;
   if (!id) {
@@ -591,42 +606,6 @@ router.put("/NewAccessToken", function (req, res) {
     });
   });
 });
-
-/* router.post("/Takvim",(req,res)=>{
-    var con = getDb.getConnection();
-    const { kullaniciID, tarih } = req.body;
-
-    console.log(tarih)
-    con.query("INSERT INTO Takvim (KullaniciID,Tarih) Values(?,?)",[kullaniciID,tarih],(err,result)=>{
-        if(err) throw err;
-
-        res.json({message:"Başariyla Eklendi"})
-    })
-
-
-})
-
-router.get("/Takvim",(req,res)=>{
-    const kullaniciID = req.query.kullaniciID
-    if (!kullaniciID) {
-        return res.status(400).json({ error: "Kullanıcı ID'si gereklidir." });
-    }
-
-    // Veritabanı bağlantısını sağla
-    const con = getDb.getConnection();
-
-    // Veritabanı sorgusunu yap
-    con.query("SELECT Tarih FROM Takvim WHERE KullaniciID = ?", [kullaniciID], (err, result) => {
-        if (err) {
-            console.error("Sorgu hatası:", err);
-            return res.status(500).json({ error: "Veritabanı hatası." });
-        }
-
-        // Yanıtı gönder
-        res.json(result);
-    });
-}) */
-
 router.get("/Seviye", function (req, res) {
   var con = getDb.getConnection();
   con.query("SELECT * FROM seviye", function (err, result) {
@@ -636,5 +615,15 @@ router.get("/Seviye", function (req, res) {
     res.json(result);
   });
 });
-router.get("/Sezon", function (req, res) {});
+router.get("/Sezon", function (req, res) {
+  var SeviyeID = req.query.SeviyeID;
+  var HangiDilID = req.query.HangiDilID;
+  var con = getDb.getConnection();
+  con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ?", [SeviyeID, HangiDilID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json(result);
+  });
+});
 module.exports = router;
