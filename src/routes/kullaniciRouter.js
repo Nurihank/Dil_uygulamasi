@@ -534,9 +534,9 @@ router.get("/Seviye",(req,res)=>{
 })
 
 router.get("/Sezon",(req,res)=>{
-    const SeviyeID = req.query.SeviyeID
+    const SeviyeID = req.query.SeviyeID 
     const HangiDilID = req.query.HangiDilID
-
+    console.log(HangiDilID)
     var con = getDb.getConnection();
 
     con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ?",[SeviyeID,HangiDilID],(err,result)=>{
