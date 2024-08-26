@@ -536,7 +536,6 @@ router.get("/Seviye",(req,res)=>{
 router.get("/Sezon",(req,res)=>{
     const SeviyeID = req.query.SeviyeID 
     const HangiDilID = req.query.HangiDilID
-    console.log(HangiDilID)
     var con = getDb.getConnection();
 
     con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ?",[SeviyeID,HangiDilID],(err,result)=>{
@@ -546,5 +545,19 @@ router.get("/Sezon",(req,res)=>{
 
                 res.json(result)
             })
+})
+
+router.get("/Bolum",(req,res)=>{
+    const SezonID = req.query.SezonID
+    const HangiDilID = req.query.HangiDilID
+    var con = getDb.getConnection();
+
+    con.query("SELECT BolumID, ceviriler.Ceviri  FROM bolum INNER JOIN ceviriler ON bolum.CeviriID = ceviriler.CevirilerID WHERE bolum.SezonID = ? AND ceviriler.HangiDilID = ?",[SezonID,HangiDilID],(err,result)=>{
+        if(err){
+            throw err
+        }
+
+        res.json(result)
+    })
 })
 module.exports = router

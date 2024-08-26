@@ -618,9 +618,19 @@ router.get("/Seviye", function (req, res) {
 router.get("/Sezon", function (req, res) {
   var SeviyeID = req.query.SeviyeID;
   var HangiDilID = req.query.HangiDilID;
-  console.log(HangiDilID);
   var con = getDb.getConnection();
   con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ?", [SeviyeID, HangiDilID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json(result);
+  });
+});
+router.get("/Bolum", function (req, res) {
+  var SezonID = req.query.SezonID;
+  var HangiDilID = req.query.HangiDilID;
+  var con = getDb.getConnection();
+  con.query("SELECT BolumID, ceviriler.Ceviri  FROM bolum INNER JOIN ceviriler ON bolum.CeviriID = ceviriler.CevirilerID WHERE bolum.SezonID = ? AND ceviriler.HangiDilID = ?", [SezonID, HangiDilID], function (err, result) {
     if (err) {
       throw err;
     }
