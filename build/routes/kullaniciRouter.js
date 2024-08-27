@@ -637,4 +637,24 @@ router.get("/Bolum", function (req, res) {
     res.json(result);
   });
 });
+router.get("/Oyun", function (req, res) {
+  var BolumID = req.query.BolumID;
+  var con = getDb.getConnection();
+  con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1", [BolumID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json(result);
+  });
+});
+router.get("/Egitim", function (req, res) {
+  var SeviyeID = req.query.SeviyeID;
+  var con = getDb.getConnection();
+  con.query(" SELECT ak.AnaKelimelerID , ak.Value , c.Ceviri FROM anakelimeler ak JOIN bolum b ON ak.BolumID = b.BolumID JOIN sezon s ON b.SezonID = s.SezonID JOIN ceviriler c ON ak.AnaKelimelerID = c.AnakelimeID WHERE ak.test = 1 AND s.SeviyeID = ?", [SeviyeID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json(result);
+  });
+});
 module.exports = router;

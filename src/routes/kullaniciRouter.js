@@ -560,4 +560,34 @@ router.get("/Bolum",(req,res)=>{
         res.json(result)
     })
 })
+
+router.get("/Oyun",(req,res)=>{
+    const BolumID = req.query.BolumID
+
+    var con = getDb.getConnection();
+
+    con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1",[BolumID],(err,result)=>{
+        if(err){
+            throw err
+        }
+
+        res.json(result)
+    })
+})
+
+router.get("/Egitim",(req,res)=>{
+    const SeviyeID = req.query.SeviyeID
+
+    var con = getDb.getConnection();
+
+    con.query(" SELECT ak.AnaKelimelerID , ak.Value , c.Ceviri FROM anakelimeler ak JOIN bolum b ON ak.BolumID = b.BolumID JOIN sezon s ON b.SezonID = s.SezonID JOIN ceviriler c ON ak.AnaKelimelerID = c.AnakelimeID WHERE ak.test = 1 AND s.SeviyeID = ?",[SeviyeID],(err,result)=>{
+        if(err){
+            throw err
+        }
+
+        res.json(result)
+    })
+
+    
+})
 module.exports = router
