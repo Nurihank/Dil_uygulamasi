@@ -657,4 +657,39 @@ router.get("/Egitim", function (req, res) {
     res.json(result);
   });
 });
+router.post("/SozlugeKelimeEkleme", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var AnaKelimeID = req.body.AnaKelimeID;
+  con.query("SELECT COUNT(*) AS count FROM sozluk WHERE kullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, AnaKelimeID], function (err, result) {
+    if (err) throw err;
+
+    // 'count' sütun adıyla sonuç al
+    var count = result[0].count;
+    console.log('Count:', count); // Count değerini ekrana yazdır
+
+    if (count > 0) {
+      res.json({
+        message: "Bu Kelime Zaten Sözlüğünde Var"
+      });
+    } else {
+      con.query("INSERT INTO sozluk (KullaniciID, AnaKelimeID) VALUES (?, ?)", [KullaniciID, AnaKelimeID], function (err, result) {
+        if (err) throw err;
+        res.json({
+          message: "Başarıyla Eklendi"
+        });
+      });
+    }
+  });
+});
+router.get("/SozluguGetir", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  con.query("SELECT sozluk.SozlukID,anakelimeler.AnaKelimelerID, anakelimeler.Value,ceviriler.Ceviri FROM sozluk INNER JOIN anakelimeler ON sozluk.AnaKelimeID = anakelimeler.AnaKelimelerID INNER JOIN ceviriler ON ceviriler.AnaKelimeID = anakelimeler.AnaKelimelerID WHERE sozluk.KullaniciID = ?", [KullaniciID], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: result
+    });
+  });
+});
 module.exports = router;
