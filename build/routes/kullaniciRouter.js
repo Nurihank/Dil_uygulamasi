@@ -21,28 +21,28 @@ function userEmail(_x) {
   return _userEmail.apply(this, arguments);
 }
 function _userEmail() {
-  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(email) {
+  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(email) {
     var result, sayiString;
-    return _regenerator["default"].wrap(function _callee8$(_context8) {
-      while (1) switch (_context8.prev = _context8.next) {
+    return _regenerator["default"].wrap(function _callee10$(_context10) {
+      while (1) switch (_context10.prev = _context10.next) {
         case 0:
-          _context8.next = 2;
+          _context10.next = 2;
           return query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email);
         case 2:
-          result = _context8.sent;
+          result = _context10.sent;
           sayiString = JSON.parse(JSON.stringify(result));
           if (!(sayiString[0].sayi == 1)) {
-            _context8.next = 8;
+            _context10.next = 8;
             break;
           }
-          return _context8.abrupt("return", true);
+          return _context10.abrupt("return", true);
         case 8:
-          return _context8.abrupt("return", false);
+          return _context10.abrupt("return", false);
         case 9:
         case "end":
-          return _context8.stop();
+          return _context10.stop();
       }
-    }, _callee8);
+    }, _callee10);
   }));
   return _userEmail.apply(this, arguments);
 }
@@ -124,14 +124,14 @@ router.get("/signin", /*#__PURE__*/function () {
               accessToken = _jsonwebtoken["default"].sign({
                 id: user[0].id
               }, process.env.ACCESS_TOKEN_SECRET, {
-                expiresIn: "30s"
+                expiresIn: "1m"
               });
               refreshToken = _jsonwebtoken["default"].sign({
                 id: user[0].id
               }, process.env.REFRESH_TOKEN_SECRET, {
                 expiresIn: "10m"
               });
-              con.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ", [accessToken, kullaniciAdi]);
+              con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE kullaniciAdi = ? ", [accessToken, refreshToken, kullaniciAdi]);
               res.json({
                 message: "Basarili bir sekilde giris yaptiniz",
                 accessToken: accessToken,
@@ -590,22 +590,114 @@ router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
     });
   });
 });
-router.put("/NewAccessToken", function (req, res) {
-  var con = getDb.getConnection();
-  var id = req.body.id;
-  console.log("id = " + id);
-  var accessToken = _jsonwebtoken["default"].sign({
-    id: id
-  }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "30s"
-  });
-  con.query("UPDATE kullanici SET accesToken = ? WHERE id = ? ", [accessToken, id], function (err, result) {
-    if (err) throw err;
-    res.json({
-      accessToken: accessToken
-    });
-  });
-});
+router.put("/NewAccessToken", /*#__PURE__*/function () {
+  var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(req, res) {
+    var con, id, refreshToken;
+    return _regenerator["default"].wrap(function _callee9$(_context9) {
+      while (1) switch (_context9.prev = _context9.next) {
+        case 0:
+          _context9.next = 2;
+          return getDb.getConnection();
+        case 2:
+          con = _context9.sent;
+          // Bağlantıyı al
+          id = req.body.id; // ID'yi query parametrelerinden al
+          refreshToken = req.body.refreshToken; // Refresh token'ı query parametrelerinden al
+          console.log(id);
+          console.log(refreshToken);
+          try {
+            // Kullanıcının refresh token'ını kontrol et
+            con.query("SELECT * FROM kullanici WHERE id = ?", [id], /*#__PURE__*/function () {
+              var _ref9 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(err, result) {
+                var DbRefreshToken;
+                return _regenerator["default"].wrap(function _callee8$(_context8) {
+                  while (1) switch (_context8.prev = _context8.next) {
+                    case 0:
+                      if (!err) {
+                        _context8.next = 3;
+                        break;
+                      }
+                      console.error("Veritabanı sorgu hatası:", err);
+                      return _context8.abrupt("return", res.status(500).json({
+                        message: "Veritabanı hatası"
+                      }));
+                    case 3:
+                      if (!(result.length === 0)) {
+                        _context8.next = 5;
+                        break;
+                      }
+                      return _context8.abrupt("return", res.status(404).json({
+                        message: "Kullanıcı bulunamadı"
+                      }));
+                    case 5:
+                      DbRefreshToken = result[0].refreshToken;
+                      console.log(DbRefreshToken);
+                      // Refresh token'ı kontrol et 
+                      if (!(!DbRefreshToken || DbRefreshToken !== refreshToken)) {
+                        _context8.next = 10;
+                        break;
+                      }
+                      console.log("asda");
+                      return _context8.abrupt("return", res.status(403).json({
+                        message: "Geçersiz refresh token"
+                      }));
+                    case 10:
+                      console.log("bura");
+
+                      // Refresh token'ın süresini kontrol et
+                      _jsonwebtoken["default"].verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, function (err) {
+                        if (err) {
+                          return res.status(403).json({
+                            message: "Refresh token süresi dolmuş veya geçersiz"
+                          });
+                        }
+
+                        // Yeni access token oluştur
+                        var accessToken = _jsonwebtoken["default"].sign({
+                          id: id
+                        }, process.env.ACCESS_TOKEN_SECRET, {
+                          expiresIn: "30s"
+                        });
+
+                        // Yeni access token'ı veritabanında güncelle
+                        con.query("UPDATE kullanici SET accesToken = ? WHERE id = ?", [accessToken, id], function (err) {
+                          if (err) {
+                            console.error("Veritabanı güncelleme hatası:", err);
+                            return res.status(500).json({
+                              message: "Veritabanı hatası"
+                            });
+                          }
+                          res.json({
+                            accessToken: accessToken
+                          });
+                        });
+                      });
+                    case 12:
+                    case "end":
+                      return _context8.stop();
+                  }
+                }, _callee8);
+              }));
+              return function (_x18, _x19) {
+                return _ref9.apply(this, arguments);
+              };
+            }());
+          } catch (error) {
+            console.error("Hata:", error);
+            res.status(500).json({
+              message: "Sunucu hatası"
+            });
+          }
+        case 8:
+        case "end":
+          return _context9.stop();
+      }
+    }, _callee9);
+  }));
+  return function (_x16, _x17) {
+    return _ref8.apply(this, arguments);
+  };
+}());
 router.get("/Seviye", function (req, res) {
   var con = getDb.getConnection();
   con.query("SELECT * FROM seviye", function (err, result) {

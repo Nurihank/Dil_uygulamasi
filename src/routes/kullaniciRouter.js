@@ -91,11 +91,12 @@ router.get("/signin", async (req, res) => {
 
             const accessToken = jwt.sign({ id: user[0].id },
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: "30s" })
+                { expiresIn: "1m" })
+
             const refreshToken = jwt.sign({ id: user[0].id },
                 process.env.REFRESH_TOKEN_SECRET,
                 { expiresIn: "10m" })
-            con.query("UPDATE kullanici SET accesToken = ? WHERE kullaniciAdi = ? ", [accessToken, kullaniciAdi])
+            con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE kullaniciAdi = ? ", [accessToken,refreshToken, kullaniciAdi])
             res.json({ message: "Basarili bir sekilde giris yaptiniz", accessToken: accessToken,refreshToken : refreshToken, status: "SUCCES", id: user[0].id })
         } else {
             res.json({
@@ -507,19 +508,62 @@ router.get("/KullaniciBilgileri",userMiddleware, function (req, res) {
     });
 });
 
-router.put("/NewAccessToken",(req,res)=>{
-    var con = getDb.getConnection();
-    var id = req.body.id
-    console.log("id = "+id)
-    const accessToken = jwt.sign({ id: id },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "30s" })
-        con.query("UPDATE kullanici SET accesToken = ? WHERE id = ? ", [accessToken, id],(err,result)=>{
-            if(err)  throw err;
+router.put("/NewAccessToken", async (req, res) => {
+    const con = await getDb.getConnection(); // Bağlantıyı al
+    const id = req.body.id; // ID'yi query parametrelerinden al
+    const refreshToken = req.body.refreshToken; // Refresh token'ı query parametrelerinden al
 
-            res.json({accessToken:accessToken})
-        })
-})
+    console.log(id)
+    console.log(refreshToken)
+
+    try {
+        // Kullanıcının refresh token'ını kontrol et
+        con.query("SELECT * FROM kullanici WHERE id = ?", [id], async (err, result) => {
+            if (err) {
+                console.error("Veritabanı sorgu hatası:", err);
+                return res.status(500).json({ message: "Veritabanı hatası" });
+            }
+
+            if (result.length === 0) {
+                return res.status(404).json({ message: "Kullanıcı bulunamadı" });
+            }
+
+            const DbRefreshToken = result[0].refreshToken;
+            console.log(DbRefreshToken)
+            // Refresh token'ı kontrol et 
+            if (!DbRefreshToken || DbRefreshToken !== refreshToken) {
+                console.log("asda")
+                return res.status(403).json({ message: "Geçersiz refresh token" });
+            }
+            console.log("bura")
+
+            // Refresh token'ın süresini kontrol et
+            jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err) => {
+                if (err) {
+                    return res.status(403).json({ message: "Refresh token süresi dolmuş veya geçersiz" });
+                }
+
+                // Yeni access token oluştur
+                const accessToken = jwt.sign({ id: id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "30s" });
+
+                // Yeni access token'ı veritabanında güncelle
+                con.query("UPDATE kullanici SET accesToken = ? WHERE id = ?", [accessToken, id], (err) => {
+                    if (err) {
+                        console.error("Veritabanı güncelleme hatası:", err);
+                        return res.status(500).json({ message: "Veritabanı hatası" });
+                    }
+
+                    res.json({ accessToken: accessToken });
+                });
+            });
+        });
+    } catch (error) {
+        console.error("Hata:", error);
+        res.status(500).json({ message: "Sunucu hatası" });
+    } 
+});
+
+
 
 
 router.get("/Seviye",(req,res)=>{
