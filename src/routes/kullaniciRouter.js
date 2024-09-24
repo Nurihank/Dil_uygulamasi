@@ -513,9 +513,6 @@ router.put("/NewAccessToken", async (req, res) => {
     const id = req.body.id; // ID'yi query parametrelerinden al
     const refreshToken = req.body.refreshToken; // Refresh token'ı query parametrelerinden al
 
-    console.log(id)
-    console.log(refreshToken)
-
     try {
         // Kullanıcının refresh token'ını kontrol et
         con.query("SELECT * FROM kullanici WHERE id = ?", [id], async (err, result) => {
@@ -529,13 +526,10 @@ router.put("/NewAccessToken", async (req, res) => {
             }
 
             const DbRefreshToken = result[0].refreshToken;
-            console.log(DbRefreshToken)
             // Refresh token'ı kontrol et 
             if (!DbRefreshToken || DbRefreshToken !== refreshToken) {
-                console.log("asda")
                 return res.status(403).json({ message: "Geçersiz refresh token" });
             }
-            console.log("bura")
 
             // Refresh token'ın süresini kontrol et
             jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err) => {

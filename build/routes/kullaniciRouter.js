@@ -603,8 +603,6 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
           // Bağlantıyı al
           id = req.body.id; // ID'yi query parametrelerinden al
           refreshToken = req.body.refreshToken; // Refresh token'ı query parametrelerinden al
-          console.log(id);
-          console.log(refreshToken);
           try {
             // Kullanıcının refresh token'ını kontrol et
             con.query("SELECT * FROM kullanici WHERE id = ?", [id], /*#__PURE__*/function () {
@@ -630,20 +628,15 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
                         message: "Kullanıcı bulunamadı"
                       }));
                     case 5:
-                      DbRefreshToken = result[0].refreshToken;
-                      console.log(DbRefreshToken);
-                      // Refresh token'ı kontrol et 
+                      DbRefreshToken = result[0].refreshToken; // Refresh token'ı kontrol et 
                       if (!(!DbRefreshToken || DbRefreshToken !== refreshToken)) {
-                        _context8.next = 10;
+                        _context8.next = 8;
                         break;
                       }
-                      console.log("asda");
                       return _context8.abrupt("return", res.status(403).json({
                         message: "Geçersiz refresh token"
                       }));
-                    case 10:
-                      console.log("bura");
-
+                    case 8:
                       // Refresh token'ın süresini kontrol et
                       _jsonwebtoken["default"].verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, function (err) {
                         if (err) {
@@ -672,7 +665,7 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
                           });
                         });
                       });
-                    case 12:
+                    case 9:
                     case "end":
                       return _context8.stop();
                   }
@@ -688,7 +681,7 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
               message: "Sunucu hatası"
             });
           }
-        case 8:
+        case 6:
         case "end":
           return _context9.stop();
       }
