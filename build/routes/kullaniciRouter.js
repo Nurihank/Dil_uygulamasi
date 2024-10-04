@@ -124,7 +124,7 @@ router.get("/signin", /*#__PURE__*/function () {
               accessToken = _jsonwebtoken["default"].sign({
                 id: user[0].id
               }, process.env.ACCESS_TOKEN_SECRET, {
-                expiresIn: "1m"
+                expiresIn: "30s"
               });
               refreshToken = _jsonwebtoken["default"].sign({
                 id: user[0].id
@@ -692,8 +692,9 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
   };
 }());
 router.get("/Seviye", function (req, res) {
+  //seviye sezon bölüm bunları order'ına göre sıralama yapsın
   var con = getDb.getConnection();
-  con.query("SELECT * FROM seviye", function (err, result) {
+  con.query("SELECT * FROM seviye ORDER BY seviye.Order", function (err, result) {
     if (err) {
       throw err;
     }
@@ -704,7 +705,7 @@ router.get("/Sezon", function (req, res) {
   var SeviyeID = req.query.SeviyeID;
   var HangiDilID = req.query.HangiDilID;
   var con = getDb.getConnection();
-  con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ?", [SeviyeID, HangiDilID], function (err, result) {
+  con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ? ORDER BY sezon.Order;", [SeviyeID, HangiDilID], function (err, result) {
     if (err) {
       throw err;
     }
@@ -715,7 +716,7 @@ router.get("/Bolum", function (req, res) {
   var SezonID = req.query.SezonID;
   var HangiDilID = req.query.HangiDilID;
   var con = getDb.getConnection();
-  con.query("SELECT BolumID, ceviriler.Ceviri  FROM bolum INNER JOIN ceviriler ON bolum.CeviriID = ceviriler.CevirilerID WHERE bolum.SezonID = ? AND ceviriler.HangiDilID = ?", [SezonID, HangiDilID], function (err, result) {
+  con.query("SELECT BolumID, ceviriler.Ceviri,bolum.Order  FROM bolum INNER JOIN ceviriler ON bolum.CeviriID = ceviriler.CevirilerID WHERE bolum.SezonID = ? AND ceviriler.HangiDilID = ? ORDER BY bolum.Order;", [SezonID, HangiDilID], function (err, result) {
     if (err) {
       throw err;
     }
@@ -733,6 +734,7 @@ router.get("/Oyun", function (req, res) {
   });
 });
 router.get("/Egitim", function (req, res) {
+  //eğitimde bir de kullanıcının meslek diline göre diline göre getirmeyi de kontoırl et
   var SeviyeID = req.query.SeviyeID;
   var con = getDb.getConnection();
   con.query(" SELECT ak.AnaKelimelerID , ak.Value , c.Ceviri FROM anakelimeler ak JOIN bolum b ON ak.BolumID = b.BolumID JOIN sezon s ON b.SezonID = s.SezonID JOIN ceviriler c ON ak.AnaKelimelerID = c.AnakelimeID WHERE ak.test = 1 AND s.SeviyeID = ?", [SeviyeID], function (err, result) {
@@ -771,6 +773,36 @@ router.get("/SozluguGetir", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   con.query("SELECT sozluk.SozlukID,anakelimeler.AnaKelimelerID, anakelimeler.Value,ceviriler.Ceviri FROM sozluk INNER JOIN anakelimeler ON sozluk.AnaKelimeID = anakelimeler.AnaKelimelerID INNER JOIN ceviriler ON ceviriler.AnaKelimeID = anakelimeler.AnaKelimelerID WHERE sozluk.KullaniciID = ?", [KullaniciID], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: result
+    });
+  });
+});
+router.post("/GecilenBolumlerEkle", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var BolumID = req.body.BolumID;
+  con.query("SELECT COUNT(*) AS count FROM gecilenbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
+    if (result[0].count > 0) {
+      res.json({
+        message: "failed"
+      });
+    } else {
+      con.query("INSERT INTO gecilenbolumler (KullaniciID,BolumID) VALUES (?,?)", [KullaniciID, BolumID], function (err, result) {
+        if (err) throw err;
+        res.json({
+          message: "succes"
+        });
+      });
+    }
+  });
+});
+router.get("/GecilenBolumler", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var SezonID = req.query.SezonID;
+  con.query("SELECT * FROM bolum INNER JOIN gecilenbolumler ON bolum.BolumID = gecilenbolumler.BolumID WHERE bolum.SezonID = ? AND KullaniciID = ? ORDER BY bolum.Order", [SezonID, KullaniciID], function (err, result) {
     if (err) throw err;
     res.json({
       message: result
