@@ -802,7 +802,7 @@ router.get("/GecilenBolumler", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SezonID = req.query.SezonID;
-  con.query("SELECT * FROM bolum INNER JOIN gecilenbolumler ON bolum.BolumID = gecilenbolumler.BolumID WHERE bolum.SezonID = ? AND KullaniciID = ? ORDER BY bolum.Order", [SezonID, KullaniciID], function (err, result) {
+  con.query("SELECT * FROM bolum INNER JOIN gecilenbolumler ON bolum.BolumID = gecilenbolumler.BolumID WHERE bolum.SezonID = ? AND gecilenbolumler.KullaniciID = ? ORDER BY bolum.Order", [SezonID, KullaniciID], function (err, result) {
     if (err) throw err;
     res.json({
       message: result
@@ -831,8 +831,8 @@ router.post("/GecilenSezonEkle", function (req, res) {
 router.get("/GecilenSezonlar", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
-  var SezonID = req.query.SezonID;
-  con.query("SELECT * FROM gecilensezonlar INNER JOIN sezon ON gecilensezonlar.SezonID = sezon.SezonID WHERE sezon.SeviyeID = ? AND gecilensezonlar.KullaniciID = ?", [SezonID, KullaniciID], function (err, result) {
+  var SeviyeID = req.query.SeviyeID;
+  con.query("SELECT * FROM gecilensezonlar INNER JOIN sezon ON gecilensezonlar.SezonID = sezon.SezonID WHERE sezon.SeviyeID = ? AND gecilensezonlar.KullaniciID = ?", [SeviyeID, KullaniciID], function (err, result) {
     if (err) throw err;
     res.json({
       message: result
