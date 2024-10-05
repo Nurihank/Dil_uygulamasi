@@ -809,4 +809,34 @@ router.get("/GecilenBolumler", function (req, res) {
     });
   });
 });
+router.post("/GecilenSezonEkle", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var SezonID = req.body.SezonID;
+  con.query("SELECT COUNT(*) AS count FROM gecilensezonlar WHERE KullaniciID=? AND SezonID=?", [KullaniciID, SezonID], function (err, result) {
+    if (result[0].count > 0) {
+      res.json({
+        message: "failed"
+      });
+    } else {
+      con.query("INSERT INTO gecilensezonlar (KullaniciID,SezonID) VALUES (?,?)", [KullaniciID, SezonID], function (err, result) {
+        if (err) throw err;
+        res.json({
+          message: "succes"
+        });
+      });
+    }
+  });
+});
+router.get("/GecilenSezonlar", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var SezonID = req.query.SezonID;
+  con.query("SELECT * FROM gecilensezonlar INNER JOIN sezon ON gecilensezonlar.SezonID = sezon.SezonID WHERE sezon.SeviyeID = ? AND gecilensezonlar.KullaniciID = ?", [SezonID, KullaniciID], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: result
+    });
+  });
+});
 module.exports = router;
