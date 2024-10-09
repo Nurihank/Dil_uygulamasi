@@ -664,7 +664,8 @@ router.post("/GecilenBolumlerEkle", function (req, res) {
     var KullaniciID = req.body.KullaniciID;
     var BolumID = req.body.BolumID;
     con.query("SELECT COUNT(*) AS count FROM gecilenbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
-      if(result[0].count > 0){
+      console.log("")
+        if(result[0].count > 0){
         res.json({
           message: "failed"
         });
@@ -712,7 +713,7 @@ router.post("/GecilenSezonEkle", function (req, res) {
     });
   });
 
-  router.get("/GecilenSezonlar",(req,res)=>{
+router.get("/GecilenSezonlar",(req,res)=>{
     var con = getDb.getConnection()
 
     const KullaniciID = req.query.KullaniciID
@@ -724,4 +725,35 @@ router.post("/GecilenSezonEkle", function (req, res) {
         res.json({message:result})
     })
 })
+router.get("/SezonBittiMiKontrol", (req, res) => {
+    const con = getDb.getConnection();
+
+    const KullaniciID = req.query.KullaniciID;
+    const SezonID = req.query.SezonID;
+
+    // SezonID ile bölümleri al
+    con.query("SELECT * FROM bolum WHERE SezonID = ?", [SezonID], (err, bolumlerResult) => {
+        if (err) {
+            return res.status(500).json({ message: "Bölümleri alırken hata oluştu." });
+        }
+
+        // Geçilen bölümleri al
+        con.query("SELECT * FROM gecilenbolumler WHERE KullaniciID = ?", [KullaniciID], (err, gecilenBolumlerResult) => {
+            if (err) {
+                return res.status(500).json({ message: "Geçilen bölümleri alırken hata oluştu." });
+            }
+
+            // Geçilen bölüm ID'lerini diziye çevir
+            const gecilenBolumIDs = gecilenBolumlerResult.map(bolum => bolum.BolumID);
+
+            // Sezondaki tüm bölümlerin ID'lerini al
+            const bolumIDs = bolumlerResult.map(bolum => bolum.BolumID);
+
+            // Tüm bölümler geçilmişse true döndür
+            const sezonBittiMi = bolumIDs.every(bolumID => gecilenBolumIDs.includes(bolumID));
+
+            res.json({ sezonBittiMi });
+        });
+    });
+});
 module.exports = router

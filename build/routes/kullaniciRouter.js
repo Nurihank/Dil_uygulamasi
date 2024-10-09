@@ -784,6 +784,7 @@ router.post("/GecilenBolumlerEkle", function (req, res) {
   var KullaniciID = req.body.KullaniciID;
   var BolumID = req.body.BolumID;
   con.query("SELECT COUNT(*) AS count FROM gecilenbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
+    console.log("");
     if (result[0].count > 0) {
       res.json({
         message: "failed"
@@ -836,6 +837,47 @@ router.get("/GecilenSezonlar", function (req, res) {
     if (err) throw err;
     res.json({
       message: result
+    });
+  });
+});
+router.get("/SezonBittiMiKontrol", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var SezonID = req.query.SezonID;
+
+  // SezonID ile bölümleri al
+  con.query("SELECT * FROM bolum WHERE SezonID = ?", [SezonID], function (err, bolumlerResult) {
+    if (err) {
+      return res.status(500).json({
+        message: "Bölümleri alırken hata oluştu."
+      });
+    }
+
+    // Geçilen bölümleri al
+    con.query("SELECT * FROM gecilenbolumler WHERE KullaniciID = ?", [KullaniciID], function (err, gecilenBolumlerResult) {
+      if (err) {
+        return res.status(500).json({
+          message: "Geçilen bölümleri alırken hata oluştu."
+        });
+      }
+
+      // Geçilen bölüm ID'lerini diziye çevir
+      var gecilenBolumIDs = gecilenBolumlerResult.map(function (bolum) {
+        return bolum.BolumID;
+      });
+
+      // Sezondaki tüm bölümlerin ID'lerini al
+      var bolumIDs = bolumlerResult.map(function (bolum) {
+        return bolum.BolumID;
+      });
+
+      // Tüm bölümler geçilmişse true döndür
+      var sezonBittiMi = bolumIDs.every(function (bolumID) {
+        return gecilenBolumIDs.includes(bolumID);
+      });
+      res.json({
+        sezonBittiMi: sezonBittiMi
+      });
     });
   });
 });
