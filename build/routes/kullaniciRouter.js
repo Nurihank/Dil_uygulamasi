@@ -8,6 +8,7 @@ var _md = _interopRequireDefault(require("md5"));
 var _nodemailer = _interopRequireDefault(require("nodemailer"));
 var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
 var _express = require("express");
+var _console = require("console");
 var router = require("express").Router(); //routerları export etmek için   
 
 var userMiddleware = require("../middlewares/user");
@@ -779,12 +780,25 @@ router.get("/SozluguGetir", function (req, res) {
     });
   });
 });
+router.get("/SozlugeEkliMi", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var KelimeID = req.query.KelimeID;
+  con.query("SELECT COUNT(*) AS count FROM sozluk WHERE KullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, KelimeID], function (err, result) {
+    var count = result[0].count;
+    if (err) throw err;
+    if (count > 0) {
+      res.json(true);
+    } else {
+      res.json(false);
+    }
+  });
+});
 router.post("/GecilenBolumlerEkle", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var BolumID = req.body.BolumID;
   con.query("SELECT COUNT(*) AS count FROM gecilenbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
-    console.log("");
     if (result[0].count > 0) {
       res.json({
         message: "failed"
