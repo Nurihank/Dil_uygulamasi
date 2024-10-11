@@ -9,6 +9,7 @@ var _nodemailer = _interopRequireDefault(require("nodemailer"));
 var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
 var _express = require("express");
 var _console = require("console");
+var _bcryptjs = require("bcryptjs");
 var router = require("express").Router(); //routerları export etmek için   
 
 var userMiddleware = require("../middlewares/user");
@@ -768,6 +769,31 @@ router.post("/SozlugeKelimeEkleme", function (req, res) {
         });
       });
     }
+  });
+});
+router["delete"]("/SozluktenKelimeSilme", function (req, res) {
+  var KullaniciID = req.query.KullaniciID;
+  var KelimeID = req.query.KelimeID;
+  console.log(KelimeID);
+  con.query("DELETE FROM sozluk WHERE KullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, KelimeID], function (err, result) {
+    if (err) {
+      // Hata durumunda hata mesajını geri döndür
+      return res.status(500).json({
+        error: "Veritabanı hatası"
+      });
+    }
+
+    // Etkilenen satır sayısını kontrol et
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Kelime bulunamadı veya zaten silinmiş"
+      });
+    }
+
+    // Silme işlemi başarılıysa
+    res.json({
+      message: "Kelime başarıyla silindi"
+    });
   });
 });
 router.get("/SozluguGetir", function (req, res) {

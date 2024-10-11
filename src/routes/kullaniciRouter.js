@@ -6,6 +6,7 @@ import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
 import { Router } from "express";
 import { Console } from "console";
+import { compareSync } from "bcryptjs";
 
 var userModel = require("../model/userModel")
 
@@ -647,6 +648,26 @@ router.post("/SozlugeKelimeEkleme", (req, res) => {
     });
     
 })
+
+router.delete("/SozluktenKelimeSilme", (req, res) => {
+    const KullaniciID = req.query.KullaniciID;
+    const KelimeID = req.query.KelimeID;
+    console.log(KelimeID)
+    con.query("DELETE FROM sozluk WHERE KullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, KelimeID], (err, result) => {
+        if (err) {
+            // Hata durumunda hata mesajını geri döndür
+            return res.status(500).json({ error: "Veritabanı hatası" });
+        }
+
+        // Etkilenen satır sayısını kontrol et
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Kelime bulunamadı veya zaten silinmiş" });
+        }
+
+        // Silme işlemi başarılıysa
+        res.json({ message: "Kelime başarıyla silindi" });
+    });
+});
 
 router.get("/SozluguGetir",(req,res)=>{
     var con = getDb.getConnection()
