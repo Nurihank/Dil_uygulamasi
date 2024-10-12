@@ -5,6 +5,8 @@ import kullaniciRouter from "./routes/kullaniciRouter.js"
 import authorizedRouter from "./routes/authorizedRouter.js" 
 import adminRouter from "./routes/adminLoginRouter.js"
 
+const cors = require('cors');
+
 
 const app = express();
 
@@ -12,6 +14,8 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
     extended:true
 }))
+
+app.use(cors());
 
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())  //verileri json formatına çeviriyor  

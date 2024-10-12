@@ -4,9 +4,7 @@ const userMiddleware = require("../middlewares/user")
 import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
-import { Router } from "express";
-import { Console } from "console";
-import { compareSync } from "bcryptjs";
+
 
 var userModel = require("../model/userModel")
 
@@ -78,7 +76,6 @@ router.get("/signin", async (req, res) => {
     const kullaniciAdi = req.query.kullaniciAdi;
     const sifre = req.query.sifre
     //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
-
     var passwordToken = md5(sifre)
 
     var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
@@ -373,7 +370,6 @@ router.post("/sectigiDilSecim", (req, res) => {
     const sectigiDil = req.body.sectigiDil
     const id = req.body.id
     var con = getDb.getConnection()
-    console.log(id)
 
     con.query("UPDATE kullanici SET SectigiDilID = ? WHERE id = ? ", [sectigiDil, id], (err, result) => {
         if (err) {
@@ -635,7 +631,6 @@ router.post("/SozlugeKelimeEkleme", (req, res) => {
     
         // 'count' sütun adıyla sonuç al
         const count = result[0].count;
-        console.log('Count:', count); // Count değerini ekrana yazdır
     
         if (count > 0) {
             res.json({ message: "Bu Kelime Zaten Sözlüğünde Var" });
@@ -652,7 +647,7 @@ router.post("/SozlugeKelimeEkleme", (req, res) => {
 router.delete("/SozluktenKelimeSilme", (req, res) => {
     const KullaniciID = req.query.KullaniciID;
     const KelimeID = req.query.KelimeID;
-    console.log(KelimeID)
+
     con.query("DELETE FROM sozluk WHERE KullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, KelimeID], (err, result) => {
         if (err) {
             // Hata durumunda hata mesajını geri döndür
@@ -792,5 +787,68 @@ router.get("/SezonBittiMiKontrol", (req, res) => {
             res.json({ sezonBittiMi });
         });
     });
+});
+
+router.post("/GunlukGiris", function (req, res) {
+    var con = getDb.getConnection();
+    var KullaniciID = req.body.KullaniciID;
+    var Date = req.body.Date;
+
+    con.query("SELECT COUNT(*) as count FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID,Date],(err,result)=>{
+        if (err) {
+            console.error("Hata:", err);
+            return res.status(500).json({ error: "Veritabanı hatası." });
+        }
+
+        if(result[0].count > 0){
+            res.json(false)
+        }
+        else{
+            con.query("INSERT INTO gunlukgiris (KullaniciID,Tarih) VALUES (?,?)", [KullaniciID,Date], function (err, result) {
+                if (err) {
+                    console.error("Hata:", err);
+                    return res.status(500).json({ error: "Veritabanı hatası." });
+                }
+
+                return res.json(true);  // Yeni giriş başarılı
+            });
+        }
+    })  
+});
+router.get("/GunlukGiris", function (req, res) {
+    var con = getDb.getConnection();
+    var KullaniciID = req.query.KullaniciID;
+
+    console.log(KullaniciID)
+    con.query("SELECT * FROM gunlukgiris WHERE KullaniciID = ?", [KullaniciID],(err,result)=>{
+        if (err) {
+            console.error("Hata:", err);
+            return res.status(500).json({ error: "Veritabanı hatası." });
+        }
+        res.json({message:result})
+    })  
+});
+router.post("/GunlukSozlugeGiris", function (req, res) {
+    var con = getDb.getConnection();
+    var KullaniciID = req.body.KullaniciID;
+    var Date = req.body.Date;
+    var SozlugeGiris = req.body.SozlugeGiris;
+
+    con.query("SELECT COUNT(*) as count FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID,Date],(err,result)=>{
+        if (err) {
+            return res.status(500).json({ error: "Veritabanı hatası burda." });
+        }
+        if(result[0].count > 0){
+            con.query("UPDATE gunlukgiris SET SozlukGiris = ? WHERE KullaniciID = ? AND Tarih = ?", [SozlugeGiris,KullaniciID,Date], function (err, result) {
+                if (err) {
+                    return res.status(500).json({ error: "Veritabanı hatası. şurda" });
+                }
+                return res.json(true);  
+            });
+        }
+        else{
+            res.json(false)
+        }
+    })  
 });
 module.exports = router
