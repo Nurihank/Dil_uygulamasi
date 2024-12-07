@@ -20,28 +20,28 @@ function userEmail(_x) {
   return _userEmail.apply(this, arguments);
 }
 function _userEmail() {
-  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(email) {
+  _userEmail = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(email) {
     var result, sayiString;
-    return _regenerator["default"].wrap(function _callee10$(_context10) {
-      while (1) switch (_context10.prev = _context10.next) {
+    return _regenerator["default"].wrap(function _callee9$(_context9) {
+      while (1) switch (_context9.prev = _context9.next) {
         case 0:
-          _context10.next = 2;
+          _context9.next = 2;
           return query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email);
         case 2:
-          result = _context10.sent;
+          result = _context9.sent;
           sayiString = JSON.parse(JSON.stringify(result));
           if (!(sayiString[0].sayi == 1)) {
-            _context10.next = 8;
+            _context9.next = 8;
             break;
           }
-          return _context10.abrupt("return", true);
+          return _context9.abrupt("return", true);
         case 8:
-          return _context10.abrupt("return", false);
+          return _context9.abrupt("return", false);
         case 9:
         case "end":
-          return _context10.stop();
+          return _context9.stop();
       }
-    }, _callee10);
+    }, _callee9);
   }));
   return _userEmail.apply(this, arguments);
 }
@@ -98,7 +98,7 @@ router.post("/signup", /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }());
-router.get("/signin", /*#__PURE__*/function () {
+router.post("/signin", /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
     var con, kullaniciAdi, sifre, passwordToken, getUserInfo, userInfo, isUserExist, user, accessToken, refreshToken;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
@@ -123,12 +123,12 @@ router.get("/signin", /*#__PURE__*/function () {
               accessToken = _jsonwebtoken["default"].sign({
                 id: user[0].id
               }, process.env.ACCESS_TOKEN_SECRET, {
-                expiresIn: "30s"
+                expiresIn: "30m"
               });
               refreshToken = _jsonwebtoken["default"].sign({
                 id: user[0].id
               }, process.env.REFRESH_TOKEN_SECRET, {
-                expiresIn: "10m"
+                expiresIn: "60m"
               });
               con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE kullaniciAdi = ? ", [accessToken, refreshToken, kullaniciAdi]);
               res.json({
@@ -161,105 +161,71 @@ router.get("/signin", /*#__PURE__*/function () {
   };
 }());
 router.get("/forgetPasswordCode", /*#__PURE__*/function () {
-  var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(req, res) {
-    var con, kullaniciAdi, email, getUserInfo, userInfo, isUserExist, user;
-    return _regenerator["default"].wrap(function _callee4$(_context4) {
-      while (1) switch (_context4.prev = _context4.next) {
+  var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(req, res) {
+    var con, email, codeUret, code, transporter;
+    return _regenerator["default"].wrap(function _callee3$(_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
         case 0:
+          codeUret = function _codeUret(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+          };
           con = getDb.getConnection();
-          kullaniciAdi = req.query.kullaniciAdi;
           email = req.query.email;
-          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
-          userInfo = new getUserInfo(kullaniciAdi);
-          _context4.next = 7;
-          return userInfo.userFind(kullaniciAdi);
-        case 7:
-          isUserExist = _context4.sent;
-          _context4.next = 10;
-          return userInfo.userInfo(kullaniciAdi);
-        case 10:
-          user = _context4.sent;
-          if (kullaniciAdi == "" || email == "") {
-            res.json({
-              status: "FAILED"
-            });
-          } else {
-            if (isUserExist == true) {
-              con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, function (err, result) {
-                if (user[0].email == email) {
-                  var codeUret = /*#__PURE__*/function () {
-                    var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(min, max) {
-                      var sayi;
-                      return _regenerator["default"].wrap(function _callee3$(_context3) {
-                        while (1) switch (_context3.prev = _context3.next) {
-                          case 0:
-                            sayi = "";
-                            sayi = Math.floor(Math.random() * (max - min)) + min;
-                            return _context3.abrupt("return", sayi);
-                          case 3:
-                          case "end":
-                            return _context3.stop();
-                        }
-                      }, _callee3);
-                    }));
-                    return function codeUret(_x8, _x9) {
-                      return _ref4.apply(this, arguments);
-                    };
-                  }();
-                  var code = "1000";
-                  var codeToken = (0, _md["default"])(code);
-                  var transporter = _nodemailer["default"].createTransport({
-                    host: "smtp.gmail.com",
-                    port: 465,
-                    secure: true,
-                    auth: {
-                      user: 'kavalcinurihan@gmail.com',
-                      pass: 'lfxtfgzyiserimdn'
-                    },
-                    postman: res.json({
-                      message: "Code gönderildi"
-                    })
-                  });
-                  transporter.sendMail({
-                    from: '"You" <kavalcinurihan@gmail.com>',
-                    to: email,
-                    subject: "VERIFICATION CODE",
-                    html: code
-                  });
-                  con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ", [codeToken, kullaniciAdi], function (err) {
-                    if (err) {
-                      throw err;
-                    } else {}
-                  });
-                } else {
-                  res.json({
-                    status: "FAILED",
-                    message: "Kullanici adi ve email eşleşmiyo"
-                  });
-                }
-              });
-            } else {
-              res.json({
-                status: "FAILED",
-                message: "Kullanici adi hatalidir"
-              });
-            }
+          if (email) {
+            _context3.next = 5;
+            break;
           }
-        case 12:
+          return _context3.abrupt("return", res.json({
+            status: "FAILED",
+            message: "Email adresi gereklidir"
+          }));
+        case 5:
+          code = codeUret(1000, 9999).toString(); // 4 haneli bir kod üretir
+          //var codeToken = md5(code)
+          transporter = _nodemailer["default"].createTransport({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: {
+              user: 'kavalcinurihan@gmail.com',
+              pass: 'lfxtfgzyiserimdn'
+            },
+            postman: res.json({
+              message: "Code gönderildi"
+            })
+          });
+          _context3.next = 9;
+          return transporter.sendMail({
+            from: '"You" <kavalcinurihan@gmail.com>',
+            to: email,
+            subject: "ŞİFREMİ UNUTTUM KODU",
+            html: code
+          });
+        case 9:
+          con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE email= ? ", [code, email], function (err) {
+            if (err) {
+              throw err;
+            }
+            res.json({
+              status: "SUCCESS",
+              message: "Şifre sıfırlama kodu email adresinize gönderildi"
+            });
+          });
+        case 10:
         case "end":
-          return _context4.stop();
+          return _context3.stop();
       }
-    }, _callee4);
+    }, _callee3);
   }));
   return function (_x6, _x7) {
     return _ref3.apply(this, arguments);
   };
 }());
 router.put("/forgetPassword", /*#__PURE__*/function () {
-  var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(req, res) {
+  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(req, res) {
     var con, kullaniciAdi, code, newPassword, codeToken, getUserInfo, userInfo, isUserExist, newPasswordToken;
-    return _regenerator["default"].wrap(function _callee5$(_context5) {
-      while (1) switch (_context5.prev = _context5.next) {
+    return _regenerator["default"].wrap(function _callee4$(_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
         case 0:
           con = getDb.getConnection();
           kullaniciAdi = req.body.kullaniciAdi;
@@ -268,10 +234,10 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
           codeToken = (0, _md["default"])(code);
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
-          _context5.next = 9;
+          _context4.next = 9;
           return userInfo.userFind(kullaniciAdi);
         case 9:
-          isUserExist = _context5.sent;
+          isUserExist = _context4.sent;
           newPasswordToken = (0, _md["default"])(newPassword);
           if (isUserExist == true) {
             con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", [kullaniciAdi], function (err, result) {
@@ -304,19 +270,19 @@ router.put("/forgetPassword", /*#__PURE__*/function () {
           }
         case 12:
         case "end":
-          return _context5.stop();
+          return _context4.stop();
       }
-    }, _callee5);
+    }, _callee4);
   }));
-  return function (_x10, _x11) {
-    return _ref5.apply(this, arguments);
+  return function (_x8, _x9) {
+    return _ref4.apply(this, arguments);
   };
 }());
 router.post("/changePasswordCode", userMiddleware, /*#__PURE__*/function () {
-  var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res) {
+  var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(req, res) {
     var con, kullaniciAdi, oldPassword, email, oldPasswordToken, getUserInfo, userInfo, isUserExist, user, code, codeToken, transporter;
-    return _regenerator["default"].wrap(function _callee6$(_context6) {
-      while (1) switch (_context6.prev = _context6.next) {
+    return _regenerator["default"].wrap(function _callee5$(_context5) {
+      while (1) switch (_context5.prev = _context5.next) {
         case 0:
           con = getDb.getConnection();
           kullaniciAdi = req.body.kullaniciAdi;
@@ -325,14 +291,14 @@ router.post("/changePasswordCode", userMiddleware, /*#__PURE__*/function () {
           oldPasswordToken = (0, _md["default"])(oldPassword);
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
-          _context6.next = 9;
+          _context5.next = 9;
           return userInfo.userFind(kullaniciAdi);
         case 9:
-          isUserExist = _context6.sent;
-          _context6.next = 12;
+          isUserExist = _context5.sent;
+          _context5.next = 12;
           return userInfo.userInfo(kullaniciAdi);
         case 12:
-          user = _context6.sent;
+          user = _context5.sent;
           code = "1001";
           codeToken = (0, _md["default"])(code);
           if (isUserExist == true && user[0].şifre == oldPasswordToken) {
@@ -362,19 +328,19 @@ router.post("/changePasswordCode", userMiddleware, /*#__PURE__*/function () {
           }
         case 16:
         case "end":
-          return _context6.stop();
+          return _context5.stop();
       }
-    }, _callee6);
+    }, _callee5);
   }));
-  return function (_x12, _x13) {
-    return _ref6.apply(this, arguments);
+  return function (_x10, _x11) {
+    return _ref5.apply(this, arguments);
   };
 }());
 router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
-  var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(req, res) {
+  var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(req, res) {
     var con, kullaniciAdi, code, newPassword, getUserInfo, userInfo, isUserExist, codeToken, newPasswordToken;
-    return _regenerator["default"].wrap(function _callee7$(_context7) {
-      while (1) switch (_context7.prev = _context7.next) {
+    return _regenerator["default"].wrap(function _callee6$(_context6) {
+      while (1) switch (_context6.prev = _context6.next) {
         case 0:
           con = getDb.getConnection();
           kullaniciAdi = req.body.kullaniciAdi;
@@ -382,10 +348,10 @@ router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
           newPassword = req.body.newPassword;
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
-          _context7.next = 8;
+          _context6.next = 8;
           return userInfo.userFind();
         case 8:
-          isUserExist = _context7.sent;
+          isUserExist = _context6.sent;
           codeToken = (0, _md["default"])(code);
           newPasswordToken = (0, _md["default"])(newPassword);
           if (isUserExist == true) {
@@ -412,12 +378,12 @@ router.put("/changePassword", userMiddleware, /*#__PURE__*/function () {
           }
         case 12:
         case "end":
-          return _context7.stop();
+          return _context6.stop();
       }
-    }, _callee7);
+    }, _callee6);
   }));
-  return function (_x14, _x15) {
-    return _ref7.apply(this, arguments);
+  return function (_x12, _x13) {
+    return _ref6.apply(this, arguments);
   };
 }());
 router.get("/meslek", function (req, res) {
@@ -589,49 +555,49 @@ router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
   });
 });
 router.put("/NewAccessToken", /*#__PURE__*/function () {
-  var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(req, res) {
+  var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(req, res) {
     var con, id, refreshToken;
-    return _regenerator["default"].wrap(function _callee9$(_context9) {
-      while (1) switch (_context9.prev = _context9.next) {
+    return _regenerator["default"].wrap(function _callee8$(_context8) {
+      while (1) switch (_context8.prev = _context8.next) {
         case 0:
-          _context9.next = 2;
+          _context8.next = 2;
           return getDb.getConnection();
         case 2:
-          con = _context9.sent;
+          con = _context8.sent;
           // Bağlantıyı al
           id = req.body.id; // ID'yi query parametrelerinden al
           refreshToken = req.body.refreshToken; // Refresh token'ı query parametrelerinden al
           try {
             // Kullanıcının refresh token'ını kontrol et
             con.query("SELECT * FROM kullanici WHERE id = ?", [id], /*#__PURE__*/function () {
-              var _ref9 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(err, result) {
+              var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(err, result) {
                 var DbRefreshToken;
-                return _regenerator["default"].wrap(function _callee8$(_context8) {
-                  while (1) switch (_context8.prev = _context8.next) {
+                return _regenerator["default"].wrap(function _callee7$(_context7) {
+                  while (1) switch (_context7.prev = _context7.next) {
                     case 0:
                       if (!err) {
-                        _context8.next = 3;
+                        _context7.next = 3;
                         break;
                       }
                       console.error("Veritabanı sorgu hatası:", err);
-                      return _context8.abrupt("return", res.status(500).json({
+                      return _context7.abrupt("return", res.status(500).json({
                         message: "Veritabanı hatası"
                       }));
                     case 3:
                       if (!(result.length === 0)) {
-                        _context8.next = 5;
+                        _context7.next = 5;
                         break;
                       }
-                      return _context8.abrupt("return", res.status(404).json({
+                      return _context7.abrupt("return", res.status(404).json({
                         message: "Kullanıcı bulunamadı"
                       }));
                     case 5:
                       DbRefreshToken = result[0].refreshToken; // Refresh token'ı kontrol et 
                       if (!(!DbRefreshToken || DbRefreshToken !== refreshToken)) {
-                        _context8.next = 8;
+                        _context7.next = 8;
                         break;
                       }
-                      return _context8.abrupt("return", res.status(403).json({
+                      return _context7.abrupt("return", res.status(403).json({
                         message: "Geçersiz refresh token"
                       }));
                     case 8:
@@ -665,12 +631,12 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
                       });
                     case 9:
                     case "end":
-                      return _context8.stop();
+                      return _context7.stop();
                   }
-                }, _callee8);
+                }, _callee7);
               }));
-              return function (_x18, _x19) {
-                return _ref9.apply(this, arguments);
+              return function (_x16, _x17) {
+                return _ref8.apply(this, arguments);
               };
             }());
           } catch (error) {
@@ -681,12 +647,12 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
           }
         case 6:
         case "end":
-          return _context9.stop();
+          return _context8.stop();
       }
-    }, _callee9);
+    }, _callee8);
   }));
-  return function (_x16, _x17) {
-    return _ref8.apply(this, arguments);
+  return function (_x14, _x15) {
+    return _ref7.apply(this, arguments);
   };
 }());
 router.get("/Seviye", function (req, res) {

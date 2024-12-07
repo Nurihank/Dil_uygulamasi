@@ -70,7 +70,7 @@ router.post("/signup", async (req, res) => {
     }
 })
 
-router.get("/signin", async (req, res) => {
+router.post("/signin", async (req, res) => {
     var con = getDb.getConnection();
 
     const kullaniciAdi = req.query.kullaniciAdi;
@@ -90,13 +90,13 @@ router.get("/signin", async (req, res) => {
 
             const accessToken = jwt.sign({ id: user[0].id },
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: "30s" })
+                { expiresIn: "30m" })
 
             const refreshToken = jwt.sign({ id: user[0].id },
                 process.env.REFRESH_TOKEN_SECRET,
-                { expiresIn: "10m" })
-            con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE kullaniciAdi = ? ", [accessToken,refreshToken, kullaniciAdi])
-            res.json({ message: "Basarili bir sekilde giris yaptiniz", accessToken: accessToken,refreshToken : refreshToken, status: "SUCCES", id: user[0].id })
+                { expiresIn: "60m" })
+            con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE kullaniciAdi = ? ", [accessToken, refreshToken, kullaniciAdi])
+            res.json({ message: "Basarili bir sekilde giris yaptiniz", accessToken: accessToken, refreshToken: refreshToken, status: "SUCCES", id: user[0].id })
         } else {
             res.json({
                 status: "FAILED",
@@ -116,80 +116,51 @@ router.get("/signin", async (req, res) => {
 router.get("/forgetPasswordCode", async (req, res) => {
     var con = getDb.getConnection();
 
-    const kullaniciAdi = req.query.kullaniciAdi
     const email = req.query.email;
 
-    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
-    var userInfo = new getUserInfo(kullaniciAdi)
-
-    var isUserExist = await userInfo.userFind(kullaniciAdi)
-    var user = await userInfo.userInfo(kullaniciAdi)
-
-    if (kullaniciAdi == "" || email == "") {
-        res.json({
-            status: "FAILED"
-        })
-    } else {
-        if (isUserExist == true) {
-
-            con.query("SELECT * FROM kullanici WHERE kullaniciAdi = ?", kullaniciAdi, (err, result) => {
-                if (user[0].email == email) {
-
-                    async function codeUret(min, max) {
-                        var sayi = ""
-                        var sayi = Math.floor(Math.random() * (max - min)) + min
-                        return sayi
-                    }
-                    var code = "1000"
-                    var codeToken = md5(code)
-
-                    let transporter = nodemailer.createTransport({
-                        host: "smtp.gmail.com",
-                        port: 465,
-                        secure: true,
-                        auth: {
-                            user: 'kavalcinurihan@gmail.com',
-                            pass: 'lfxtfgzyiserimdn'
-                        },
-                        postman: res.json({
-                            message: "Code gönderildi"
-                        })
-                    })
-                    transporter.sendMail({
-                        from: '"You" <kavalcinurihan@gmail.com>',
-                        to: email,
-                        subject: "VERIFICATION CODE",
-                        html: code,
-                    })
-
-                    con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE kullaniciAdi= ? ", [codeToken, kullaniciAdi], (err) => {
-
-                        if (err) {
-
-                            throw err
-                        }
-
-                        else {
-
-                        }
-                    })
-                }
-                else {
-                    res.json({
-                        status: "FAILED",
-                        message: "Kullanici adi ve email eşleşmiyo"
-                    })
-                }
-            })
-        } else {
-            res.json({
-                status: "FAILED",
-                message: "Kullanici adi hatalidir"
-            })
-        }
+    if (!email) {
+        return res.json({
+            status: "FAILED",
+            message: "Email adresi gereklidir"
+        });
     }
 
+    function codeUret(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+    const code = codeUret(1000, 9999).toString(); // 4 haneli bir kod üretir
+    //var codeToken = md5(code)
+
+    let transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            user: 'kavalcinurihan@gmail.com',
+            pass: 'lfxtfgzyiserimdn'
+        },
+        postman: res.json({
+            message: "Code gönderildi"
+        })
+    })
+    await transporter.sendMail({
+        from: '"You" <kavalcinurihan@gmail.com>',
+        to: email,
+        subject: "ŞİFREMİ UNUTTUM KODU",
+        html: code,
+    })
+
+    con.query("UPDATE kullanici SET forgetPasswordToken = ? WHERE email= ? ", [code, email], (err) => {
+        if (err) {
+            throw err
+        }
+        res.json({
+            status: "SUCCESS",
+            message: "Şifre sıfırlama kodu email adresinize gönderildi",
+        });
+    })
 })
+
 
 router.put("/forgetPassword", async (req, res) => {
     var con = getDb.getConnection();
@@ -424,15 +395,15 @@ router.post("/NedenOgreniyor", (req, res) => {
     })
 })
 
-router.get("/Kullanici",(req,res)=>{
+router.get("/Kullanici", (req, res) => {
     var id = req.query.id
     if (!id) {
         return res.status(400).json({ error: "ID is required" });
     }
     var con = getDb.getConnection();
 
-    con.query("SELECT * FROM kullanici WHERE id = ?",[id],(err,result)=>{
-        if(err){
+    con.query("SELECT * FROM kullanici WHERE id = ?", [id], (err, result) => {
+        if (err) {
             throw err
         }
 
@@ -441,10 +412,10 @@ router.get("/Kullanici",(req,res)=>{
 
 })
 
-router.get("/KullaniciBilgileri",userMiddleware, function (req, res) {
+router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
 
     var id = req.query.id;
-    
+
     if (!id) {
         return res.status(400).json({ error: "ID is required" });
     }
@@ -467,10 +438,10 @@ router.get("/KullaniciBilgileri",userMiddleware, function (req, res) {
         if (err) {
 
             return res.status(500).json({ error: "Database query failed" });
-            
+
         }
         if (result.length === 0) {
-   
+
             return res.status(404).json({ error: "User not found" });
         }
 
@@ -485,7 +456,7 @@ router.get("/KullaniciBilgileri",userMiddleware, function (req, res) {
             if (result.length === 0) {
                 return res.status(404).json({ error: "Language not found" });
             }
-           
+
             user[0].dil = result[0].LocalName;
 
             con.query("SELECT LocalName FROM kullanici INNER JOIN dil ON kullanici.SectigiDilID = dil.DilID WHERE kullanici.id = ?", [id], function (err, result) {
@@ -548,44 +519,44 @@ router.put("/NewAccessToken", async (req, res) => {
     } catch (error) {
         console.error("Hata:", error);
         res.status(500).json({ message: "Sunucu hatası" });
-    } 
+    }
 });
 
 
 
 
-router.get("/Seviye",(req,res)=>{ //seviye sezon bölüm bunları order'ına göre sıralama yapsın
+router.get("/Seviye", (req, res) => { //seviye sezon bölüm bunları order'ına göre sıralama yapsın
     var con = getDb.getConnection()
 
-    con.query("SELECT * FROM seviye ORDER BY seviye.Order",(err,result)=>{
-        if(err){
+    con.query("SELECT * FROM seviye ORDER BY seviye.Order", (err, result) => {
+        if (err) {
             throw err;
         }
         res.json(result);
     })
 })
 
-router.get("/Sezon",(req,res)=>{  
-    const SeviyeID = req.query.SeviyeID 
+router.get("/Sezon", (req, res) => {
+    const SeviyeID = req.query.SeviyeID
     const HangiDilID = req.query.HangiDilID
     var con = getDb.getConnection();
 
-    con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ? ORDER BY sezon.Order;",[SeviyeID,HangiDilID],(err,result)=>{
-                if(err){
-                    throw err
-                }
+    con.query("SELECT ceviriler.Ceviri, SezonID ,sezon.Order FROM sezon INNER JOIN ceviriler ON sezon.CeviriID = ceviriler.CevirilerID where sezon.SeviyeID = ? AND ceviriler.HangiDilID = ? ORDER BY sezon.Order;", [SeviyeID, HangiDilID], (err, result) => {
+        if (err) {
+            throw err
+        }
 
-                res.json(result)
-            })
+        res.json(result)
+    })
 })
 
-router.get("/Bolum",(req,res)=>{
+router.get("/Bolum", (req, res) => {
     const SezonID = req.query.SezonID
     const HangiDilID = req.query.HangiDilID
     var con = getDb.getConnection();
 
-    con.query("SELECT BolumID, ceviriler.Ceviri,bolum.Order  FROM bolum INNER JOIN ceviriler ON bolum.CeviriID = ceviriler.CevirilerID WHERE bolum.SezonID = ? AND ceviriler.HangiDilID = ? ORDER BY bolum.Order;",[SezonID,HangiDilID],(err,result)=>{
-        if(err){
+    con.query("SELECT BolumID, ceviriler.Ceviri,bolum.Order  FROM bolum INNER JOIN ceviriler ON bolum.CeviriID = ceviriler.CevirilerID WHERE bolum.SezonID = ? AND ceviriler.HangiDilID = ? ORDER BY bolum.Order;", [SezonID, HangiDilID], (err, result) => {
+        if (err) {
             throw err
         }
 
@@ -593,13 +564,13 @@ router.get("/Bolum",(req,res)=>{
     })
 })
 
-router.get("/Oyun",(req,res)=>{
+router.get("/Oyun", (req, res) => {
     const BolumID = req.query.BolumID
 
     var con = getDb.getConnection();
 
-    con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1",[BolumID],(err,result)=>{
-        if(err){
+    con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1", [BolumID], (err, result) => {
+        if (err) {
             throw err
         }
 
@@ -607,18 +578,18 @@ router.get("/Oyun",(req,res)=>{
     })
 })
 
-router.get("/Egitim",(req,res)=>{  //eğitimde bir de kullanıcının meslek diline göre diline göre getirmeyi de kontoırl et
+router.get("/Egitim", (req, res) => {  //eğitimde bir de kullanıcının meslek diline göre diline göre getirmeyi de kontoırl et
     const SeviyeID = req.query.SeviyeID
 
     var con = getDb.getConnection();
 
-    con.query(" SELECT ak.AnaKelimelerID , ak.Value , c.Ceviri FROM anakelimeler ak JOIN bolum b ON ak.BolumID = b.BolumID JOIN sezon s ON b.SezonID = s.SezonID JOIN ceviriler c ON ak.AnaKelimelerID = c.AnakelimeID WHERE ak.test = 1 AND s.SeviyeID = ?",[SeviyeID],(err,result)=>{
-        if(err){
+    con.query(" SELECT ak.AnaKelimelerID , ak.Value , c.Ceviri FROM anakelimeler ak JOIN bolum b ON ak.BolumID = b.BolumID JOIN sezon s ON b.SezonID = s.SezonID JOIN ceviriler c ON ak.AnaKelimelerID = c.AnakelimeID WHERE ak.test = 1 AND s.SeviyeID = ?", [SeviyeID], (err, result) => {
+        if (err) {
             throw err
         }
 
         res.json(result)
-    })  
+    })
 })
 router.post("/SozlugeKelimeEkleme", (req, res) => {
     var con = getDb.getConnection()
@@ -628,10 +599,10 @@ router.post("/SozlugeKelimeEkleme", (req, res) => {
 
     con.query("SELECT COUNT(*) AS count FROM sozluk WHERE kullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, AnaKelimeID], (err, result) => {
         if (err) throw err;
-    
+
         // 'count' sütun adıyla sonuç al
         const count = result[0].count;
-    
+
         if (count > 0) {
             res.json({ message: "Bu Kelime Zaten Sözlüğünde Var" });
         } else {
@@ -641,7 +612,7 @@ router.post("/SozlugeKelimeEkleme", (req, res) => {
             });
         }
     });
-    
+
 })
 
 router.delete("/SozluktenKelimeSilme", (req, res) => {
@@ -664,15 +635,15 @@ router.delete("/SozluktenKelimeSilme", (req, res) => {
     });
 });
 
-router.get("/SozluguGetir",(req,res)=>{
+router.get("/SozluguGetir", (req, res) => {
     var con = getDb.getConnection()
 
     const KullaniciID = req.query.KullaniciID
 
-    con.query("SELECT sozluk.SozlukID,anakelimeler.AnaKelimelerID, anakelimeler.Value,ceviriler.Ceviri FROM sozluk INNER JOIN anakelimeler ON sozluk.AnaKelimeID = anakelimeler.AnaKelimelerID INNER JOIN ceviriler ON ceviriler.AnaKelimeID = anakelimeler.AnaKelimelerID WHERE sozluk.KullaniciID = ?",[KullaniciID],(err,result)=>{
-        if(err) throw err
+    con.query("SELECT sozluk.SozlukID,anakelimeler.AnaKelimelerID, anakelimeler.Value,ceviriler.Ceviri FROM sozluk INNER JOIN anakelimeler ON sozluk.AnaKelimeID = anakelimeler.AnaKelimelerID INNER JOIN ceviriler ON ceviriler.AnaKelimeID = anakelimeler.AnaKelimelerID WHERE sozluk.KullaniciID = ?", [KullaniciID], (err, result) => {
+        if (err) throw err
 
-        res.json({message:result})
+        res.json({ message: result })
     })
 })
 router.get("/SozlugeEkliMi", (req, res) => {
@@ -680,13 +651,13 @@ router.get("/SozlugeEkliMi", (req, res) => {
 
     const KullaniciID = req.query.KullaniciID
     const KelimeID = req.query.KelimeID
-    con.query("SELECT COUNT(*) AS count FROM sozluk WHERE KullaniciID = ? AND AnaKelimeID = ?", [KullaniciID,KelimeID], (err, result) => {
+    con.query("SELECT COUNT(*) AS count FROM sozluk WHERE KullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, KelimeID], (err, result) => {
         const count = result[0].count;
         if (err) throw err
 
-        if(count > 0){
+        if (count > 0) {
             res.json(true)
-        }else{
+        } else {
             res.json(false)
         }
     })
@@ -697,31 +668,31 @@ router.post("/GecilenBolumlerEkle", function (req, res) {
     var KullaniciID = req.body.KullaniciID;
     var BolumID = req.body.BolumID;
     con.query("SELECT COUNT(*) AS count FROM gecilenbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
-        if(result[0].count > 0){
-        res.json({
-          message: "failed"
-        });
-      }else{
-        con.query("INSERT INTO gecilenbolumler (KullaniciID,BolumID) VALUES (?,?)", [KullaniciID, BolumID], function (err, result) {
-          if (err) throw err;
-          res.json({
-            message: "succes"
-          });
-        });
-      }
+        if (result[0].count > 0) {
+            res.json({
+                message: "failed"
+            });
+        } else {
+            con.query("INSERT INTO gecilenbolumler (KullaniciID,BolumID) VALUES (?,?)", [KullaniciID, BolumID], function (err, result) {
+                if (err) throw err;
+                res.json({
+                    message: "succes"
+                });
+            });
+        }
     });
-  });
+});
 
-  router.get("/GecilenBolumler",(req,res)=>{
+router.get("/GecilenBolumler", (req, res) => {
     var con = getDb.getConnection()
 
     const KullaniciID = req.query.KullaniciID
     const SezonID = req.query.SezonID
 
-    con.query("SELECT * FROM bolum INNER JOIN gecilenbolumler ON bolum.BolumID = gecilenbolumler.BolumID WHERE bolum.SezonID = ? AND gecilenbolumler.KullaniciID = ? ORDER BY bolum.Order",[SezonID,KullaniciID],(err,result)=>{
-        if(err) throw err;
+    con.query("SELECT * FROM bolum INNER JOIN gecilenbolumler ON bolum.BolumID = gecilenbolumler.BolumID WHERE bolum.SezonID = ? AND gecilenbolumler.KullaniciID = ? ORDER BY bolum.Order", [SezonID, KullaniciID], (err, result) => {
+        if (err) throw err;
 
-        res.json({message:result})
+        res.json({ message: result })
     })
 })
 
@@ -730,31 +701,31 @@ router.post("/GecilenSezonEkle", function (req, res) {
     var KullaniciID = req.body.KullaniciID;
     var SezonID = req.body.SezonID;
     con.query("SELECT COUNT(*) AS count FROM gecilensezonlar WHERE KullaniciID=? AND SezonID=?", [KullaniciID, SezonID], function (err, result) {
-      if(result[0].count > 0){
-        res.json({
-          message: "failed"
-        });
-      }else{
-        con.query("INSERT INTO gecilensezonlar (KullaniciID,SezonID) VALUES (?,?)", [KullaniciID, SezonID], function (err, result) {
-          if (err) throw err;
-          res.json({
-            message: "succes"
-          });
-        });
-      }
+        if (result[0].count > 0) {
+            res.json({
+                message: "failed"
+            });
+        } else {
+            con.query("INSERT INTO gecilensezonlar (KullaniciID,SezonID) VALUES (?,?)", [KullaniciID, SezonID], function (err, result) {
+                if (err) throw err;
+                res.json({
+                    message: "succes"
+                });
+            });
+        }
     });
-  });
+});
 
-router.get("/GecilenSezonlar",(req,res)=>{
+router.get("/GecilenSezonlar", (req, res) => {
     var con = getDb.getConnection()
 
     const KullaniciID = req.query.KullaniciID
     const SeviyeID = req.query.SeviyeID
 
-    con.query("SELECT * FROM gecilensezonlar INNER JOIN sezon ON gecilensezonlar.SezonID = sezon.SezonID WHERE sezon.SeviyeID = ? AND gecilensezonlar.KullaniciID = ?",[SeviyeID,KullaniciID],(err,result)=>{
-        if(err) throw err;
+    con.query("SELECT * FROM gecilensezonlar INNER JOIN sezon ON gecilensezonlar.SezonID = sezon.SezonID WHERE sezon.SeviyeID = ? AND gecilensezonlar.KullaniciID = ?", [SeviyeID, KullaniciID], (err, result) => {
+        if (err) throw err;
 
-        res.json({message:result})
+        res.json({ message: result })
     })
 })
 router.get("/SezonBittiMiKontrol", (req, res) => {
@@ -794,17 +765,17 @@ router.post("/GunlukGiris", function (req, res) {
     var KullaniciID = req.body.KullaniciID;
     var Date = req.body.Date;
 
-    con.query("SELECT COUNT(*) as count FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID,Date],(err,result)=>{
+    con.query("SELECT COUNT(*) as count FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Date], (err, result) => {
         if (err) {
             console.error("Hata:", err);
             return res.status(500).json({ error: "Veritabanı hatası." });
         }
 
-        if(result[0].count > 0){
+        if (result[0].count > 0) {
             res.json(false)
         }
-        else{
-            con.query("INSERT INTO gunlukgiris (KullaniciID,Tarih) VALUES (?,?)", [KullaniciID,Date], function (err, result) {
+        else {
+            con.query("INSERT INTO gunlukgiris (KullaniciID,Tarih) VALUES (?,?)", [KullaniciID, Date], function (err, result) {
                 if (err) {
                     console.error("Hata:", err);
                     return res.status(500).json({ error: "Veritabanı hatası." });
@@ -813,20 +784,20 @@ router.post("/GunlukGiris", function (req, res) {
                 return res.json(true);  // Yeni giriş başarılı
             });
         }
-    })  
+    })
 });
 router.get("/GunlukGiris", function (req, res) {
     var con = getDb.getConnection();
     var KullaniciID = req.query.KullaniciID;
 
     console.log(KullaniciID)
-    con.query("SELECT * FROM gunlukgiris WHERE KullaniciID = ?", [KullaniciID],(err,result)=>{
+    con.query("SELECT * FROM gunlukgiris WHERE KullaniciID = ?", [KullaniciID], (err, result) => {
         if (err) {
             console.error("Hata:", err);
             return res.status(500).json({ error: "Veritabanı hatası." });
         }
-        res.json({message:result})
-    })  
+        res.json({ message: result })
+    })
 });
 router.post("/GunlukSozlugeGiris", function (req, res) {
     var con = getDb.getConnection();
@@ -834,21 +805,21 @@ router.post("/GunlukSozlugeGiris", function (req, res) {
     var Date = req.body.Date;
     var SozlugeGiris = req.body.SozlugeGiris;
 
-    con.query("SELECT COUNT(*) as count FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID,Date],(err,result)=>{
+    con.query("SELECT COUNT(*) as count FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Date], (err, result) => {
         if (err) {
             return res.status(500).json({ error: "Veritabanı hatası burda." });
         }
-        if(result[0].count > 0){
-            con.query("UPDATE gunlukgiris SET SozlukGiris = ? WHERE KullaniciID = ? AND Tarih = ?", [SozlugeGiris,KullaniciID,Date], function (err, result) {
+        if (result[0].count > 0) {
+            con.query("UPDATE gunlukgiris SET SozlukGiris = ? WHERE KullaniciID = ? AND Tarih = ?", [SozlugeGiris, KullaniciID, Date], function (err, result) {
                 if (err) {
                     return res.status(500).json({ error: "Veritabanı hatası. şurda" });
                 }
-                return res.json(true);  
+                return res.json(true);
             });
         }
-        else{
+        else {
             res.json(false)
         }
-    })  
+    })
 });
 module.exports = router
