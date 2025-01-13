@@ -73,8 +73,8 @@ router.post("/signup", async (req, res) => {
 router.post("/signin", async (req, res) => {
     var con = getDb.getConnection();
 
-    const kullaniciAdi = req.query.kullaniciAdi;
-    const sifre = req.query.sifre
+    const kullaniciAdi = req.body.kullaniciAdi;
+    const sifre = req.body.sifre
     //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
     var passwordToken = md5(sifre)
 

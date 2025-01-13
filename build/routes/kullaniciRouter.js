@@ -105,8 +105,8 @@ router.post("/signin", /*#__PURE__*/function () {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           con = getDb.getConnection();
-          kullaniciAdi = req.query.kullaniciAdi;
-          sifre = req.query.sifre; //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
+          kullaniciAdi = req.body.kullaniciAdi;
+          sifre = req.body.sifre; //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
           passwordToken = (0, _md["default"])(sifre);
           getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
           userInfo = new getUserInfo(kullaniciAdi);
