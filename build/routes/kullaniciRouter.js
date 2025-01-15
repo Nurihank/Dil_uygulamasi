@@ -687,10 +687,12 @@ router.get("/Bolum", function (req, res) {
     res.json(result);
   });
 });
+
+//oyunun düzlet
 router.get("/Oyun", function (req, res) {
   var BolumID = req.query.BolumID;
   var con = getDb.getConnection();
-  con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1", [BolumID], function (err, result) {
+  con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1 ", [BolumID], function (err, result) {
     if (err) {
       throw err;
     }
@@ -946,6 +948,47 @@ router.post("/GunlukSozlugeGiris", function (req, res) {
     } else {
       res.json(false);
     }
+  });
+});
+router.get("/temelKategoriler", function (req, res) {
+  var con = getDb.getConnection();
+  var AnaDilID = req.query.AnaDilID;
+  var HangiDilID = req.query.HangiDilID;
+  con.query("SELECT id,Ceviri FROM temelkategoriceviri WHERE AnaDilID = ? and HangiDilID = ?", [AnaDilID, HangiDilID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    return res.json({
+      message: result
+    });
+  });
+});
+router.get("/temelBolumler", function (req, res) {
+  var con = getDb.getConnection();
+  var AnaDilID = req.query.AnaDilID;
+  var HangiDilID = req.query.HangiDilID;
+  var KategoriID = req.query.KategoriID;
+  con.query("SELECT tb.id,tb.value,tbc.ceviri FROM temelbolumler tb INNER JOIN temelbolumlerceviri tbc ON tb.id = tbc.KelimeID WHERE tbc.AnaDilID =? and tbc.HangiDilID = ? and tb.KategoriID = ?", [AnaDilID, HangiDilID, KategoriID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    return res.json({
+      message: result
+    });
+  });
+});
+router.get("/temelKelimeler", function (req, res) {
+  var con = getDb.getConnection();
+  var AnaDilID = req.query.AnaDilID;
+  var HangiDilID = req.query.HangiDilID;
+  var BolumID = req.query.BolumID;
+  con.query("SELECT tk.id,tk.value,tkc.ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ? AND tk.BolumID = ? ", [AnaDilID, HangiDilID, BolumID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    return res.json({
+      message: result
+    });
   });
 });
 module.exports = router;

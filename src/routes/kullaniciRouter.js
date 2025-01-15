@@ -563,13 +563,14 @@ router.get("/Bolum", (req, res) => {
         res.json(result)
     })
 })
-
+ 
+//oyunun düzlet
 router.get("/Oyun", (req, res) => {
     const BolumID = req.query.BolumID
 
     var con = getDb.getConnection();
 
-    con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1", [BolumID], (err, result) => {
+    con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1 ", [BolumID], (err, result) => {
         if (err) {
             throw err
         }
@@ -822,4 +823,42 @@ router.post("/GunlukSozlugeGiris", function (req, res) {
         }
     })
 });
+
+router.get("/temelKategoriler", (req, res) => {
+    var con = getDb.getConnection();
+    var AnaDilID = req.query.AnaDilID
+    var HangiDilID = req.query.HangiDilID
+
+    con.query("SELECT id,Ceviri FROM temelkategoriceviri WHERE AnaDilID = ? and HangiDilID = ?", [AnaDilID, HangiDilID], (err, result) => {
+        if (err) { throw err }
+
+        return res.json({ message: result })
+    })
+})
+router.get("/temelBolumler", (req, res) => {
+    var con = getDb.getConnection();
+    var AnaDilID = req.query.AnaDilID
+    var HangiDilID = req.query.HangiDilID
+    var KategoriID = req.query.KategoriID
+
+    con.query("SELECT tb.id,tb.value,tbc.ceviri FROM temelbolumler tb INNER JOIN temelbolumlerceviri tbc ON tb.id = tbc.KelimeID WHERE tbc.AnaDilID =? and tbc.HangiDilID = ? and tb.KategoriID = ?", [AnaDilID, HangiDilID, KategoriID], (err, result) => {
+        if (err) { throw err }
+
+        return res.json({ message: result })
+    })
+})
+
+
+router.get("/temelKelimeler", (req, res) => {
+    var con = getDb.getConnection();
+    var AnaDilID = req.query.AnaDilID
+    var HangiDilID = req.query.HangiDilID
+    var BolumID = req.query.BolumID
+
+    con.query("SELECT tk.id,tk.value,tkc.ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ? AND tk.BolumID = ? ", [AnaDilID, HangiDilID, BolumID], (err, result) => {
+        if (err) { throw err }
+
+        return res.json({ message: result })
+    })
+})
 module.exports = router
