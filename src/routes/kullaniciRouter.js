@@ -4,6 +4,7 @@ const userMiddleware = require("../middlewares/user")
 import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
+import { count } from "console";
 
 
 var userModel = require("../model/userModel")
@@ -563,7 +564,7 @@ router.get("/Bolum", (req, res) => {
         res.json(result)
     })
 })
- 
+
 //oyunun düzlet
 router.get("/Oyun", (req, res) => {
     const BolumID = req.query.BolumID
@@ -841,7 +842,7 @@ router.get("/temelBolumler", (req, res) => {
     var HangiDilID = req.query.HangiDilID
     var KategoriID = req.query.KategoriID
 
-    con.query("SELECT tb.id,tb.value,tbc.ceviri FROM temelbolumler tb INNER JOIN temelbolumlerceviri tbc ON tb.id = tbc.KelimeID WHERE tbc.AnaDilID =? and tbc.HangiDilID = ? and tb.KategoriID = ?", [AnaDilID, HangiDilID, KategoriID], (err, result) => {
+    con.query("SELECT tb.id,tb.value,tbc.ceviri,tb.Order,tb.Image FROM temelbolumler tb INNER JOIN temelbolumlerceviri tbc ON tb.id = tbc.KelimeID WHERE tbc.AnaDilID =? and tbc.HangiDilID = ? and tb.KategoriID = ?", [AnaDilID, HangiDilID, KategoriID], (err, result) => {
         if (err) { throw err }
 
         return res.json({ message: result })
@@ -855,10 +856,44 @@ router.get("/temelKelimeler", (req, res) => {
     var HangiDilID = req.query.HangiDilID
     var BolumID = req.query.BolumID
 
-    con.query("SELECT tk.id,tk.value,tkc.ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ? AND tk.BolumID = ? ", [AnaDilID, HangiDilID, BolumID], (err, result) => {
+    con.query("SELECT tk.id,tk.value,tkc.ceviri,tk.Image FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ? AND tk.BolumID = ? ", [AnaDilID, HangiDilID, BolumID], (err, result) => {
         if (err) { throw err }
 
         return res.json({ message: result })
     })
+})
+
+router.post("/temelGecilenBolumEkle", (req, res) => {
+    var con = getDb.getConnection()
+
+    var KullaniciID = req.body.KullaniciID
+    var BolumID = req.body.BolumID
+    var KategoriID = req.body.KategoriID
+
+    con.query("SELECT COUNT(*) as count FROM gecilentemelbolumler WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ?", [KullaniciID, BolumID, KategoriID], (err, result) => {
+        if (err) { throw err }
+
+        if (result[0].count != 0) {
+            res.json({ message: "failed" })
+
+        } else {
+            con.query("INSERT INTO gecilentemelbolumler (GecilenBolumID,KategoriID,KullaniciID) values(?,?,?)", [BolumID, KategoriID,KullaniciID], (err, result) => {
+                if (err) { throw err }
+                res.json({ message: "succes" })
+            })
+        }   
+    })
+})
+
+router.get("/temelGecilenBolum",(req,res)=>{
+    var con = getDb.getConnection()
+    var KullaniciID = req.query.KullaniciID
+
+    con.query("SELECT gtb.GecilenBolumID,tb.KategoriID,gtb.KullaniciID,tb.Order FROM gecilentemelbolumler gtb INNER JOIN temelbolumler tb ON gtb.GecilenBolumID = tb.id WHERE KullaniciID = ?",[KullaniciID],(err,result)=>{
+        if(err) throw err
+
+        res.json({message:result})
+    })
+
 })
 module.exports = router

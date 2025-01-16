@@ -7,6 +7,7 @@ var _util = _interopRequireDefault(require("util"));
 var _md = _interopRequireDefault(require("md5"));
 var _nodemailer = _interopRequireDefault(require("nodemailer"));
 var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
+var _console = require("console");
 var router = require("express").Router(); //routerları export etmek için   
 
 var userMiddleware = require("../middlewares/user");
@@ -968,7 +969,7 @@ router.get("/temelBolumler", function (req, res) {
   var AnaDilID = req.query.AnaDilID;
   var HangiDilID = req.query.HangiDilID;
   var KategoriID = req.query.KategoriID;
-  con.query("SELECT tb.id,tb.value,tbc.ceviri FROM temelbolumler tb INNER JOIN temelbolumlerceviri tbc ON tb.id = tbc.KelimeID WHERE tbc.AnaDilID =? and tbc.HangiDilID = ? and tb.KategoriID = ?", [AnaDilID, HangiDilID, KategoriID], function (err, result) {
+  con.query("SELECT tb.id,tb.value,tbc.ceviri,tb.Order,tb.Image FROM temelbolumler tb INNER JOIN temelbolumlerceviri tbc ON tb.id = tbc.KelimeID WHERE tbc.AnaDilID =? and tbc.HangiDilID = ? and tb.KategoriID = ?", [AnaDilID, HangiDilID, KategoriID], function (err, result) {
     if (err) {
       throw err;
     }
@@ -982,11 +983,46 @@ router.get("/temelKelimeler", function (req, res) {
   var AnaDilID = req.query.AnaDilID;
   var HangiDilID = req.query.HangiDilID;
   var BolumID = req.query.BolumID;
-  con.query("SELECT tk.id,tk.value,tkc.ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ? AND tk.BolumID = ? ", [AnaDilID, HangiDilID, BolumID], function (err, result) {
+  con.query("SELECT tk.id,tk.value,tkc.ceviri,tk.Image FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ? AND tk.BolumID = ? ", [AnaDilID, HangiDilID, BolumID], function (err, result) {
     if (err) {
       throw err;
     }
     return res.json({
+      message: result
+    });
+  });
+});
+router.post("/temelGecilenBolumEkle", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var BolumID = req.body.BolumID;
+  var KategoriID = req.body.KategoriID;
+  con.query("SELECT COUNT(*) as count FROM gecilentemelbolumler WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ?", [KullaniciID, BolumID, KategoriID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    if (result[0].count != 0) {
+      res.json({
+        message: "failed"
+      });
+    } else {
+      con.query("INSERT INTO gecilentemelbolumler (GecilenBolumID,KategoriID,KullaniciID) values(?,?,?)", [BolumID, KategoriID, KullaniciID], function (err, result) {
+        if (err) {
+          throw err;
+        }
+        res.json({
+          message: "succes"
+        });
+      });
+    }
+  });
+});
+router.get("/temelGecilenBolum", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  con.query("SELECT gtb.GecilenBolumID,tb.KategoriID,gtb.KullaniciID,tb.Order FROM gecilentemelbolumler gtb INNER JOIN temelbolumler tb ON gtb.GecilenBolumID = tb.id WHERE KullaniciID = ?", [KullaniciID], function (err, result) {
+    if (err) throw err;
+    res.json({
       message: result
     });
   });
