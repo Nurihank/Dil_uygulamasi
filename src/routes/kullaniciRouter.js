@@ -593,6 +593,7 @@ router.get("/Egitim", (req, res) => {  //eğitimde bir de kullanıcının meslek
         res.json(result)
     })
 })
+
 router.post("/SozlugeKelimeEkleme", (req, res) => {
     var con = getDb.getConnection()
 
@@ -896,4 +897,63 @@ router.get("/temelGecilenBolum",(req,res)=>{
     })
 
 })
+
+router.post("/temelSozluk",(req,res)=>{
+    var con = getDb.getConnection()
+
+    var KullaniciID = req.body.KullaniciID
+    var KelimeID = req.body.KelimeID
+
+    con.query("SELECT COUNT(*) AS count FROM temelkelimelersozluk WHERE KelimeID = ? AND KullaniciID = ?",[KelimeID,KullaniciID],(err,result)=>{
+        if(err){throw err}
+
+        console.log(result[0].count)
+
+        if( result[0].count == 0){
+            con.query("INSERT INTO temelkelimelersozluk (KelimeID,KullaniciID) values(?,?)",[KelimeID,KullaniciID],(err,result)=>{
+                if(err){throw err}
+        
+                res.json({message:"Sözlüğe Eklendi"})
+            })
+        }else{
+            res.json({message:"Zaten Sözlüğe Eklenmiş"})
+
+        }
+    })
+   
+})
+
+router.get("/temelSozluk",(req,res)=>{
+    var con = getDb.getConnection()
+
+    var KullaniciID = req.query.KullaniciID
+
+    con.query("SELECT tk.id,tk.value,tkc.Ceviri,tk.Image FROM temelkelimelersozluk tks INNER JOIN temelkelimeler tk ON tks.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tkc.KelimeID = tk.id WHERE tks.KullaniciID = ?",[KullaniciID],(err,result)=>{
+        if(err) {throw err}
+
+        console.log(result)
+        res.json({message:result})
+    })
+})
+
+router.delete("/temelSozluk", (req, res) => {
+    var con = getDb.getConnection();
+
+    const KullaniciID = req.query.KullaniciID;
+    const KelimeID = req.query.KelimeID;
+
+    con.query("DELETE FROM temelkelimelersozluk WHERE KullaniciID = ? AND KelimeID = ?", [KullaniciID, KelimeID], (err, result) => {
+        if (err) {
+            throw err;
+        }
+
+        // Silme işleminin başarılı olup olmadığını kontrol et
+        if (result.affectedRows > 0) {
+            res.json({ message: "Başarıyla Silindi" });
+        } else {
+            res.status(404).json({ message: "Silinecek kayıt bulunamadı" });
+        }
+    });
+});
+
 module.exports = router
