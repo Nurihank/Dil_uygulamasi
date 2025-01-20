@@ -7,7 +7,6 @@ var _util = _interopRequireDefault(require("util"));
 var _md = _interopRequireDefault(require("md5"));
 var _nodemailer = _interopRequireDefault(require("nodemailer"));
 var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
-var _console = require("console");
 var router = require("express").Router(); //routerları export etmek için   
 
 var userMiddleware = require("../middlewares/user");
@@ -48,52 +47,59 @@ function _userEmail() {
 }
 router.post("/signup", /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(req, res) {
-    var con, kullaniciAdi, sifre, email, getUserInfo, userInfo, isUserExist, isEmailExist, passwordToken;
+    var con, kullaniciAdi, eposta, sifre, getUserInfo, userInfo, isUserExist, isEmailExist, passwordToken;
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
           con = getDb.getConnection();
           kullaniciAdi = req.body.kullaniciAdi;
+          eposta = req.body.eposta;
           sifre = req.body.sifre;
-          email = req.body.email; //react nativeden post isteği gönderirken direkt gönderirsen body ile alabilirsin 
-          //ama ör:mahir { } ile gönderirsen req.body.mahir.kullaniciAdi ile erişirsin
-          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+          console.log(eposta);
+          getUserInfo = userModel.user;
           userInfo = new getUserInfo(kullaniciAdi);
-          _context.next = 8;
+          _context.prev = 7;
+          _context.next = 10;
           return userInfo.userFind(kullaniciAdi);
-        case 8:
+        case 10:
           isUserExist = _context.sent;
-          _context.next = 11;
-          return userEmail(email);
-        case 11:
+          _context.next = 13;
+          return userEmail(eposta);
+        case 13:
           isEmailExist = _context.sent;
-          passwordToken = (0, _md["default"])(sifre);
-          if (isUserExist == false) {
-            if (isEmailExist == false) {
-              con.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)", [kullaniciAdi, passwordToken, email], function (err) {
-                if (err) throw err;
-                res.json({
-                  status: "SUCCES",
-                  message: "Başarili bir şekilde kayit oldun"
-                });
-              });
-            } else {
-              res.json({
-                status: "FAILED",
-                message: "Böyle bir e posta vardir"
-              });
-            }
-          } else {
-            res.json({
-              status: "FAILED",
-              message: "Böyle bir kullanici adi vardir"
-            });
+          console.log(isUserExist);
+          console.log(isEmailExist);
+          if (isUserExist && isEmailExist) {
+            _context.next = 18;
+            break;
           }
-        case 14:
+          return _context.abrupt("return", res.status(400).json({
+            status: "FAILED",
+            message: "Girdiğiniz bilgilerle kayıt oluşturulamıyor."
+          }));
+        case 18:
+          passwordToken = (0, _md["default"])(sifre);
+          con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], function (err) {
+            if (err) throw err;
+            res.json({
+              status: "SUCCESS",
+              message: "Başarılı bir şekilde kayıt oldunuz."
+            });
+          });
+          _context.next = 25;
+          break;
+        case 22:
+          _context.prev = 22;
+          _context.t0 = _context["catch"](7);
+          res.status(500).json({
+            status: "ERROR",
+            message: "Bir hata oluştu."
+          });
+        case 25:
         case "end":
           return _context.stop();
       }
-    }, _callee);
+    }, _callee, null, [[7, 22]]);
   }));
   return function (_x2, _x3) {
     return _ref.apply(this, arguments);
@@ -101,57 +107,58 @@ router.post("/signup", /*#__PURE__*/function () {
 }());
 router.post("/signin", /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
-    var con, kullaniciAdi, sifre, passwordToken, getUserInfo, userInfo, isUserExist, user, accessToken, refreshToken;
+    var con, eposta, sifre, passwordToken;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           con = getDb.getConnection();
-          kullaniciAdi = req.body.kullaniciAdi;
+          eposta = req.body.eposta;
           sifre = req.body.sifre; //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
           passwordToken = (0, _md["default"])(sifre);
-          getUserInfo = userModel.user; //user modelden import ediyoruz ve ordan fonk çağrıyoruz
-          userInfo = new getUserInfo(kullaniciAdi);
-          _context2.next = 8;
-          return userInfo.userFind(kullaniciAdi);
-        case 8:
-          isUserExist = _context2.sent;
-          _context2.next = 11;
-          return userInfo.userInfo(kullaniciAdi);
-        case 11:
-          user = _context2.sent;
-          if (isUserExist == true) {
-            if (passwordToken == user[0].şifre) {
-              accessToken = _jsonwebtoken["default"].sign({
-                id: user[0].id
-              }, process.env.ACCESS_TOKEN_SECRET, {
-                expiresIn: "30m"
-              });
-              refreshToken = _jsonwebtoken["default"].sign({
-                id: user[0].id
-              }, process.env.REFRESH_TOKEN_SECRET, {
-                expiresIn: "60m"
-              });
-              con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE kullaniciAdi = ? ", [accessToken, refreshToken, kullaniciAdi]);
-              res.json({
-                message: "Basarili bir sekilde giris yaptiniz",
-                accessToken: accessToken,
-                refreshToken: refreshToken,
-                status: "SUCCES",
-                id: user[0].id
-              });
-            } else {
-              res.json({
-                status: "FAILED",
-                message: "Kullanici adi ve ya şifre hatalidir"
-              });
-            }
+          if (eposta && sifre) {
+            // Kullanıcıyı kontrol eden SELECT sorgusu
+            con.query("SELECT * FROM kullanici WHERE email = ? AND şifre = ?", [eposta, passwordToken], function (err, result) {
+              if (err) {
+                res.status(500).json({
+                  status: "FAILED",
+                  message: "Sunucu hatası meydana geldi"
+                });
+              } else if (result.length > 0) {
+                /* kullanıcı giriş yaptı */
+                var accessToken = _jsonwebtoken["default"].sign({
+                  id: result[0].id
+                }, process.env.ACCESS_TOKEN_SECRET, {
+                  expiresIn: "30m"
+                });
+                var refreshToken = _jsonwebtoken["default"].sign({
+                  id: result[0].id
+                }, process.env.REFRESH_TOKEN_SECRET, {
+                  expiresIn: "60m"
+                });
+                con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE id = ? ", [accessToken, refreshToken, result[0].id]);
+                res.json({
+                  message: "Basarili bir sekilde giris yaptiniz",
+                  accessToken: accessToken,
+                  refreshToken: refreshToken,
+                  status: "SUCCES",
+                  id: result[0].id
+                });
+              } else {
+                // Kullanıcı bulunamadı
+                res.json({
+                  status: "FAILED",
+                  message: "E-posta veya şifre hatalı"
+                });
+              }
+            });
           } else {
-            res.send({
+            // E-posta veya şifre eksik
+            res.json({
               status: "FAILED",
-              message: "Kullanici adi ve ya şifre hatalidir"
+              message: "E-posta ve şifre gerekli"
             });
           }
-        case 13:
+        case 5:
         case "end":
           return _context2.stop();
       }
@@ -474,22 +481,9 @@ router.post("/NedenOgreniyor", function (req, res) {
     });
   });
 });
-router.get("/Kullanici", function (req, res) {
-  var id = req.query.id;
-  if (!id) {
-    return res.status(400).json({
-      error: "ID is required"
-    });
-  }
-  var con = getDb.getConnection();
-  con.query("SELECT * FROM kullanici WHERE id = ?", [id], function (err, result) {
-    if (err) {
-      throw err;
-    }
-    res.json(result);
-  });
-});
 router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
+  /* bu apiyi sor */
+
   var id = req.query.id;
   if (!id) {
     return res.status(400).json({
@@ -625,6 +619,7 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
                               message: "Veritabanı hatası"
                             });
                           }
+                          console.log("Yeni accestoken oluşturuldu");
                           res.json({
                             accessToken: accessToken
                           });
@@ -689,7 +684,7 @@ router.get("/Bolum", function (req, res) {
   });
 });
 
-//oyunun düzlet
+//oyunun sorgusunu düzlet
 router.get("/Oyun", function (req, res) {
   var BolumID = req.query.BolumID;
   var con = getDb.getConnection();
@@ -1085,5 +1080,89 @@ router["delete"]("/temelSozluk", function (req, res) {
       });
     }
   });
+});
+router.get("/temelIlerleme", function (req, res) {
+  var con = getDb.getConnection();
+  var id = req.query.id;
+  con.query("SELECT COUNT(*) AS count FROM temelBolumler", function (err, result) {
+    if (err) {
+      throw err;
+    }
+    var bolumSayisi = result[0].count;
+    con.query("SELECT COUNT(*) AS count FROM gecilentemelbolumler WHERE KullaniciID = ?", [id], function (err, results) {
+      if (err) {
+        throw err;
+      }
+      var gecilenBolumSayisi = results[0].count;
+      res.json({
+        bolumSayisi: bolumSayisi,
+        gecilenBolumSayisi: gecilenBolumSayisi
+      });
+    });
+  });
+});
+router.get("/egzersiz", function (req, res) {
+  var con = getDb.getConnection();
+  con.query("SELECT * FROM egzersiz", function (err, result) {
+    if (err) {
+      throw err;
+    }
+    res.json({
+      message: result
+    });
+  });
+});
+router.post("/yanlisBilinenKelime", function (req, res) {
+  /* yanlis bilinen kelime kaydetme */
+  var con = getDb.getConnection();
+  var KelimeID = req.body.KelimeID;
+  var KullaniciID = req.body.KullaniciID;
+  var TemelMi = req.body.TemelMi;
+  con.query("SELECT COUNT(*) as count FROM yanlisbilinenkelimeler WHERE KelimeID = ? AND KullaniciID = ?", [KelimeID, KullaniciID], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    var count = result[0].count;
+    if (count > 0) {
+      res.json({
+        message: "Zaten Ekli"
+      });
+    } else {
+      con.query("INSERT INTO yanlisbilinenkelimeler (KelimeID,KullaniciID,temelMi,aktifMi) values(?,?,?,1)", [KelimeID, KullaniciID, TemelMi], function (err, result) {
+        if (err) {
+          throw err;
+        }
+        if (result.affectedRows > 0) {
+          res.json({
+            message: "Başarıyla Eklendi"
+          });
+        } else {
+          res.status(404).json({
+            message: "Bir Hata Var"
+          });
+        }
+      });
+    }
+  });
+});
+router.get("/yanlisBilinenKelime", function (req, res) {
+  /* yanlis bilinen kelime getirme */
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var TemelMi = req.body.TemelMi;
+  if (TemelMi == 1) {
+    con.query("SELECT ybk.KelimeID,ybk.KullaniciID,tk.value,tkc.Ceviri FROM yanlisbilinenkelimeler ybk INNER JOIN temelkelimeler tk ON ybk.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE ybk.KullaniciID = ? AND ybk.temelMi = 1", [KullaniciID], function (err, result) {
+      if (err) {
+        throw err;
+      }
+      res.json({
+        message: result
+      });
+    });
+  }
+});
+router.put("/yanlisBilinenKelime", function (req, res) {
+  /* yanlis bilinen kelime silme(değiştirme aktifliği) */
+  var con = getDb.getConnection();
 });
 module.exports = router;

@@ -4,8 +4,6 @@ const userMiddleware = require("../middlewares/user")
 import md5 from "md5"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
-import { count } from "console";
-
 
 var userModel = require("../model/userModel")
 
@@ -31,86 +29,95 @@ async function userEmail(email) {
 
 router.post("/signup", async (req, res) => {
     var con = getDb.getConnection();
-
-    const kullaniciAdi = req.body.kullaniciAdi
+    const  kullaniciAdi = req.body.kullaniciAdi
+    const eposta = req.body.eposta;
     const sifre = req.body.sifre
-    const email = req.body.email
-    //react nativeden post isteği gönderirken direkt gönderirsen body ile alabilirsin 
-    //ama ör:mahir { } ile gönderirsen req.body.mahir.kullaniciAdi ile erişirsin
 
-    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
+    console.log(eposta)
+    var getUserInfo = userModel.user
     var userInfo = new getUserInfo(kullaniciAdi)
 
-    var isUserExist = await userInfo.userFind(kullaniciAdi);
-    var isEmailExist = await userEmail(email)
+    try {
+        const isUserExist = await userInfo.userFind(kullaniciAdi);
+        const isEmailExist = await userEmail(eposta);
 
-    var passwordToken = md5(sifre)
-    if (isUserExist == false) {
-        if (isEmailExist == false) {
-            con.query("INSERT INTO kullanici (kullaniciAdi,şifre,email) values (?,?,?)", [kullaniciAdi, passwordToken, email], (err) => {
-                if (err) throw err
+        console.log(isUserExist)
+        console.log(isEmailExist)
 
-                res.json({
-                    status: "SUCCES",
-                    message: "Başarili bir şekilde kayit oldun"
-                })
-            })
-        }
-        else {
-            res.json({
+        if (!(isUserExist && isEmailExist)) {
+            return res.status(400).json({
                 status: "FAILED",
-                message: "Böyle bir e posta vardir"
-            })
+                message: "Girdiğiniz bilgilerle kayıt oluşturulamıyor."
+            });
         }
-    }
-    else {
-        res.json({
-            status: "FAILED",
-            message: "Böyle bir kullanici adi vardir"
-        })
+
+        var passwordToken = md5(sifre)
+
+        con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], (err) => {
+            if (err) throw err;
+
+            res.json({
+                status: "SUCCESS",
+                message: "Başarılı bir şekilde kayıt oldunuz."
+            });
+        });
+    } catch (error) {
+        res.status(500).json({ status: "ERROR", message: "Bir hata oluştu." });
     }
 })
 
 router.post("/signin", async (req, res) => {
     var con = getDb.getConnection();
 
-    const kullaniciAdi = req.body.kullaniciAdi;
+    const eposta = req.body.eposta;
     const sifre = req.body.sifre
     //react native'de get metodu gönderirken params ile göndercez burdan query metodu olarak alabiliz 
     var passwordToken = md5(sifre)
 
-    var getUserInfo = userModel.user  //user modelden import ediyoruz ve ordan fonk çağrıyoruz
-    var userInfo = new getUserInfo(kullaniciAdi)
+    if (eposta && sifre) {
+        // Kullanıcıyı kontrol eden SELECT sorgusu
+        con.query(
+            "SELECT * FROM kullanici WHERE email = ? AND şifre = ?",
+            [eposta, passwordToken],
+            (err, result) => {
+                if (err) {
+                    res.status(500).json({
+                        status: "FAILED",
+                        message: "Sunucu hatası meydana geldi"
+                    });
+                } else if (result.length > 0) { /* kullanıcı giriş yaptı */
+                    const accessToken = jwt.sign({ id: result[0].id },
+                        process.env.ACCESS_TOKEN_SECRET,
+                        { expiresIn: "30m" })
 
-    var isUserExist = await userInfo.userFind(kullaniciAdi)
-    var user = await userInfo.userInfo(kullaniciAdi)
+                    const refreshToken = jwt.sign({ id: result[0].id },
+                        process.env.REFRESH_TOKEN_SECRET,
+                        { expiresIn: "60m" })
+                    con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE id = ? ", [accessToken, refreshToken, result[0].id])
 
+                    res.json({
+                        message: "Basarili bir sekilde giris yaptiniz",
+                        accessToken: accessToken,
+                        refreshToken: refreshToken,
+                        status: "SUCCES",
+                        id: result[0].id
+                    })
 
-    if (isUserExist == true) {
-        if (passwordToken == user[0].şifre) {
-
-            const accessToken = jwt.sign({ id: user[0].id },
-                process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: "30m" })
-
-            const refreshToken = jwt.sign({ id: user[0].id },
-                process.env.REFRESH_TOKEN_SECRET,
-                { expiresIn: "60m" })
-            con.query("UPDATE kullanici SET accesToken = ? , refreshToken = ? WHERE kullaniciAdi = ? ", [accessToken, refreshToken, kullaniciAdi])
-            res.json({ message: "Basarili bir sekilde giris yaptiniz", accessToken: accessToken, refreshToken: refreshToken, status: "SUCCES", id: user[0].id })
-        } else {
-            res.json({
-                status: "FAILED",
-                message: "Kullanici adi ve ya şifre hatalidir"
-            })
-
-        }
+                } else {
+                    // Kullanıcı bulunamadı
+                    res.json({
+                        status: "FAILED",
+                        message: "E-posta veya şifre hatalı"
+                    });
+                }
+            }
+        );
     } else {
-        res.send({
+        // E-posta veya şifre eksik
+        res.json({
             status: "FAILED",
-            message: "Kullanici adi ve ya şifre hatalidir"
-        })
-
+            message: "E-posta ve şifre gerekli"
+        });
     }
 })
 
@@ -302,8 +309,6 @@ router.post("/meslekSecim", (req, res) => {
     const id = req.body.id
     var con = getDb.getConnection()
 
-
-
     con.query("UPDATE kullanici SET MeslekID = ? WHERE id = ? ", [meslek, id], (err, result) => {
         if (err) {
             throw err
@@ -396,24 +401,7 @@ router.post("/NedenOgreniyor", (req, res) => {
     })
 })
 
-router.get("/Kullanici", (req, res) => {
-    var id = req.query.id
-    if (!id) {
-        return res.status(400).json({ error: "ID is required" });
-    }
-    var con = getDb.getConnection();
-
-    con.query("SELECT * FROM kullanici WHERE id = ?", [id], (err, result) => {
-        if (err) {
-            throw err
-        }
-
-        res.json(result)
-    })
-
-})
-
-router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
+router.get("/KullaniciBilgileri", userMiddleware, function (req, res) { /* bu apiyi sor */
 
     var id = req.query.id;
 
@@ -512,7 +500,7 @@ router.put("/NewAccessToken", async (req, res) => {
                         console.error("Veritabanı güncelleme hatası:", err);
                         return res.status(500).json({ message: "Veritabanı hatası" });
                     }
-
+                    console.log("Yeni accestoken oluşturuldu")
                     res.json({ accessToken: accessToken });
                 });
             });
@@ -522,9 +510,6 @@ router.put("/NewAccessToken", async (req, res) => {
         res.status(500).json({ message: "Sunucu hatası" });
     }
 });
-
-
-
 
 router.get("/Seviye", (req, res) => { //seviye sezon bölüm bunları order'ına göre sıralama yapsın
     var con = getDb.getConnection()
@@ -565,7 +550,7 @@ router.get("/Bolum", (req, res) => {
     })
 })
 
-//oyunun düzlet
+//oyunun sorgusunu düzlet
 router.get("/Oyun", (req, res) => {
     const BolumID = req.query.BolumID
 
@@ -878,61 +863,61 @@ router.post("/temelGecilenBolumEkle", (req, res) => {
             res.json({ message: "failed" })
 
         } else {
-            con.query("INSERT INTO gecilentemelbolumler (GecilenBolumID,KategoriID,KullaniciID) values(?,?,?)", [BolumID, KategoriID,KullaniciID], (err, result) => {
+            con.query("INSERT INTO gecilentemelbolumler (GecilenBolumID,KategoriID,KullaniciID) values(?,?,?)", [BolumID, KategoriID, KullaniciID], (err, result) => {
                 if (err) { throw err }
                 res.json({ message: "succes" })
             })
-        }   
+        }
     })
 })
 
-router.get("/temelGecilenBolum",(req,res)=>{
+router.get("/temelGecilenBolum", (req, res) => {
     var con = getDb.getConnection()
     var KullaniciID = req.query.KullaniciID
 
-    con.query("SELECT gtb.GecilenBolumID,tb.KategoriID,gtb.KullaniciID,tb.Order FROM gecilentemelbolumler gtb INNER JOIN temelbolumler tb ON gtb.GecilenBolumID = tb.id WHERE KullaniciID = ?",[KullaniciID],(err,result)=>{
-        if(err) throw err
+    con.query("SELECT gtb.GecilenBolumID,tb.KategoriID,gtb.KullaniciID,tb.Order FROM gecilentemelbolumler gtb INNER JOIN temelbolumler tb ON gtb.GecilenBolumID = tb.id WHERE KullaniciID = ?", [KullaniciID], (err, result) => {
+        if (err) throw err
 
-        res.json({message:result})
+        res.json({ message: result })
     })
 
 })
 
-router.post("/temelSozluk",(req,res)=>{
+router.post("/temelSozluk", (req, res) => {
     var con = getDb.getConnection()
 
     var KullaniciID = req.body.KullaniciID
     var KelimeID = req.body.KelimeID
 
-    con.query("SELECT COUNT(*) AS count FROM temelkelimelersozluk WHERE KelimeID = ? AND KullaniciID = ?",[KelimeID,KullaniciID],(err,result)=>{
-        if(err){throw err}
+    con.query("SELECT COUNT(*) AS count FROM temelkelimelersozluk WHERE KelimeID = ? AND KullaniciID = ?", [KelimeID, KullaniciID], (err, result) => {
+        if (err) { throw err }
 
         console.log(result[0].count)
 
-        if( result[0].count == 0){
-            con.query("INSERT INTO temelkelimelersozluk (KelimeID,KullaniciID) values(?,?)",[KelimeID,KullaniciID],(err,result)=>{
-                if(err){throw err}
-        
-                res.json({message:"Sözlüğe Eklendi"})
+        if (result[0].count == 0) {
+            con.query("INSERT INTO temelkelimelersozluk (KelimeID,KullaniciID) values(?,?)", [KelimeID, KullaniciID], (err, result) => {
+                if (err) { throw err }
+
+                res.json({ message: "Sözlüğe Eklendi" })
             })
-        }else{
-            res.json({message:"Zaten Sözlüğe Eklenmiş"})
+        } else {
+            res.json({ message: "Zaten Sözlüğe Eklenmiş" })
 
         }
     })
-   
+
 })
 
-router.get("/temelSozluk",(req,res)=>{
+router.get("/temelSozluk", (req, res) => {
     var con = getDb.getConnection()
 
     var KullaniciID = req.query.KullaniciID
 
-    con.query("SELECT tk.id,tk.value,tkc.Ceviri,tk.Image FROM temelkelimelersozluk tks INNER JOIN temelkelimeler tk ON tks.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tkc.KelimeID = tk.id WHERE tks.KullaniciID = ?",[KullaniciID],(err,result)=>{
-        if(err) {throw err}
+    con.query("SELECT tk.id,tk.value,tkc.Ceviri,tk.Image FROM temelkelimelersozluk tks INNER JOIN temelkelimeler tk ON tks.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tkc.KelimeID = tk.id WHERE tks.KullaniciID = ?", [KullaniciID], (err, result) => {
+        if (err) { throw err }
 
         console.log(result)
-        res.json({message:result})
+        res.json({ message: result })
     })
 })
 
@@ -956,4 +941,82 @@ router.delete("/temelSozluk", (req, res) => {
     });
 });
 
+router.get("/temelIlerleme",(req,res)=>{
+    var con = getDb.getConnection();
+
+    const id = req.query.id
+
+    con.query("SELECT COUNT(*) AS count FROM temelBolumler",(err,result)=>{
+        if(err) {throw err}
+
+        const bolumSayisi = result[0].count
+
+        con.query("SELECT COUNT(*) AS count FROM gecilentemelbolumler WHERE KullaniciID = ?",[id],(err,results)=>{
+            if (err) { throw err }
+
+            const gecilenBolumSayisi = results[0].count
+         
+            res.json({bolumSayisi:bolumSayisi,gecilenBolumSayisi:gecilenBolumSayisi})
+        })
+    })
+})
+
+router.get("/egzersiz",(req,res)=>{
+    var con = getDb.getConnection();
+
+    con.query("SELECT * FROM egzersiz",(err,result)=>{
+        if (err) { throw err }
+
+        res.json({message:result})
+    })
+})
+
+router.post("/yanlisBilinenKelime",(req,res)=>{ /* yanlis bilinen kelime kaydetme */
+    var con = getDb.getConnection();
+
+    var KelimeID = req.body.KelimeID
+    var KullaniciID = req.body.KullaniciID
+    var TemelMi = req.body.TemelMi
+
+    con.query("SELECT COUNT(*) as count FROM yanlisbilinenkelimeler WHERE KelimeID = ? AND KullaniciID = ?",[KelimeID,KullaniciID],(err,result)=>{
+        if (err) { throw err }
+
+        const count = result[0].count
+
+        if(count > 0){
+            res.json({message:"Zaten Ekli"})
+        }else{
+            con.query("INSERT INTO yanlisbilinenkelimeler (KelimeID,KullaniciID,temelMi,aktifMi) values(?,?,?,1)", [KelimeID, KullaniciID, TemelMi], (err, result) => {
+                if (err) { throw err }
+
+                if (result.affectedRows > 0) {
+                    res.json({ message: "Başarıyla Eklendi" });
+                } else {
+                    res.status(404).json({ message: "Bir Hata Var" });
+                }
+            })
+        }
+    })
+    
+})
+
+router.get("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime getirme */
+    var con = getDb.getConnection();
+
+    var KullaniciID = req.body.KullaniciID
+    var TemelMi = req.body.TemelMi
+
+    if(TemelMi == 1){
+        con.query("SELECT ybk.KelimeID,ybk.KullaniciID,tk.value,tkc.Ceviri FROM yanlisbilinenkelimeler ybk INNER JOIN temelkelimeler tk ON ybk.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE ybk.KullaniciID = ? AND ybk.temelMi = 1",[KullaniciID],(err,result)=>{
+            if (err) { throw err }
+
+            res.json({message:result})
+        })
+    }
+})
+
+router.put("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime silme(değiştirme aktifliği) */
+    var con = getDb.getConnection();
+
+})
 module.exports = router

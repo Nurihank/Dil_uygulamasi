@@ -2,12 +2,8 @@ require('dotenv').config() //tokenlerin gözükmesi için yazdık bunu
 import express from "express"
 import bodyParser from "body-parser";
 import kullaniciRouter from "./routes/kullaniciRouter.js"
-import authorizedRouter from "./routes/authorizedRouter.js" 
-import adminRouter from "./routes/adminLoginRouter.js"
 
 const cors = require('cors');
-
-
 const app = express();
 
 app.use(bodyParser.json())
@@ -24,5 +20,3 @@ app.listen(3000,(err)=>{
 })
 
 app.use("/kullanici",kullaniciRouter)
-app.use("/authorized",authorizedRouter)
-app.use("/adminLogin",adminRouter)
