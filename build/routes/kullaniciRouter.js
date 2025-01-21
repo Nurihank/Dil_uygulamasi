@@ -1148,10 +1148,21 @@ router.post("/yanlisBilinenKelime", function (req, res) {
 router.get("/yanlisBilinenKelime", function (req, res) {
   /* yanlis bilinen kelime getirme */
   var con = getDb.getConnection();
-  var KullaniciID = req.body.KullaniciID;
-  var TemelMi = req.body.TemelMi;
+  var KullaniciID = req.query.KullaniciID;
+  var TemelMi = req.query.TemelMi;
+  console.log(TemelMi);
+  console.log(TemelMi);
   if (TemelMi == 1) {
-    con.query("SELECT ybk.KelimeID,ybk.KullaniciID,tk.value,tkc.Ceviri FROM yanlisbilinenkelimeler ybk INNER JOIN temelkelimeler tk ON ybk.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE ybk.KullaniciID = ? AND ybk.temelMi = 1", [KullaniciID], function (err, result) {
+    con.query("SELECT ybk.KelimeID,ybk.KullaniciID,tk.value,tkc.Ceviri,tk.Image FROM yanlisbilinenkelimeler ybk INNER JOIN temelkelimeler tk ON ybk.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE ybk.KullaniciID = ? AND ybk.temelMi = 1", [KullaniciID], function (err, result) {
+      if (err) {
+        throw err;
+      }
+      res.json({
+        message: result
+      });
+    });
+  } else if (TemelMi == 0) {
+    con.query("SELECT ybk.KullaniciID, ybk.id, ak.Value, c.Ceviri FROM yanlisbilinenkelimeler ybk INNER JOIN anakelimeler ak ON ybk.KelimeID = ak.AnaKelimelerID INNER JOIN ceviriler c ON c.AnaKelimeID = ak.AnaKelimelerID WHERE ybk.KullaniciID = ? AND ybk.TemelMi = 0", [KullaniciID], function (err, result) {
       if (err) {
         throw err;
       }
