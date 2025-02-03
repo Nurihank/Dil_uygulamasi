@@ -1009,13 +1009,13 @@ router.get("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime geti
 
     console.log(TemelMi)
     if(TemelMi == 1){
-        con.query("SELECT ybk.KelimeID,ybk.KullaniciID,tk.value,tkc.Ceviri,tk.Image FROM yanlisbilinenkelimeler ybk INNER JOIN temelkelimeler tk ON ybk.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE ybk.KullaniciID = ? AND ybk.temelMi = 1",[KullaniciID],(err,result)=>{
+        con.query("SELECT ybk.KelimeID,ybk.KullaniciID,tk.value,tkc.Ceviri,tk.Image FROM yanlisbilinenkelimeler ybk INNER JOIN temelkelimeler tk ON ybk.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE ybk.KullaniciID = ? AND ybk.temelMi = 1 AND ybk.aktifMi=1",[KullaniciID],(err,result)=>{
             if (err) { throw err }
 
             res.json({message:result})
         })
     }else if(TemelMi == 0){
-        con.query("SELECT ybk.KullaniciID, ybk.id, ak.Value, c.Ceviri FROM yanlisbilinenkelimeler ybk INNER JOIN anakelimeler ak ON ybk.KelimeID = ak.AnaKelimelerID INNER JOIN ceviriler c ON c.AnaKelimeID = ak.AnaKelimelerID WHERE ybk.KullaniciID = ? AND ybk.TemelMi = 0", [KullaniciID], (err, result) => {
+        con.query("SELECT ybk.KullaniciID, ybk.KelimeID, ak.Value, c.Ceviri FROM yanlisbilinenkelimeler ybk INNER JOIN anakelimeler ak ON ybk.KelimeID = ak.AnaKelimelerID INNER JOIN ceviriler c ON c.AnaKelimeID = ak.AnaKelimelerID WHERE ybk.KullaniciID = ? AND ybk.TemelMi = 0 AND ybk.aktifMi=1", [KullaniciID], (err, result) => {
             if (err) { throw err }
 
             res.json({ message: result })
@@ -1025,6 +1025,21 @@ router.get("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime geti
 
 router.put("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime silme(değiştirme aktifliği) */
     var con = getDb.getConnection();
+    const KullaniciID = req.body.KullaniciID
+    const KelimeID = req.body.KelimeID
+    const temelMi = req.body.temelMi
+    console.log(KelimeID)
+    console.log(temelMi)
+    console.log(KullaniciID)
 
+    con.query("UPDATE yanlisbilinenkelimeler ybk SET ybk.aktifMi = 0 WHERE ybk.kullaniciID = ? AND ybk.KelimeID = ? AND ybk.temelMi=?",[KullaniciID,KelimeID,temelMi],(err,result)=>{
+        if(err) {throw err}
+
+        if (result.affectedRows > 0) {
+            res.json({ message: "Başarıyla Değişti" });
+        } else {
+            res.status(404).json({ message: "Bir Hata Var" });
+        }
+    })
 })
 module.exports = router
