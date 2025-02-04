@@ -56,28 +56,30 @@ router.post("/signup", /*#__PURE__*/function () {
           eposta = req.body.eposta;
           sifre = req.body.sifre;
           console.log(eposta);
+          console.log(sifre);
+          console.log(kullaniciAdi);
           getUserInfo = userModel.user;
           userInfo = new getUserInfo(kullaniciAdi);
-          _context.prev = 7;
-          _context.next = 10;
+          _context.prev = 9;
+          _context.next = 12;
           return userInfo.userFind(kullaniciAdi);
-        case 10:
+        case 12:
           isUserExist = _context.sent;
-          _context.next = 13;
+          _context.next = 15;
           return userEmail(eposta);
-        case 13:
+        case 15:
           isEmailExist = _context.sent;
           console.log(isUserExist);
           console.log(isEmailExist);
           if (isUserExist && isEmailExist) {
-            _context.next = 18;
+            _context.next = 20;
             break;
           }
           return _context.abrupt("return", res.status(400).json({
             status: "FAILED",
             message: "Girdiğiniz bilgilerle kayıt oluşturulamıyor."
           }));
-        case 18:
+        case 20:
           passwordToken = (0, _md["default"])(sifre);
           con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], function (err) {
             if (err) throw err;
@@ -86,20 +88,20 @@ router.post("/signup", /*#__PURE__*/function () {
               message: "Başarılı bir şekilde kayıt oldunuz."
             });
           });
-          _context.next = 25;
+          _context.next = 27;
           break;
-        case 22:
-          _context.prev = 22;
-          _context.t0 = _context["catch"](7);
+        case 24:
+          _context.prev = 24;
+          _context.t0 = _context["catch"](9);
           res.status(500).json({
             status: "ERROR",
             message: "Bir hata oluştu."
           });
-        case 25:
+        case 27:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[7, 22]]);
+    }, _callee, null, [[9, 24]]);
   }));
   return function (_x2, _x3) {
     return _ref.apply(this, arguments);
@@ -1195,5 +1197,28 @@ router.put("/yanlisBilinenKelime", function (req, res) {
       });
     }
   });
+});
+router.get("/dinlemeEgzersizi", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var temelMi = req.query.temelMi;
+  var AnaDilID = req.query.AnaDilID;
+  var HangiDilID = req.query.HangiDilID;
+  var MeslekID = req.query.MeslekID;
+  if (temelMi == 0) {
+    con.query("SELECT ak.AnaKelimelerID AS id , ak.Value ,c.Ceviri FROM anakelimeler ak INNER JOIN ceviriler c ON ak.AnaKelimelerID = c.AnaKelimeID WHERE ak.test = 1 AND c.AnaDilID = ?  AND c.HangiDilID = ? AND ak.MeslekID = ?", [AnaDilID, HangiDilID, MeslekID], function (err, result) {
+      if (err) throw err;
+      res.json({
+        message: result
+      });
+    });
+  } else if (temelMi == 1) {
+    con.query("SELECT tk.id,tk.value,tkc.Ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ?", [AnaDilID, HangiDilID], function (err, result) {
+      if (err) throw err;
+      res.json({
+        message: result
+      });
+    });
+  }
 });
 module.exports = router;

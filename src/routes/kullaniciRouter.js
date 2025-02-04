@@ -34,6 +34,9 @@ router.post("/signup", async (req, res) => {
     const sifre = req.body.sifre
 
     console.log(eposta)
+    console.log(sifre)
+    console.log(kullaniciAdi)
+
     var getUserInfo = userModel.user
     var userInfo = new getUserInfo(kullaniciAdi)
 
@@ -1042,4 +1045,30 @@ router.put("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime silm
         }
     })
 })
+
+router.get("/dinlemeEgzersizi",(req,res)=>{
+    var con = getDb.getConnection();
+    const KullaniciID = req.query.KullaniciID
+    const temelMi = req.query.temelMi
+    const AnaDilID = req.query.AnaDilID
+    const HangiDilID = req.query.HangiDilID
+    const MeslekID = req.query.MeslekID
+
+    if(temelMi == 0){
+        con.query("SELECT ak.AnaKelimelerID AS id , ak.Value ,c.Ceviri FROM anakelimeler ak INNER JOIN ceviriler c ON ak.AnaKelimelerID = c.AnaKelimeID WHERE ak.test = 1 AND c.AnaDilID = ?  AND c.HangiDilID = ? AND ak.MeslekID = ?",[AnaDilID,HangiDilID,MeslekID],(err,result)=>{
+            if(err) throw err
+
+            res.json({message:result})
+        })
+    }else if(temelMi == 1){
+        con.query("SELECT tk.id,tk.value,tkc.Ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ?",[AnaDilID,HangiDilID],(err,result)=>{
+            if(err) throw err
+
+            res.json({message:result})
+
+        })
+    }
+})
+
+
 module.exports = router
