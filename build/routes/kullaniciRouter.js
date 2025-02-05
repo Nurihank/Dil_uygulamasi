@@ -712,6 +712,8 @@ router.post("/SozlugeKelimeEkleme", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var AnaKelimeID = req.body.AnaKelimeID;
+  var Date = req.body.Date;
+  console.log(Date);
   con.query("SELECT COUNT(*) AS count FROM sozluk WHERE kullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, AnaKelimeID], function (err, result) {
     if (err) throw err;
 
@@ -722,7 +724,7 @@ router.post("/SozlugeKelimeEkleme", function (req, res) {
         message: "Bu Kelime Zaten Sözlüğünde Var"
       });
     } else {
-      con.query("INSERT INTO sozluk (KullaniciID, AnaKelimeID) VALUES (?, ?)", [KullaniciID, AnaKelimeID], function (err, result) {
+      con.query("INSERT INTO sozluk (KullaniciID, AnaKelimeID,Tarih) VALUES (?, ?,?)", [KullaniciID, AnaKelimeID, Date], function (err, result) {
         if (err) throw err;
         res.json({
           message: "Başarıyla Eklendi"
@@ -783,13 +785,14 @@ router.post("/GecilenBolumlerEkle", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var BolumID = req.body.BolumID;
+  var Tarih = req.body.Date;
   con.query("SELECT COUNT(*) AS count FROM gecilenbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
     if (result[0].count > 0) {
       res.json({
         message: "failed"
       });
     } else {
-      con.query("INSERT INTO gecilenbolumler (KullaniciID,BolumID) VALUES (?,?)", [KullaniciID, BolumID], function (err, result) {
+      con.query("INSERT INTO gecilenbolumler (KullaniciID,BolumID,Tarih) VALUES (?,?,?)", [KullaniciID, BolumID, Tarih], function (err, result) {
         if (err) throw err;
         res.json({
           message: "succes"
@@ -813,13 +816,14 @@ router.post("/GecilenSezonEkle", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var SezonID = req.body.SezonID;
+  var Tarih = req.body.Date;
   con.query("SELECT COUNT(*) AS count FROM gecilensezonlar WHERE KullaniciID=? AND SezonID=?", [KullaniciID, SezonID], function (err, result) {
     if (result[0].count > 0) {
       res.json({
         message: "failed"
       });
     } else {
-      con.query("INSERT INTO gecilensezonlar (KullaniciID,SezonID) VALUES (?,?)", [KullaniciID, SezonID], function (err, result) {
+      con.query("INSERT INTO gecilensezonlar (KullaniciID,SezonID,Tarih) VALUES (?,?,?)", [KullaniciID, SezonID, Tarih], function (err, result) {
         if (err) throw err;
         res.json({
           message: "succes"
@@ -923,31 +927,6 @@ router.get("/GunlukGiris", function (req, res) {
     });
   });
 });
-router.post("/GunlukSozlugeGiris", function (req, res) {
-  var con = getDb.getConnection();
-  var KullaniciID = req.body.KullaniciID;
-  var Date = req.body.Date;
-  var SozlugeGiris = req.body.SozlugeGiris;
-  con.query("SELECT COUNT(*) as count FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Date], function (err, result) {
-    if (err) {
-      return res.status(500).json({
-        error: "Veritabanı hatası burda."
-      });
-    }
-    if (result[0].count > 0) {
-      con.query("UPDATE gunlukgiris SET SozlukGiris = ? WHERE KullaniciID = ? AND Tarih = ?", [SozlugeGiris, KullaniciID, Date], function (err, result) {
-        if (err) {
-          return res.status(500).json({
-            error: "Veritabanı hatası. şurda"
-          });
-        }
-        return res.json(true);
-      });
-    } else {
-      res.json(false);
-    }
-  });
-});
 router.get("/temelKategoriler", function (req, res) {
   var con = getDb.getConnection();
   var AnaDilID = req.query.AnaDilID;
@@ -994,6 +973,7 @@ router.post("/temelGecilenBolumEkle", function (req, res) {
   var KullaniciID = req.body.KullaniciID;
   var BolumID = req.body.BolumID;
   var KategoriID = req.body.KategoriID;
+  var Tarih = req.body.Date;
   con.query("SELECT COUNT(*) as count FROM gecilentemelbolumler WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ?", [KullaniciID, BolumID, KategoriID], function (err, result) {
     if (err) {
       throw err;
@@ -1003,7 +983,7 @@ router.post("/temelGecilenBolumEkle", function (req, res) {
         message: "failed"
       });
     } else {
-      con.query("INSERT INTO gecilentemelbolumler (GecilenBolumID,KategoriID,KullaniciID) values(?,?,?)", [BolumID, KategoriID, KullaniciID], function (err, result) {
+      con.query("INSERT INTO gecilentemelbolumler (GecilenBolumID,KategoriID,KullaniciID,tarih) values(?,?,?,?)", [BolumID, KategoriID, KullaniciID, Tarih], function (err, result) {
         if (err) {
           throw err;
         }
@@ -1028,13 +1008,14 @@ router.post("/temelSozluk", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var KelimeID = req.body.KelimeID;
+  var Tarih = req.body.Date;
   con.query("SELECT COUNT(*) AS count FROM temelkelimelersozluk WHERE KelimeID = ? AND KullaniciID = ?", [KelimeID, KullaniciID], function (err, result) {
     if (err) {
       throw err;
     }
     console.log(result[0].count);
     if (result[0].count == 0) {
-      con.query("INSERT INTO temelkelimelersozluk (KelimeID,KullaniciID) values(?,?)", [KelimeID, KullaniciID], function (err, result) {
+      con.query("INSERT INTO temelkelimelersozluk (KelimeID,KullaniciID,Tarih) values(?,?,?)", [KelimeID, KullaniciID, Tarih], function (err, result) {
         if (err) {
           throw err;
         }
@@ -1084,6 +1065,7 @@ router["delete"]("/temelSozluk", function (req, res) {
   });
 });
 router.get("/temelIlerleme", function (req, res) {
+  /* temel eğitimdeki ilerleme barı */
   var con = getDb.getConnection();
   var id = req.query.id;
   con.query("SELECT COUNT(*) AS count FROM temelBolumler", function (err, result) {
@@ -1120,6 +1102,7 @@ router.post("/yanlisBilinenKelime", function (req, res) {
   var KelimeID = req.body.KelimeID;
   var KullaniciID = req.body.KullaniciID;
   var TemelMi = req.body.TemelMi;
+  var Tarih = req.body.Date;
   con.query("SELECT COUNT(*) as count FROM yanlisbilinenkelimeler WHERE KelimeID = ? AND KullaniciID = ?", [KelimeID, KullaniciID], function (err, result) {
     if (err) {
       throw err;
@@ -1130,7 +1113,7 @@ router.post("/yanlisBilinenKelime", function (req, res) {
         message: "Zaten Ekli"
       });
     } else {
-      con.query("INSERT INTO yanlisbilinenkelimeler (KelimeID,KullaniciID,temelMi,aktifMi) values(?,?,?,1)", [KelimeID, KullaniciID, TemelMi], function (err, result) {
+      con.query("INSERT INTO yanlisbilinenkelimeler (KelimeID,KullaniciID,temelMi,aktifMi,Tarih) values(?,?,?,1,?)", [KelimeID, KullaniciID, TemelMi, Tarih], function (err, result) {
         if (err) {
           throw err;
         }
@@ -1220,5 +1203,42 @@ router.get("/dinlemeEgzersizi", function (req, res) {
       });
     });
   }
+});
+router.post("/GunlukSozlugeGiris", function (req, res) {
+  /* BUNU GÜNLÜK SÖZLÜK OYUNUNU OYNADIYSA KAYDETCEK */
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var Date = req.body.Date;
+  var SozlugeGiris = req.body.SozlugeGiris;
+  con.query("SELECT COUNT(*) as count FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Date], function (err, result) {
+    if (err) {
+      return res.status(500).json({
+        error: "Veritabanı hatası burda."
+      });
+    }
+    if (result[0].count > 0) {
+      con.query("UPDATE gunlukgiris SET SozlukGiris = ? WHERE KullaniciID = ? AND Tarih = ?", [SozlugeGiris, KullaniciID, Date], function (err, result) {
+        if (err) {
+          return res.status(500).json({
+            error: "Veritabanı hatası. şurda"
+          });
+        }
+        return res.json(true);
+      });
+    } else {
+      res.json(false);
+    }
+  });
+});
+router.get("/MeslekiEgitimKontrol", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var Tarih = req.query.Date;
+  con.query("SELECT COUNT(*) as count FROM gecilenbolumler WHERE KullaniciID = ? AND Tarih = ? ", [KullaniciID, Tarih], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: result[0].count
+    });
+  });
 });
 module.exports = router;
