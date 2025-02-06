@@ -1053,7 +1053,7 @@ router.get("/dinlemeEgzersizi",(req,res)=>{
     }
 })
 
-router.post("/GunlukSozlugeGiris", function (req, res) { /* BUNU GÜNLÜK SÖZLÜK OYUNUNU OYNADIYSA KAYDETCEK */
+router.post("/GunlukSozlugeGiris", function (req, res) {
     var con = getDb.getConnection();
     var KullaniciID = req.body.KullaniciID;
     var Date = req.body.Date;
@@ -1085,10 +1085,21 @@ router.get("/MeslekiEgitimKontrol",(req,res)=>{
 
     con.query("SELECT COUNT(*) as count FROM gecilenbolumler WHERE KullaniciID = ? AND Tarih = ? ",[KullaniciID,Tarih],(err,result)=>{
         if(err) throw err
-
         res.json({message:result[0].count})
     })
-
 })
 
+router.get("/TemelEgitimKontrol",(req,res)=>{
+    var con = getDb.getConnection();
+
+    var KullaniciID = req.query.KullaniciID
+    var Tarih = req.query.Date
+
+    con.query("SELECT COUNT(*) AS count FROM gecilentemelbolumler WHERE  KullaniciID = ? AND Tarih = ?",[KullaniciID,Tarih],(err,result)=>{
+        if(err) throw err
+        res.json({message:result[0].count})
+    })
+})
+
+router.get
 module.exports = router
