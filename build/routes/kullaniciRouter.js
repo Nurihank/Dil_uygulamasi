@@ -1298,12 +1298,11 @@ router.post("/GunlukGorevEgzersiz", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var Tarih = req.body.Date;
-  con.query("SELECT EXISTS (SELECT 1 FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?) AS exists", [KullaniciID, Tarih], function (err, result) {
+  con.query("SELECT COUNT(*) as count FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
     if (err) {
       throw err;
     }
-    console.log(result);
-    if (result) {
+    if (result[0].count) {
       con.query("UPDATE gunlukgorev SET Egzersiz=1 WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
         if (err) {
           throw err;
@@ -1350,16 +1349,19 @@ router.get("/SozlukTekrariKontrol", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
+  console.log(KullaniciID);
+  console.log(Tarih);
   con.query("SELECT SozlukGiris FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
     if (err) throw err;
-    if (!result) {
+    if (!result || result.length === 0) {
       res.json({
-        message: "Hata var"
+        message: 0
       });
     } else {
-      console.log(result[0].SozlukGiris);
+      var _result$, _result$2;
+      console.log(((_result$ = result[0]) === null || _result$ === void 0 ? void 0 : _result$.SozlukGiris) || 0);
       res.json({
-        message: result[0].SozlukGiris
+        message: ((_result$2 = result[0]) === null || _result$2 === void 0 ? void 0 : _result$2.SozlukGiris) || 0
       });
     }
   });
@@ -1370,9 +1372,36 @@ router.get("/GunlukGorevHataKontrol", function (req, res) {
   var Tarih = req.query.Date;
   con.query("SELECT HataEgzersiz FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
     if (err) throw err;
-    res.json({
-      message: result
-    });
+    if (!result || result.length === 0) {
+      res.json({
+        message: 0
+      });
+    } else {
+      var _result$3, _result$4;
+      console.log(((_result$3 = result[0]) === null || _result$3 === void 0 ? void 0 : _result$3.HataEgzersiz) || 0);
+      res.json({
+        message: ((_result$4 = result[0]) === null || _result$4 === void 0 ? void 0 : _result$4.HataEgzersiz) || 0
+      });
+    }
+  });
+});
+router.get("/GunlukGorevEgzersizKontrol", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var Tarih = req.query.Date;
+  con.query("SELECT Egzersiz FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+    if (err) throw err;
+    if (!result || result.length === 0) {
+      res.json({
+        message: 0
+      });
+    } else {
+      var _result$5, _result$6;
+      console.log(((_result$5 = result[0]) === null || _result$5 === void 0 ? void 0 : _result$5.Egzersiz) || 0);
+      res.json({
+        message: ((_result$6 = result[0]) === null || _result$6 === void 0 ? void 0 : _result$6.Egzersiz) || 0
+      });
+    }
   });
 });
 module.exports = router;
