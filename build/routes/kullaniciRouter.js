@@ -781,18 +781,33 @@ router.get("/SozlugeEkliMi", function (req, res) {
     }
   });
 });
-router.post("/GecilenBolumlerEkle", function (req, res) {
+router.post("/OynananOyun", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var BolumID = req.body.BolumID;
   var Tarih = req.body.Date;
-  con.query("SELECT COUNT(*) AS count FROM gecilenbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
+  var GectiMi = req.body.GectiMi;
+  con.query("SELECT COUNT(*) AS count FROM oynananbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
     if (result[0].count > 0) {
-      res.json({
-        message: "failed"
+      con.query("SELECT GectiMi FROM oynananbolumler WHERE KullaniciID = ? AND BolumID = ?", [KullaniciID, BolumID], function (err, result) {
+        if (err) {
+          throw err;
+        }
+        console.log(result[0].GectiMi);
+        if (result[0].GectiMi) {
+          res.json({
+            message: "Zaten Bu Bölümü Geçmiş"
+          });
+        } else {
+          con.query("UPDATE oynananbolumler SET GectiMi = ? , Tarih = ? WHERE KullaniciID = ? AND BolumID = ?", [GectiMi, Tarih, KullaniciID, BolumID], function (err, result) {
+            res.json({
+              message: "succes"
+            });
+          });
+        }
       });
     } else {
-      con.query("INSERT INTO gecilenbolumler (KullaniciID,BolumID,Tarih) VALUES (?,?,?)", [KullaniciID, BolumID, Tarih], function (err, result) {
+      con.query("INSERT INTO oynananbolumler (KullaniciID,BolumID,Tarih,GectiMi) VALUES (?,?,?,?)", [KullaniciID, BolumID, Tarih, GectiMi], function (err, result) {
         if (err) throw err;
         res.json({
           message: "succes"
@@ -805,7 +820,7 @@ router.get("/GecilenBolumler", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SezonID = req.query.SezonID;
-  con.query("SELECT * FROM bolum INNER JOIN gecilenbolumler ON bolum.BolumID = gecilenbolumler.BolumID WHERE bolum.SezonID = ? AND gecilenbolumler.KullaniciID = ? ORDER BY bolum.Order", [SezonID, KullaniciID], function (err, result) {
+  con.query("SELECT * FROM bolum INNER JOIN oynananbolumler ON bolum.BolumID = oynananbolumler.BolumID WHERE bolum.SezonID = ? AND oynananbolumler.KullaniciID = ? AND oynananbolumler.GectiMi = 1 ORDER BY bolum.Order", [SezonID, KullaniciID], function (err, result) {
     if (err) throw err;
     res.json({
       message: result
@@ -847,6 +862,8 @@ router.get("/SezonBittiMiKontrol", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SezonID = req.query.SezonID;
+  console.log("a " + KullaniciID);
+  console.log("b " + SezonID);
 
   // SezonID ile bölümleri al
   con.query("SELECT * FROM bolum WHERE SezonID = ?", [SezonID], function (err, bolumlerResult) {
@@ -857,7 +874,7 @@ router.get("/SezonBittiMiKontrol", function (req, res) {
     }
 
     // Geçilen bölümleri al
-    con.query("SELECT * FROM gecilenbolumler WHERE KullaniciID = ?", [KullaniciID], function (err, gecilenBolumlerResult) {
+    con.query("SELECT * FROM oynananbolumler WHERE KullaniciID = ? AND GectiMi = 1", [KullaniciID], function (err, gecilenBolumlerResult) {
       if (err) {
         return res.status(500).json({
           message: "Geçilen bölümleri alırken hata oluştu."
@@ -968,22 +985,39 @@ router.get("/temelKelimeler", function (req, res) {
     });
   });
 });
-router.post("/temelGecilenBolumEkle", function (req, res) {
+router.post("/OynananTemelOyun", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var BolumID = req.body.BolumID;
   var KategoriID = req.body.KategoriID;
   var Tarih = req.body.Date;
-  con.query("SELECT COUNT(*) as count FROM gecilentemelbolumler WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ?", [KullaniciID, BolumID, KategoriID], function (err, result) {
+  var GectiMi = req.body.GectiMi;
+  con.query("SELECT COUNT(*) as count FROM oynanantemelbolumler WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ?", [KullaniciID, BolumID, KategoriID], function (err, result) {
     if (err) {
       throw err;
     }
-    if (result[0].count != 0) {
-      res.json({
-        message: "failed"
+    if (result[0].count) {
+      con.query("SELECT GectiMi FROM oynanantemelbolumler WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ? and Tarih = ?", [KullaniciID, BolumID, KategoriID, Tarih], function (err, result) {
+        if (err) {
+          throw err;
+        }
+        if (result[0].GectiMi) {
+          res.json({
+            message: "Bu Bölümü Daha Önce Geçmişsin"
+          });
+        } else {
+          con.query("UPDATE oynanantemelbolumler SET GectiMi = ? , Tarih = ? WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ?", [GectiMi, Tarih, KullaniciID, BolumID, KategoriID], function (err, result) {
+            if (err) {
+              throw err;
+            }
+            res.json({
+              message: "succes"
+            });
+          });
+        }
       });
     } else {
-      con.query("INSERT INTO gecilentemelbolumler (GecilenBolumID,KategoriID,KullaniciID,tarih) values(?,?,?,?)", [BolumID, KategoriID, KullaniciID, Tarih], function (err, result) {
+      con.query("INSERT INTO oynanantemelbolumler (GecilenBolumID,KategoriID,KullaniciID,Tarih,GectiMi) values(?,?,?,?,?)", [BolumID, KategoriID, KullaniciID, Tarih, GectiMi], function (err, result) {
         if (err) {
           throw err;
         }
@@ -997,7 +1031,7 @@ router.post("/temelGecilenBolumEkle", function (req, res) {
 router.get("/temelGecilenBolum", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
-  con.query("SELECT gtb.GecilenBolumID,tb.KategoriID,gtb.KullaniciID,tb.Order FROM gecilentemelbolumler gtb INNER JOIN temelbolumler tb ON gtb.GecilenBolumID = tb.id WHERE KullaniciID = ?", [KullaniciID], function (err, result) {
+  con.query("SELECT gtb.GecilenBolumID,tb.KategoriID,gtb.KullaniciID,tb.Order FROM oynanantemelbolumler gtb INNER JOIN temelbolumler tb ON gtb.GecilenBolumID = tb.id WHERE KullaniciID = ? AND GectiMi = 1", [KullaniciID], function (err, result) {
     if (err) throw err;
     res.json({
       message: result
@@ -1073,7 +1107,7 @@ router.get("/temelIlerleme", function (req, res) {
       throw err;
     }
     var bolumSayisi = result[0].count;
-    con.query("SELECT COUNT(*) AS count FROM gecilentemelbolumler WHERE KullaniciID = ?", [id], function (err, results) {
+    con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE KullaniciID = ?", [id], function (err, results) {
       if (err) {
         throw err;
       }
@@ -1204,7 +1238,7 @@ router.get("/dinlemeEgzersizi", function (req, res) {
     });
   }
 });
-router.post("/GunlukSozlugeGiris", function (req, res) {
+router.post("/GunlukGorevSozluk", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var Date = req.body.Date;
@@ -1229,11 +1263,72 @@ router.post("/GunlukSozlugeGiris", function (req, res) {
     }
   });
 });
+router.post("/GunlukGorevHata", function (req, res) {
+  /* hataları gözden geçirme ekranaına baktıysa bu api çalışcak */
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var Tarih = req.body.Date;
+  con.query("SELECT COUNT(*) AS count FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    if (result[0].count) {
+      con.query("UPDATE gunlukgorev SET HataEgzersiz=1 WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+        if (err) {
+          throw err;
+        }
+        res.json({
+          message: "succes"
+        });
+      });
+    } else {
+      con.query("INSERT INTO gunlukgorev (KullaniciID,Tarih,HataEgzersiz) values(?,?,?)", [KullaniciID, Tarih, 1], function (err, result) {
+        if (err) {
+          throw err;
+        }
+        res.json({
+          message: "succes"
+        });
+      });
+    }
+  });
+});
+router.post("/GunlukGorevEgzersiz", function (req, res) {
+  /* egzersiz yaparsa kaydetcek */
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var Tarih = req.body.Date;
+  con.query("SELECT EXISTS (SELECT 1 FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?) AS exists", [KullaniciID, Tarih], function (err, result) {
+    if (err) {
+      throw err;
+    }
+    console.log(result);
+    if (result) {
+      con.query("UPDATE gunlukgorev SET Egzersiz=1 WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+        if (err) {
+          throw err;
+        }
+        res.json({
+          message: "succes"
+        });
+      });
+    } else {
+      con.query("INSERT INTO gunlukgorev (KullaniciID,Tarih,Egzersiz) values(?,?,?)", [KullaniciID, Tarih, 1], function (err, result) {
+        if (err) {
+          throw err;
+        }
+        res.json({
+          message: "succes"
+        });
+      });
+    }
+  });
+});
 router.get("/MeslekiEgitimKontrol", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
-  con.query("SELECT COUNT(*) as count FROM gecilenbolumler WHERE KullaniciID = ? AND Tarih = ? ", [KullaniciID, Tarih], function (err, result) {
+  con.query("SELECT COUNT(*) as count FROM oynananbolumler WHERE KullaniciID = ? AND Tarih = ? AND GectiMi = 1", [KullaniciID, Tarih], function (err, result) {
     if (err) throw err;
     res.json({
       message: result[0].count
@@ -1244,12 +1339,40 @@ router.get("/TemelEgitimKontrol", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
-  con.query("SELECT COUNT(*) AS count FROM gecilentemelbolumler WHERE  KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+  con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE  KullaniciID = ? AND Tarih = ? AND GectiMi = 1", [KullaniciID, Tarih], function (err, result) {
     if (err) throw err;
     res.json({
       message: result[0].count
     });
   });
 });
-router.get;
+router.get("/SozlukTekrariKontrol", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var Tarih = req.query.Date;
+  con.query("SELECT SozlukGiris FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+    if (err) throw err;
+    if (!result) {
+      res.json({
+        message: "Hata var"
+      });
+    } else {
+      console.log(result[0].SozlukGiris);
+      res.json({
+        message: result[0].SozlukGiris
+      });
+    }
+  });
+});
+router.get("/GunlukGorevHataKontrol", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var Tarih = req.query.Date;
+  con.query("SELECT HataEgzersiz FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: result
+    });
+  });
+});
 module.exports = router;
