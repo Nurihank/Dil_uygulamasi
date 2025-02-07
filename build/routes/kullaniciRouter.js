@@ -948,7 +948,7 @@ router.get("/temelKategoriler", function (req, res) {
   var con = getDb.getConnection();
   var AnaDilID = req.query.AnaDilID;
   var HangiDilID = req.query.HangiDilID;
-  con.query("SELECT id,Ceviri FROM temelkategoriceviri WHERE AnaDilID = ? and HangiDilID = ?", [AnaDilID, HangiDilID], function (err, result) {
+  con.query("SELECT tk.id,tkc.Ceviri,tk.value,tk.Image FROM temelkategoriceviri tkc INNER JOIN temelkategoriler tk ON tk.id = tkc.KelimeID WHERE AnaDilID =? and HangiDilID = ?", [AnaDilID, HangiDilID], function (err, result) {
     if (err) {
       throw err;
     }
@@ -1107,7 +1107,7 @@ router.get("/temelIlerleme", function (req, res) {
       throw err;
     }
     var bolumSayisi = result[0].count;
-    con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE KullaniciID = ?", [id], function (err, results) {
+    con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE KullaniciID = ? and GectiMi = 1", [id], function (err, results) {
       if (err) {
         throw err;
       }
@@ -1349,8 +1349,6 @@ router.get("/SozlukTekrariKontrol", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
-  console.log(KullaniciID);
-  console.log(Tarih);
   con.query("SELECT SozlukGiris FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
     if (err) throw err;
     if (!result || result.length === 0) {
@@ -1400,6 +1398,31 @@ router.get("/GunlukGorevEgzersizKontrol", function (req, res) {
       console.log(((_result$5 = result[0]) === null || _result$5 === void 0 ? void 0 : _result$5.Egzersiz) || 0);
       res.json({
         message: ((_result$6 = result[0]) === null || _result$6 === void 0 ? void 0 : _result$6.Egzersiz) || 0
+      });
+    }
+  });
+});
+router.post("/GunlukGorevTamamlandi", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var Tarih = req.body.Date;
+  console.log(KullaniciID);
+  console.log(Tarih);
+  con.query("SELECT TamamlandiMi FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+    if (err) throw err;
+    console.log(result);
+
+    // Eğer sonuç boşsa, UPDATE işlemini yap
+    if (!result || result.length === 0 || result[0].TamamlandiMi === null) {
+      con.query("UPDATE gunlukgorev SET TamamlandiMi = 1 WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
+        if (err) throw err;
+        res.json({
+          message: "success"
+        });
+      });
+    } else {
+      res.json({
+        message: "failed"
       });
     }
   });

@@ -820,12 +820,13 @@ router.get("/temelKategoriler", (req, res) => {
     var AnaDilID = req.query.AnaDilID
     var HangiDilID = req.query.HangiDilID
 
-    con.query("SELECT id,Ceviri FROM temelkategoriceviri WHERE AnaDilID = ? and HangiDilID = ?", [AnaDilID, HangiDilID], (err, result) => {
+    con.query("SELECT tk.id,tkc.Ceviri,tk.value,tk.Image FROM temelkategoriceviri tkc INNER JOIN temelkategoriler tk ON tk.id = tkc.KelimeID WHERE AnaDilID =? and HangiDilID = ?", [AnaDilID, HangiDilID], (err, result) => {
         if (err) { throw err }
 
         return res.json({ message: result })
     })
 })
+
 router.get("/temelBolumler", (req, res) => {
     var con = getDb.getConnection();
     var AnaDilID = req.query.AnaDilID
@@ -970,7 +971,7 @@ router.get("/temelIlerleme",(req,res)=>{  /* temel eğitimdeki ilerleme barı */
 
         const bolumSayisi = result[0].count
 
-        con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE KullaniciID = ?",[id],(err,results)=>{
+        con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE KullaniciID = ? and GectiMi = 1",[id],(err,results)=>{
             if (err) { throw err }
 
             const gecilenBolumSayisi = results[0].count
@@ -1189,9 +1190,6 @@ router.get("/SozlukTekrariKontrol", (req, res) => {
     var KullaniciID = req.query.KullaniciID;
     var Tarih = req.query.Date;
 
-    console.log(KullaniciID);
-    console.log(Tarih);
-
     con.query(
         "SELECT SozlukGiris FROM gunlukgiris WHERE KullaniciID = ? AND Tarih = ?",
         [KullaniciID, Tarih],
@@ -1250,6 +1248,32 @@ router.get("/GunlukGorevEgzersizKontrol", (req, res) => {
             }
         }
     );
+});
+
+router.post("/GunlukGorevTamamlandi", (req, res) => {
+    var con = getDb.getConnection();
+
+    var KullaniciID = req.body.KullaniciID;
+    var Tarih = req.body.Date;
+
+    console.log(KullaniciID);
+    console.log(Tarih);
+
+    con.query("SELECT TamamlandiMi FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], (err, result) => {
+        if (err) throw err;
+        console.log(result);
+
+        // Eğer sonuç boşsa, UPDATE işlemini yap
+        if (!result || result.length === 0 || result[0].TamamlandiMi === null) {
+            con.query("UPDATE gunlukgorev SET TamamlandiMi = 1 WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], (err, result) => {
+                if (err) throw err;
+
+                res.json({ message: "success" });
+            });
+        } else {
+            res.json({ message: "failed" });
+        }
+    });
 });
 
 module.exports = router
