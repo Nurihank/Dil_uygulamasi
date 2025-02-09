@@ -29,7 +29,7 @@ async function userEmail(email) {
 
 router.post("/signup", async (req, res) => {
     var con = getDb.getConnection();
-    const  kullaniciAdi = req.body.kullaniciAdi
+    const kullaniciAdi = req.body.kullaniciAdi
     const eposta = req.body.eposta;
     const sifre = req.body.sifre
 
@@ -582,7 +582,7 @@ router.get("/Egitim", (req, res) => {  //eğitimde bir de kullanıcının meslek
     })
 })
 
-router.post("/SozlugeKelimeEkleme", (req, res) => {  
+router.post("/SozlugeKelimeEkleme", (req, res) => {
     var con = getDb.getConnection()
 
     const KullaniciID = req.body.KullaniciID;
@@ -599,7 +599,7 @@ router.post("/SozlugeKelimeEkleme", (req, res) => {
         if (count > 0) {
             res.json({ message: "Bu Kelime Zaten Sözlüğünde Var" });
         } else {
-            con.query("INSERT INTO sozluk (KullaniciID, AnaKelimeID,Tarih) VALUES (?, ?,?)", [KullaniciID, AnaKelimeID,Date], (err, result) => {
+            con.query("INSERT INTO sozluk (KullaniciID, AnaKelimeID,Tarih) VALUES (?, ?,?)", [KullaniciID, AnaKelimeID, Date], (err, result) => {
                 if (err) throw err;
                 res.json({ message: "Başarıyla Eklendi" });
             });
@@ -664,18 +664,18 @@ router.post("/OynananOyun", function (req, res) {
     var GectiMi = req.body.GectiMi
     con.query("SELECT COUNT(*) AS count FROM oynananbolumler WHERE KullaniciID=? AND BolumID=?", [KullaniciID, BolumID], function (err, result) {
         if (result[0].count > 0) {
-            
 
-            con.query("SELECT GectiMi FROM oynananbolumler WHERE KullaniciID = ? AND BolumID = ?",[KullaniciID,BolumID],(err,result)=>{
-                if(err){throw err}
+
+            con.query("SELECT GectiMi FROM oynananbolumler WHERE KullaniciID = ? AND BolumID = ?", [KullaniciID, BolumID], (err, result) => {
+                if (err) { throw err }
 
                 console.log(result[0].GectiMi)
-                if(result[0].GectiMi){
+                if (result[0].GectiMi) {
                     res.json({
                         message: "Zaten Bu Bölümü Geçmiş"
                     });
-                }else{
-                    con.query("UPDATE oynananbolumler SET GectiMi = ? , Tarih = ? WHERE KullaniciID = ? AND BolumID = ?",[GectiMi,Tarih,KullaniciID,BolumID],(err,result)=>{
+                } else {
+                    con.query("UPDATE oynananbolumler SET GectiMi = ? , Tarih = ? WHERE KullaniciID = ? AND BolumID = ?", [GectiMi, Tarih, KullaniciID, BolumID], (err, result) => {
                         res.json({
                             message: "succes"
                         });
@@ -683,7 +683,7 @@ router.post("/OynananOyun", function (req, res) {
                 }
             })
         } else {
-            con.query("INSERT INTO oynananbolumler (KullaniciID,BolumID,Tarih,GectiMi) VALUES (?,?,?,?)", [KullaniciID, BolumID,Tarih,GectiMi], function (err, result) {
+            con.query("INSERT INTO oynananbolumler (KullaniciID,BolumID,Tarih,GectiMi) VALUES (?,?,?,?)", [KullaniciID, BolumID, Tarih, GectiMi], function (err, result) {
                 if (err) throw err;
                 res.json({
                     message: "succes"
@@ -718,7 +718,7 @@ router.post("/GecilenSezonEkle", function (req, res) {
                 message: "failed"
             });
         } else {
-            con.query("INSERT INTO gecilensezonlar (KullaniciID,SezonID,Tarih) VALUES (?,?,?)", [KullaniciID, SezonID,Tarih], function (err, result) {
+            con.query("INSERT INTO gecilensezonlar (KullaniciID,SezonID,Tarih) VALUES (?,?,?)", [KullaniciID, SezonID, Tarih], function (err, result) {
                 if (err) throw err;
                 res.json({
                     message: "succes"
@@ -746,8 +746,8 @@ router.get("/SezonBittiMiKontrol", (req, res) => {
     const KullaniciID = req.query.KullaniciID;
     const SezonID = req.query.SezonID;
 
-    console.log("a "+KullaniciID)
-    console.log("b "+SezonID)
+    console.log("a " + KullaniciID)
+    console.log("b " + SezonID)
 
     // SezonID ile bölümleri al
     con.query("SELECT * FROM bolum WHERE SezonID = ?", [SezonID], (err, bolumlerResult) => {
@@ -868,22 +868,22 @@ router.post("/OynananTemelOyun", (req, res) => {
 
         if (result[0].count) {
 
-            con.query("SELECT GectiMi FROM oynanantemelbolumler WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ? and Tarih = ?",[KullaniciID,BolumID,KategoriID,Tarih],(err,result)=>{
-                if(err){throw err}
+            con.query("SELECT GectiMi FROM oynanantemelbolumler WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ? and Tarih = ?", [KullaniciID, BolumID, KategoriID, Tarih], (err, result) => {
+                if (err) { throw err }
 
-                if(result[0].GectiMi){
+                if (result[0].GectiMi) {
                     res.json({ message: "Bu Bölümü Daha Önce Geçmişsin" })
 
-                }else{
-                    con.query("UPDATE oynanantemelbolumler SET GectiMi = ? , Tarih = ? WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ?",[GectiMi,Tarih,KullaniciID,BolumID,KategoriID],(err,result)=>{
-                        if(err){throw err}
+                } else {
+                    con.query("UPDATE oynanantemelbolumler SET GectiMi = ? , Tarih = ? WHERE KullaniciID = ? AND GecilenBolumID = ? AND KategoriID = ?", [GectiMi, Tarih, KullaniciID, BolumID, KategoriID], (err, result) => {
+                        if (err) { throw err }
                         res.json({ message: "succes" })
 
                     })
                 }
             })
         } else {
-            con.query("INSERT INTO oynanantemelbolumler (GecilenBolumID,KategoriID,KullaniciID,Tarih,GectiMi) values(?,?,?,?,?)", [BolumID, KategoriID, KullaniciID,Tarih,GectiMi], (err, result) => {
+            con.query("INSERT INTO oynanantemelbolumler (GecilenBolumID,KategoriID,KullaniciID,Tarih,GectiMi) values(?,?,?,?,?)", [BolumID, KategoriID, KullaniciID, Tarih, GectiMi], (err, result) => {
                 if (err) { throw err }
                 res.json({ message: "succes" })
             })
@@ -915,7 +915,7 @@ router.post("/temelSozluk", (req, res) => {
         console.log(result[0].count)
 
         if (result[0].count == 0) {
-            con.query("INSERT INTO temelkelimelersozluk (KelimeID,KullaniciID,Tarih) values(?,?,?)", [KelimeID, KullaniciID,Tarih], (err, result) => {
+            con.query("INSERT INTO temelkelimelersozluk (KelimeID,KullaniciID,Tarih) values(?,?,?)", [KelimeID, KullaniciID, Tarih], (err, result) => {
                 if (err) { throw err }
 
                 res.json({ message: "Sözlüğe Eklendi" })
@@ -961,52 +961,52 @@ router.delete("/temelSozluk", (req, res) => {
     });
 });
 
-router.get("/temelIlerleme",(req,res)=>{  /* temel eğitimdeki ilerleme barı */
+router.get("/temelIlerleme", (req, res) => {  /* temel eğitimdeki ilerleme barı */
     var con = getDb.getConnection();
 
     const id = req.query.id
 
-    con.query("SELECT COUNT(*) AS count FROM temelBolumler",(err,result)=>{
-        if(err) {throw err}
+    con.query("SELECT COUNT(*) AS count FROM temelBolumler", (err, result) => {
+        if (err) { throw err }
 
         const bolumSayisi = result[0].count
 
-        con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE KullaniciID = ? and GectiMi = 1",[id],(err,results)=>{
+        con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE KullaniciID = ? and GectiMi = 1", [id], (err, results) => {
             if (err) { throw err }
 
             const gecilenBolumSayisi = results[0].count
-         
-            res.json({bolumSayisi:bolumSayisi,gecilenBolumSayisi:gecilenBolumSayisi})
+
+            res.json({ bolumSayisi: bolumSayisi, gecilenBolumSayisi: gecilenBolumSayisi })
         })
     })
 })
 
-router.get("/egzersiz",(req,res)=>{
+router.get("/egzersiz", (req, res) => {
     var con = getDb.getConnection();
 
-    con.query("SELECT * FROM egzersiz",(err,result)=>{
+    con.query("SELECT * FROM egzersiz", (err, result) => {
         if (err) { throw err }
 
-        res.json({message:result})
+        res.json({ message: result })
     })
 })
 
-router.post("/yanlisBilinenKelime",(req,res)=>{ /* yanlis bilinen kelime kaydetme */
+router.post("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime kaydetme */
     var con = getDb.getConnection();
 
     var KelimeID = req.body.KelimeID
     var KullaniciID = req.body.KullaniciID
     var TemelMi = req.body.TemelMi
-var Tarih = req.body.Date
-    con.query("SELECT COUNT(*) as count FROM yanlisbilinenkelimeler WHERE KelimeID = ? AND KullaniciID = ?",[KelimeID,KullaniciID],(err,result)=>{
+    var Tarih = req.body.Date
+    con.query("SELECT COUNT(*) as count FROM yanlisbilinenkelimeler WHERE KelimeID = ? AND KullaniciID = ?", [KelimeID, KullaniciID], (err, result) => {
         if (err) { throw err }
 
         const count = result[0].count
 
-        if(count > 0){
-            res.json({message:"Zaten Ekli"})
-        }else{
-            con.query("INSERT INTO yanlisbilinenkelimeler (KelimeID,KullaniciID,temelMi,aktifMi,Tarih) values(?,?,?,1,?)", [KelimeID, KullaniciID, TemelMi,Tarih], (err, result) => {
+        if (count > 0) {
+            res.json({ message: "Zaten Ekli" })
+        } else {
+            con.query("INSERT INTO yanlisbilinenkelimeler (KelimeID,KullaniciID,temelMi,aktifMi,Tarih) values(?,?,?,1,?)", [KelimeID, KullaniciID, TemelMi, Tarih], (err, result) => {
                 if (err) { throw err }
 
                 if (result.affectedRows > 0) {
@@ -1017,7 +1017,7 @@ var Tarih = req.body.Date
             })
         }
     })
-    
+
 })
 
 router.get("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime getirme */
@@ -1028,19 +1028,19 @@ router.get("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime geti
     console.log(TemelMi)
 
     console.log(TemelMi)
-    if(TemelMi == 1){
-        con.query("SELECT ybk.KelimeID,ybk.KullaniciID,tk.value,tkc.Ceviri,tk.Image FROM yanlisbilinenkelimeler ybk INNER JOIN temelkelimeler tk ON ybk.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE ybk.KullaniciID = ? AND ybk.temelMi = 1 AND ybk.aktifMi=1",[KullaniciID],(err,result)=>{
+    if (TemelMi == 1) {
+        con.query("SELECT ybk.KelimeID,ybk.KullaniciID,tk.value,tkc.Ceviri,tk.Image FROM yanlisbilinenkelimeler ybk INNER JOIN temelkelimeler tk ON ybk.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE ybk.KullaniciID = ? AND ybk.temelMi = 1 AND ybk.aktifMi=1", [KullaniciID], (err, result) => {
             if (err) { throw err }
 
-            res.json({message:result})
+            res.json({ message: result })
         })
-    }else if(TemelMi == 0){
+    } else if (TemelMi == 0) {
         con.query("SELECT ybk.KullaniciID, ybk.KelimeID, ak.Value, c.Ceviri FROM yanlisbilinenkelimeler ybk INNER JOIN anakelimeler ak ON ybk.KelimeID = ak.AnaKelimelerID INNER JOIN ceviriler c ON c.AnaKelimeID = ak.AnaKelimelerID WHERE ybk.KullaniciID = ? AND ybk.TemelMi = 0 AND ybk.aktifMi=1", [KullaniciID], (err, result) => {
             if (err) { throw err }
 
             res.json({ message: result })
         })
-}
+    }
 })
 
 router.put("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime silme(değiştirme aktifliği) */
@@ -1052,8 +1052,8 @@ router.put("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime silm
     console.log(temelMi)
     console.log(KullaniciID)
 
-    con.query("UPDATE yanlisbilinenkelimeler ybk SET ybk.aktifMi = 0 WHERE ybk.kullaniciID = ? AND ybk.KelimeID = ? AND ybk.temelMi=?",[KullaniciID,KelimeID,temelMi],(err,result)=>{
-        if(err) {throw err}
+    con.query("UPDATE yanlisbilinenkelimeler ybk SET ybk.aktifMi = 0 WHERE ybk.kullaniciID = ? AND ybk.KelimeID = ? AND ybk.temelMi=?", [KullaniciID, KelimeID, temelMi], (err, result) => {
+        if (err) { throw err }
 
         if (result.affectedRows > 0) {
             res.json({ message: "Başarıyla Değişti" });
@@ -1063,7 +1063,7 @@ router.put("/yanlisBilinenKelime", (req, res) => { /* yanlis bilinen kelime silm
     })
 })
 
-router.get("/dinlemeEgzersizi",(req,res)=>{
+router.get("/dinlemeEgzersizi", (req, res) => {
     var con = getDb.getConnection();
     const KullaniciID = req.query.KullaniciID
     const temelMi = req.query.temelMi
@@ -1071,17 +1071,17 @@ router.get("/dinlemeEgzersizi",(req,res)=>{
     const HangiDilID = req.query.HangiDilID
     const MeslekID = req.query.MeslekID
 
-    if(temelMi == 0){
-        con.query("SELECT ak.AnaKelimelerID AS id , ak.Value ,c.Ceviri FROM anakelimeler ak INNER JOIN ceviriler c ON ak.AnaKelimelerID = c.AnaKelimeID WHERE ak.test = 1 AND c.AnaDilID = ?  AND c.HangiDilID = ? AND ak.MeslekID = ?",[AnaDilID,HangiDilID,MeslekID],(err,result)=>{
-            if(err) throw err
+    if (temelMi == 0) {
+        con.query("SELECT ak.AnaKelimelerID AS id , ak.Value ,c.Ceviri FROM anakelimeler ak INNER JOIN ceviriler c ON ak.AnaKelimelerID = c.AnaKelimeID WHERE ak.test = 1 AND c.AnaDilID = ?  AND c.HangiDilID = ? AND ak.MeslekID = ?", [AnaDilID, HangiDilID, MeslekID], (err, result) => {
+            if (err) throw err
 
-            res.json({message:result})
+            res.json({ message: result })
         })
-    }else if(temelMi == 1){
-        con.query("SELECT tk.id,tk.value,tkc.Ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ?",[AnaDilID,HangiDilID],(err,result)=>{
-            if(err) throw err
+    } else if (temelMi == 1) {
+        con.query("SELECT tk.id,tk.value,tkc.Ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ?", [AnaDilID, HangiDilID], (err, result) => {
+            if (err) throw err
 
-            res.json({message:result})
+            res.json({ message: result })
 
         })
     }
@@ -1111,76 +1111,76 @@ router.post("/GunlukGorevSozluk", function (req, res) {
     })
 });
 
-router.post("/GunlukGorevHata",(req,res)=>{  /* hataları gözden geçirme ekranaına baktıysa bu api çalışcak */
+router.post("/GunlukGorevHata", (req, res) => {  /* hataları gözden geçirme ekranaına baktıysa bu api çalışcak */
     var con = getDb.getConnection();
     var KullaniciID = req.body.KullaniciID;
     var Tarih = req.body.Date;
 
-    con.query("SELECT COUNT(*) AS count FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?",[KullaniciID,Tarih],(err,result)=>{
-        if(err) {throw err}
+    con.query("SELECT COUNT(*) AS count FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], (err, result) => {
+        if (err) { throw err }
 
-        if(result[0].count){
-            con.query("UPDATE gunlukgorev SET HataEgzersiz=1 WHERE KullaniciID = ? AND Tarih = ?",[KullaniciID,Tarih],(err,result)=>{
-                if(err) {throw err}
+        if (result[0].count) {
+            con.query("UPDATE gunlukgorev SET HataEgzersiz=1 WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], (err, result) => {
+                if (err) { throw err }
 
-                res.json({message:"succes"})
+                res.json({ message: "succes" })
             })
-        }else{
-            con.query("INSERT INTO gunlukgorev (KullaniciID,Tarih,HataEgzersiz) values(?,?,?)",[KullaniciID,Tarih,1],(err,result)=>{
-                if(err) {throw err}
+        } else {
+            con.query("INSERT INTO gunlukgorev (KullaniciID,Tarih,HataEgzersiz) values(?,?,?)", [KullaniciID, Tarih, 1], (err, result) => {
+                if (err) { throw err }
 
-                res.json({message:"succes"})
-            })
-        }
-    })
-})
- 
-router.post("/GunlukGorevEgzersiz",(req,res)=>{  /* egzersiz yaparsa kaydetcek */
-    var con = getDb.getConnection();
-    var KullaniciID = req.body.KullaniciID;
-    var Tarih = req.body.Date;
-
-    con.query("SELECT COUNT(*) as count FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?",[KullaniciID,Tarih],(err,result)=>{
-        if(err) {throw err}
-
-
-        if (result[0].count){
-            con.query("UPDATE gunlukgorev SET Egzersiz=1 WHERE KullaniciID = ? AND Tarih = ?",[KullaniciID,Tarih],(err,result)=>{
-                if(err) {throw err}
-
-                res.json({message:"succes"})
-            })
-        }else{
-            con.query("INSERT INTO gunlukgorev (KullaniciID,Tarih,Egzersiz) values(?,?,?)",[KullaniciID,Tarih,1],(err,result)=>{
-                if(err) {throw err}
-
-                res.json({message:"succes"})
+                res.json({ message: "succes" })
             })
         }
     })
 })
 
-router.get("/MeslekiEgitimKontrol",(req,res)=>{
+router.post("/GunlukGorevEgzersiz", (req, res) => {  /* egzersiz yaparsa kaydetcek */
     var con = getDb.getConnection();
+    var KullaniciID = req.body.KullaniciID;
+    var Tarih = req.body.Date;
 
-    var KullaniciID = req.query.KullaniciID
-    var Tarih = req.query.Date
+    con.query("SELECT COUNT(*) as count FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], (err, result) => {
+        if (err) { throw err }
 
-    con.query("SELECT COUNT(*) as count FROM oynananbolumler WHERE KullaniciID = ? AND Tarih = ? AND GectiMi = 1",[KullaniciID,Tarih],(err,result)=>{
-        if(err) throw err
-        res.json({message:result[0].count})
+
+        if (result[0].count) {
+            con.query("UPDATE gunlukgorev SET Egzersiz=1 WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], (err, result) => {
+                if (err) { throw err }
+
+                res.json({ message: "succes" })
+            })
+        } else {
+            con.query("INSERT INTO gunlukgorev (KullaniciID,Tarih,Egzersiz) values(?,?,?)", [KullaniciID, Tarih, 1], (err, result) => {
+                if (err) { throw err }
+
+                res.json({ message: "succes" })
+            })
+        }
     })
 })
 
-router.get("/TemelEgitimKontrol",(req,res)=>{
+router.get("/MeslekiEgitimKontrol", (req, res) => {
     var con = getDb.getConnection();
 
     var KullaniciID = req.query.KullaniciID
     var Tarih = req.query.Date
 
-    con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE  KullaniciID = ? AND Tarih = ? AND GectiMi = 1",[KullaniciID,Tarih],(err,result)=>{
-        if(err) throw err
-        res.json({message:result[0].count})
+    con.query("SELECT COUNT(*) as count FROM oynananbolumler WHERE KullaniciID = ? AND Tarih = ? AND GectiMi = 1", [KullaniciID, Tarih], (err, result) => {
+        if (err) throw err
+        res.json({ message: result[0].count })
+    })
+})
+
+router.get("/TemelEgitimKontrol", (req, res) => {
+    var con = getDb.getConnection();
+
+    var KullaniciID = req.query.KullaniciID
+    var Tarih = req.query.Date
+
+    con.query("SELECT COUNT(*) AS count FROM oynanantemelbolumler WHERE  KullaniciID = ? AND Tarih = ? AND GectiMi = 1", [KullaniciID, Tarih], (err, result) => {
+        if (err) throw err
+        res.json({ message: result[0].count })
     })
 })
 
@@ -1256,8 +1256,7 @@ router.post("/GunlukGorevTamamlandi", (req, res) => {
     var KullaniciID = req.body.KullaniciID;
     var Tarih = req.body.Date;
 
-    console.log(KullaniciID);
-    console.log(Tarih);
+
 
     con.query("SELECT TamamlandiMi FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], (err, result) => {
         if (err) throw err;
@@ -1276,4 +1275,17 @@ router.post("/GunlukGorevTamamlandi", (req, res) => {
     });
 });
 
+router.get("/Test", (req, res) => {
+    var con = getDb.getConnection();
+
+    var MeslekID = req.query.MeslekID;
+    var DilID = req.query.DilID;
+    var OgrencegiDilID = req.query.OgrencegiDilID;
+
+    con.query("CALL TestOlusturma(?,?,?)", [MeslekID, DilID, OgrencegiDilID],(err,result)=>{
+        if (err) throw err;
+
+        res.json({message:result})
+    })
+})
 module.exports = router

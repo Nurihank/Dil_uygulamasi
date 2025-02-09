@@ -1406,8 +1406,6 @@ router.post("/GunlukGorevTamamlandi", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var Tarih = req.body.Date;
-  console.log(KullaniciID);
-  console.log(Tarih);
   con.query("SELECT TamamlandiMi FROM gunlukgorev WHERE KullaniciID = ? AND Tarih = ?", [KullaniciID, Tarih], function (err, result) {
     if (err) throw err;
     console.log(result);
@@ -1425,6 +1423,18 @@ router.post("/GunlukGorevTamamlandi", function (req, res) {
         message: "failed"
       });
     }
+  });
+});
+router.get("/Test", function (req, res) {
+  var con = getDb.getConnection();
+  var MeslekID = req.query.MeslekID;
+  var DilID = req.query.DilID;
+  var OgrencegiDilID = req.query.OgrencegiDilID;
+  con.query("CALL TestOlusturma(?,?,?)", [MeslekID, DilID, OgrencegiDilID], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: result
+    });
   });
 });
 module.exports = router;
