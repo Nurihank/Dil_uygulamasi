@@ -1288,4 +1288,32 @@ router.get("/Test", (req, res) => {
         res.json({message:result})
     })
 })
+
+router.post("/test",(req,res)=>{
+    var con = getDb.getConnection();
+
+    var name = req.body.Name;
+
+    con.query("INSERT INTO test (GirilenAd) values(?)",[name],(err,result)=>{
+        if (err) throw err;
+
+        res.json({ success: true, id: result.insertId });
+    })
+})
+
+router.post("/TestSorulari",(req,res)=>{
+    var con = getDb.getConnection();
+
+    var TestID = req.body.TestID
+    var KelimeID = req.body.KelimeID
+    var dogruMu = req.body.dogruMu
+
+    console.log(KelimeID)
+    con.query("INSERT INTO testsorulari (TestID,KelimeID,dogruMu) values(?,?,?)",[TestID,KelimeID,dogruMu],(err,result)=>{
+        if (err) throw err;
+
+        res.json({message:"succes"})
+    })
+
+})
 module.exports = router

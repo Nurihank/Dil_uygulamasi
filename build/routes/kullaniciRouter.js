@@ -1437,4 +1437,28 @@ router.get("/Test", function (req, res) {
     });
   });
 });
+router.post("/test", function (req, res) {
+  var con = getDb.getConnection();
+  var name = req.body.Name;
+  con.query("INSERT INTO test (GirilenAd) values(?)", [name], function (err, result) {
+    if (err) throw err;
+    res.json({
+      success: true,
+      id: result.insertId
+    });
+  });
+});
+router.post("/TestSorulari", function (req, res) {
+  var con = getDb.getConnection();
+  var TestID = req.body.TestID;
+  var KelimeID = req.body.KelimeID;
+  var dogruMu = req.body.dogruMu;
+  console.log(KelimeID);
+  con.query("INSERT INTO testsorulari (TestID,KelimeID,dogruMu) values(?,?,?)", [TestID, KelimeID, dogruMu], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: "succes"
+    });
+  });
+});
 module.exports = router;
