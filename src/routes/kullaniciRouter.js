@@ -19,11 +19,12 @@ async function userEmail(email) {
     var result = await query("Select COUNT(*) as sayi FROM kullanici WHERE email = ?", email)
 
     var sayiString = JSON.parse(JSON.stringify(result))
-    if (sayiString[0].sayi == 1) {
-        return true
+    console.log(sayiString[0].sayi)
+    if (sayiString[0].sayi > 0) {
+        return false
     }
     else {
-        return false
+        return true
     }
 }
 
@@ -32,10 +33,6 @@ router.post("/signup", async (req, res) => {
     const kullaniciAdi = req.body.kullaniciAdi
     const eposta = req.body.eposta;
     const sifre = req.body.sifre
-
-    console.log(eposta)
-    console.log(sifre)
-    console.log(kullaniciAdi)
 
     var getUserInfo = userModel.user
     var userInfo = new getUserInfo(kullaniciAdi)
@@ -47,21 +44,23 @@ router.post("/signup", async (req, res) => {
         console.log(isUserExist)
         console.log(isEmailExist)
 
-        if (!(isUserExist && isEmailExist)) {
+        if (!isUserExist || !isEmailExist) { // Eğer herhangi biri veya ikisi de false ise
             return res.status(400).json({
                 status: "FAILED",
                 message: "Girdiğiniz bilgilerle kayıt oluşturulamıyor."
             });
         }
 
+
         var passwordToken = md5(sifre)
 
-        con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], (err) => {
+        con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], (err,result) => {
             if (err) throw err;
 
             res.json({
                 status: "SUCCESS",
-                message: "Başarılı bir şekilde kayıt oldunuz."
+                message: "Başarılı bir şekilde kayıt oldunuz.",
+                userId: result.insertId  // Eklenen kullanıcının ID'sini döndür
             });
         });
     } catch (error) {
@@ -1282,38 +1281,88 @@ router.get("/Test", (req, res) => {
     var DilID = req.query.DilID;
     var OgrencegiDilID = req.query.OgrencegiDilID;
 
-    con.query("CALL TestOlusturma(?,?,?)", [MeslekID, DilID, OgrencegiDilID],(err,result)=>{
+    con.query("CALL TestOlusturma(?,?,?)", [MeslekID, DilID, OgrencegiDilID], (err, result) => {
         if (err) throw err;
 
-        res.json({message:result})
+        res.json({ message: result })
     })
 })
 
-router.post("/test",(req,res)=>{
+router.post("/test", (req, res) => {
     var con = getDb.getConnection();
 
     var name = req.body.Name;
+    var Tarih = req.body.Date;
 
-    con.query("INSERT INTO test (GirilenAd) values(?)",[name],(err,result)=>{
+    con.query("INSERT INTO test (GirilenAd,Tarih) values(?,?)", [name, Tarih], (err, result) => {
         if (err) throw err;
 
         res.json({ success: true, id: result.insertId });
     })
 })
 
-router.post("/TestSorulari",(req,res)=>{
+router.post("/TestSorulari", (req, res) => {
     var con = getDb.getConnection();
 
     var TestID = req.body.TestID
     var KelimeID = req.body.KelimeID
     var dogruMu = req.body.dogruMu
 
-    console.log(KelimeID)
-    con.query("INSERT INTO testsorulari (TestID,KelimeID,dogruMu) values(?,?,?)",[TestID,KelimeID,dogruMu],(err,result)=>{
+    con.query("INSERT INTO testsorulari (TestID,KelimeID,dogruMu) values(?,?,?)", [TestID, KelimeID, dogruMu], (err, result) => {
         if (err) throw err;
 
-        res.json({message:"succes"})
+        res.json({ message: "succes" })
     })
 
+})
+
+router.post("/TestIDKaydet", (req, res) => {
+    var con = getDb.getConnection();
+
+    var TestID = req.body.TestID;
+    var KullaniciID = req.body.KullaniciID;
+
+    con.query("SELECT TestID FROM kullanici WHERE id = ?", [KullaniciID], (err, result) => {
+        if (err) {
+            return res.status(500).json({ status: "ERROR", message: "Veritabanı hatası", error: err });
+        }
+
+        // Kullanıcı bulunamadıysa
+        if (result.length === 0) {
+            return res.status(404).json({ status: "ERROR", message: "Kullanıcı bulunamadı" });
+        }
+
+        con.query("SELECT TestID FROM kullanici WHERE id = ?", [KullaniciID], (err, result) => {
+            if (err) {
+                return res.status(500).json({ status: "ERROR", message: "Veritabanı hatası", error: err });
+            }
+
+            // Eğer daha önce TestID varsa, işlem yapılmasın
+            if (result[0] && result[0].TestID !== null) {
+                return res.json({ status: "FAIL", message: "Zaten test yapmışsınız." });
+            }
+
+            // TestID daha önce kaydedilmemişse, güncelleme işlemi yapılacak
+            con.query("UPDATE kullanici SET TestID = ? WHERE id = ?", [TestID, KullaniciID], (updateErr) => {
+                if (updateErr) {
+                    return res.status(500).json({ status: "ERROR", message: "TestID kaydedilirken hata oluştu", error: updateErr });
+                }
+                return res.json({ status: "SUCCESS", message: "TestID başarıyla kaydedildi." });
+            });
+        });
+    });
+});
+
+router.get("/TestSonucu",(req,res)=>{
+    var con = getDb.getConnection();
+
+    var KullaniciID = req.query.KullaniciID
+    console.log(KullaniciID)
+    con.query("SELECT k.TestID, ak.AnaKelimelerID,ts.dogruMu,sv.SeviyeAdi,sv.Order FROM kullanici k INNER JOIN testsorulari ts ON k.TestID = ts.TestID INNER JOIN anakelimeler ak ON ts.KelimeID = ak.AnaKelimelerID INNER JOIN bolum b ON ak.BolumID = b.BolumID INNER JOIN sezon s ON b.SezonID = s.SezonID INNER JOIN seviye sv ON s.SeviyeID = sv.SeviyeID WHERE k.id = ? ORDER BY sv.Order asc",[KullaniciID],(err,result)=>{
+        if (err) throw err;
+
+        console.log(result)
+        res.json({message:result})
+    })
 })
 module.exports = router

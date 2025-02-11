@@ -30,14 +30,15 @@ function _userEmail() {
         case 2:
           result = _context9.sent;
           sayiString = JSON.parse(JSON.stringify(result));
-          if (!(sayiString[0].sayi == 1)) {
-            _context9.next = 8;
+          console.log(sayiString[0].sayi);
+          if (!(sayiString[0].sayi > 0)) {
+            _context9.next = 9;
             break;
           }
-          return _context9.abrupt("return", true);
-        case 8:
           return _context9.abrupt("return", false);
         case 9:
+          return _context9.abrupt("return", true);
+        case 10:
         case "end":
           return _context9.stop();
       }
@@ -55,53 +56,51 @@ router.post("/signup", /*#__PURE__*/function () {
           kullaniciAdi = req.body.kullaniciAdi;
           eposta = req.body.eposta;
           sifre = req.body.sifre;
-          console.log(eposta);
-          console.log(sifre);
-          console.log(kullaniciAdi);
           getUserInfo = userModel.user;
           userInfo = new getUserInfo(kullaniciAdi);
-          _context.prev = 9;
-          _context.next = 12;
+          _context.prev = 6;
+          _context.next = 9;
           return userInfo.userFind(kullaniciAdi);
-        case 12:
+        case 9:
           isUserExist = _context.sent;
-          _context.next = 15;
+          _context.next = 12;
           return userEmail(eposta);
-        case 15:
+        case 12:
           isEmailExist = _context.sent;
           console.log(isUserExist);
           console.log(isEmailExist);
-          if (isUserExist && isEmailExist) {
-            _context.next = 20;
+          if (!(!isUserExist || !isEmailExist)) {
+            _context.next = 17;
             break;
           }
           return _context.abrupt("return", res.status(400).json({
             status: "FAILED",
             message: "Girdiğiniz bilgilerle kayıt oluşturulamıyor."
           }));
-        case 20:
+        case 17:
           passwordToken = (0, _md["default"])(sifre);
-          con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], function (err) {
+          con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], function (err, result) {
             if (err) throw err;
             res.json({
               status: "SUCCESS",
-              message: "Başarılı bir şekilde kayıt oldunuz."
+              message: "Başarılı bir şekilde kayıt oldunuz.",
+              userId: result.insertId // Eklenen kullanıcının ID'sini döndür
             });
           });
-          _context.next = 27;
+          _context.next = 24;
           break;
-        case 24:
-          _context.prev = 24;
-          _context.t0 = _context["catch"](9);
+        case 21:
+          _context.prev = 21;
+          _context.t0 = _context["catch"](6);
           res.status(500).json({
             status: "ERROR",
             message: "Bir hata oluştu."
           });
-        case 27:
+        case 24:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[9, 24]]);
+    }, _callee, null, [[6, 21]]);
   }));
   return function (_x2, _x3) {
     return _ref.apply(this, arguments);
@@ -1440,7 +1439,8 @@ router.get("/Test", function (req, res) {
 router.post("/test", function (req, res) {
   var con = getDb.getConnection();
   var name = req.body.Name;
-  con.query("INSERT INTO test (GirilenAd) values(?)", [name], function (err, result) {
+  var Tarih = req.body.Date;
+  con.query("INSERT INTO test (GirilenAd,Tarih) values(?,?)", [name, Tarih], function (err, result) {
     if (err) throw err;
     res.json({
       success: true,
@@ -1453,11 +1453,76 @@ router.post("/TestSorulari", function (req, res) {
   var TestID = req.body.TestID;
   var KelimeID = req.body.KelimeID;
   var dogruMu = req.body.dogruMu;
-  console.log(KelimeID);
   con.query("INSERT INTO testsorulari (TestID,KelimeID,dogruMu) values(?,?,?)", [TestID, KelimeID, dogruMu], function (err, result) {
     if (err) throw err;
     res.json({
       message: "succes"
+    });
+  });
+});
+router.post("/TestIDKaydet", function (req, res) {
+  var con = getDb.getConnection();
+  var TestID = req.body.TestID;
+  var KullaniciID = req.body.KullaniciID;
+  con.query("SELECT TestID FROM kullanici WHERE id = ?", [KullaniciID], function (err, result) {
+    if (err) {
+      return res.status(500).json({
+        status: "ERROR",
+        message: "Veritabanı hatası",
+        error: err
+      });
+    }
+
+    // Kullanıcı bulunamadıysa
+    if (result.length === 0) {
+      return res.status(404).json({
+        status: "ERROR",
+        message: "Kullanıcı bulunamadı"
+      });
+    }
+    con.query("SELECT TestID FROM kullanici WHERE id = ?", [KullaniciID], function (err, result) {
+      if (err) {
+        return res.status(500).json({
+          status: "ERROR",
+          message: "Veritabanı hatası",
+          error: err
+        });
+      }
+
+      // Eğer daha önce TestID varsa, işlem yapılmasın
+      if (result[0] && result[0].TestID !== null) {
+        return res.json({
+          status: "FAIL",
+          message: "Zaten test yapmışsınız."
+        });
+      }
+
+      // TestID daha önce kaydedilmemişse, güncelleme işlemi yapılacak
+      con.query("UPDATE kullanici SET TestID = ? WHERE id = ?", [TestID, KullaniciID], function (updateErr) {
+        if (updateErr) {
+          return res.status(500).json({
+            status: "ERROR",
+            message: "TestID kaydedilirken hata oluştu",
+            error: updateErr
+          });
+        }
+        return res.json({
+          status: "SUCCESS",
+          message: "TestID başarıyla kaydedildi."
+        });
+      });
+    });
+  });
+});
+router.get("/TestSonucu", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  console.log(KullaniciID);
+  con.query("SELECT k.TestID, ak.AnaKelimelerID,ts.dogruMu,sv.SeviyeAdi,sv.Order FROM kullanici k INNER JOIN testsorulari ts ON k.TestID = ts.TestID INNER JOIN anakelimeler ak ON ts.KelimeID = ak.AnaKelimelerID INNER JOIN bolum b ON ak.BolumID = b.BolumID INNER JOIN sezon s ON b.SezonID = s.SezonID INNER JOIN seviye sv ON s.SeviyeID = sv.SeviyeID WHERE k.id = ? ORDER BY sv.Order asc", [KullaniciID], function (err, result) {
+    if (err) throw err;
+    console.log(result);
+    res.json({
+      message: result
     });
   });
 });

@@ -39,14 +39,15 @@ exports.user = function (kullaniciAdi) {
         case 2:
           result = _context2.sent;
           sayiString = JSON.parse(JSON.stringify(result));
-          if (!(sayiString[0].sayi == 1)) {
-            _context2.next = 8;
+          console.log(sayiString[0].sayi);
+          if (!(sayiString[0].sayi > 0)) {
+            _context2.next = 9;
             break;
           }
-          return _context2.abrupt("return", true);
-        case 8:
           return _context2.abrupt("return", false);
         case 9:
+          return _context2.abrupt("return", true);
+        case 10:
         case "end":
           return _context2.stop();
       }
