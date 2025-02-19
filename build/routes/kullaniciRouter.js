@@ -1526,4 +1526,38 @@ router.get("/TestSonucu", function (req, res) {
     });
   });
 });
+router.post("/Egzersiz", function (req, res) {
+  /* yapılan egzersizleri kaydeden endpoint */
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var TemelMi = req.body.TemelMi;
+  var EgzersizID = req.body.EgzersizID;
+  var KelimeID = req.body.KelimeID;
+  var DogruMu = req.body.DogruMu;
+  con.query("SELECT COUNT(*) as count FROM egzersizistatistikleri WHERE KullaniciID = ? AND EgzersizID = ?  AND KelimeID = ? AND TemelMi = ?", [KullaniciID, EgzersizID, KelimeID, TemelMi], function (err, result) {
+    if (err) throw err;
+    console.log("egzersiz istatistik = " + result[0].count);
+    if (result[0].count > 0) {
+      con.query("UPDATE egzersizistatistikleri SET DogruMu = ? WHERE KullaniciID = ? AND EgzersizID = ? AND KelimeID = ? AND TemelMi = ?", [DogruMu, KullaniciID, EgzersizID, KelimeID, TemelMi], function (err, result) {
+        if (err) throw err;
+        res.json({
+          message: "Degistirildi"
+        });
+      });
+    } else {
+      con.query("INSERT INTO egzersizistatistikleri (KullaniciID,TemelMi,EgzersizID,KelimeID,DogruMu) values(?,?,?,?,?)", [KullaniciID, TemelMi, EgzersizID, KelimeID, DogruMu], function (err, result) {
+        if (err) throw err;
+        if (result.affectedRows > 0) {
+          res.json({
+            message: "Eklendi"
+          });
+        } else {
+          res.json({
+            message: "Ekleme Hatasi"
+          });
+        }
+      });
+    }
+  });
+});
 module.exports = router;

@@ -54,7 +54,7 @@ router.post("/signup", async (req, res) => {
 
         var passwordToken = md5(sifre)
 
-        con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], (err,result) => {
+        con.query("INSERT INTO kullanici (kullaniciAdi, şifre, email) values (?, ?, ?)", [kullaniciAdi, passwordToken, eposta], (err, result) => {
             if (err) throw err;
 
             res.json({
@@ -1353,16 +1353,52 @@ router.post("/TestIDKaydet", (req, res) => {
     });
 });
 
-router.get("/TestSonucu",(req,res)=>{
+router.get("/TestSonucu", (req, res) => {
     var con = getDb.getConnection();
 
     var KullaniciID = req.query.KullaniciID
     console.log(KullaniciID)
-    con.query("SELECT k.TestID, ak.AnaKelimelerID,ts.dogruMu,sv.SeviyeAdi,sv.Order FROM kullanici k INNER JOIN testsorulari ts ON k.TestID = ts.TestID INNER JOIN anakelimeler ak ON ts.KelimeID = ak.AnaKelimelerID INNER JOIN bolum b ON ak.BolumID = b.BolumID INNER JOIN sezon s ON b.SezonID = s.SezonID INNER JOIN seviye sv ON s.SeviyeID = sv.SeviyeID WHERE k.id = ? ORDER BY sv.Order asc",[KullaniciID],(err,result)=>{
+    con.query("SELECT k.TestID, ak.AnaKelimelerID,ts.dogruMu,sv.SeviyeAdi,sv.Order FROM kullanici k INNER JOIN testsorulari ts ON k.TestID = ts.TestID INNER JOIN anakelimeler ak ON ts.KelimeID = ak.AnaKelimelerID INNER JOIN bolum b ON ak.BolumID = b.BolumID INNER JOIN sezon s ON b.SezonID = s.SezonID INNER JOIN seviye sv ON s.SeviyeID = sv.SeviyeID WHERE k.id = ? ORDER BY sv.Order asc", [KullaniciID], (err, result) => {
         if (err) throw err;
 
         console.log(result)
-        res.json({message:result})
+        res.json({ message: result })
     })
+})
+
+router.post("/Egzersiz", (req, res) => { /* yapılan egzersizleri kaydeden endpoint */
+    var con = getDb.getConnection();
+
+    var KullaniciID = req.body.KullaniciID
+    var TemelMi = req.body.TemelMi
+    var EgzersizID = req.body.EgzersizID
+    var KelimeID = req.body.KelimeID
+    var DogruMu = req.body.DogruMu
+
+    con.query("SELECT COUNT(*) as count FROM egzersizistatistikleri WHERE KullaniciID = ? AND EgzersizID = ?  AND KelimeID = ? AND TemelMi = ?", [KullaniciID, EgzersizID, KelimeID, TemelMi], (err, result) => {
+        if (err) throw err
+
+        console.log("egzersiz istatistik = " + result[0].count)
+        if (result[0].count > 0) {
+            con.query("UPDATE egzersizistatistikleri SET DogruMu = ? WHERE KullaniciID = ? AND EgzersizID = ? AND KelimeID = ? AND TemelMi = ?", [DogruMu, KullaniciID, EgzersizID, KelimeID, TemelMi], (err, result) => {
+                if (err) throw err
+
+                res.json({ message: "Degistirildi" })
+            })
+        } else {
+            con.query("INSERT INTO egzersizistatistikleri (KullaniciID,TemelMi,EgzersizID,KelimeID,DogruMu) values(?,?,?,?,?)", [KullaniciID, TemelMi, EgzersizID, KelimeID, DogruMu], (err, result) => {
+                if (err) throw err
+
+                if (result.affectedRows > 0) {
+                    res.json({ message: "Eklendi" })
+
+                } else {
+                    res.json({ message: "Ekleme Hatasi" })
+                }
+            })
+        }
+    })
+
+
 })
 module.exports = router
