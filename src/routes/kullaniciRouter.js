@@ -567,12 +567,15 @@ router.get("/Oyun", (req, res) => {
     })
 })
 
-router.get("/Egitim", (req, res) => {  //eğitimde bir de kullanıcının meslek diline göre diline göre getirmeyi de kontoırl et
-    const SeviyeID = req.query.SeviyeID
-
+router.get("/Egitim", (req, res) => {  
     var con = getDb.getConnection();
 
-    con.query(" SELECT ak.AnaKelimelerID , ak.Value , c.Ceviri FROM anakelimeler ak JOIN bolum b ON ak.BolumID = b.BolumID JOIN sezon s ON b.SezonID = s.SezonID JOIN ceviriler c ON ak.AnaKelimelerID = c.AnakelimeID WHERE ak.test = 1 AND s.SeviyeID = ?", [SeviyeID], (err, result) => {
+    const SeviyeID = req.query.SeviyeID
+    const MeslekID = req.query.MeslekID
+    const AnaDilID = req.query.AnaDilID
+    const HangiDilID = req.query.HangiDilID
+
+    con.query("SELECT ak.AnaKelimelerID , ak.Value , c.Ceviri FROM seviye s INNER JOIN  sezon sz ON s.SeviyeID = sz.SeviyeID INNER JOIN bolum b ON b.SezonID = sz.SezonID INNER JOIN  anakelimeler ak ON ak.BolumID = b.BolumID INNER JOIN ceviriler c ON ak.AnaKelimelerID = c.AnaKelimeID  WHERE ak.MeslekID = ? AND c.AnaDilID = ? AND c.HangiDilID = ? AND s.SeviyeID = ? AND ak.test = 1;", [MeslekID,AnaDilID,HangiDilID,SeviyeID], (err, result) => {
         if (err) {
             throw err
         }
