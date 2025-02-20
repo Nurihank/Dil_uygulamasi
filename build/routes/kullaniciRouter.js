@@ -794,7 +794,6 @@ router.post("/OynananOyun", function (req, res) {
         if (err) {
           throw err;
         }
-        console.log(result[0].GectiMi);
         if (result[0].GectiMi) {
           res.json({
             message: "Zaten Bu Bölümü Geçmiş"
@@ -863,10 +862,6 @@ router.get("/SezonBittiMiKontrol", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SezonID = req.query.SezonID;
-  console.log("a " + KullaniciID);
-  console.log("b " + SezonID);
-
-  // SezonID ile bölümleri al
   con.query("SELECT * FROM bolum WHERE SezonID = ?", [SezonID], function (err, bolumlerResult) {
     if (err) {
       return res.status(500).json({
@@ -899,6 +894,63 @@ router.get("/SezonBittiMiKontrol", function (req, res) {
       res.json({
         sezonBittiMi: sezonBittiMi
       });
+    });
+  });
+});
+router.get("/SeviyeBittiMiKontrol", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var SeviyeID = req.query.SeviyeID;
+  con.query("SELECT * FROM sezon WHERE SeviyeID = ?", [SeviyeID], function (err, sezonlarResult) {
+    if (err) throw err;
+    con.query("SELECT * FROM gecilensezonlar WHERE KullaniciID = ?", [KullaniciID], function (err, gecilenSezonlarResult) {
+      if (err) throw err;
+      var sezonlarID = sezonlarResult.map(function (sezon) {
+        return sezon.SezonID;
+      });
+      var gecilenSezonlarID = gecilenSezonlarResult.map(function (sezon) {
+        return sezon.SezonID;
+      });
+      console.log(sezonlarID);
+      console.log(gecilenSezonlarID);
+      var seviyeBittiMi = sezonlarID.every(function (SezonID) {
+        return gecilenSezonlarID.includes(SezonID);
+      });
+      res.json({
+        seviyeBittiMi: seviyeBittiMi
+      });
+    });
+  });
+});
+router.post("/GecilenSeviyeEkle", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var SeviyeID = req.body.SeviyeID;
+  var Date = req.body.Date;
+  con.query("SELECT COUNT(*) as count FROM gecilenseviyeler WHERE KullaniciID = ? AND SeviyeID = ? ", [KullaniciID, SeviyeID], function (err, result) {
+    if (err) throw err;
+    console.log(result[0].count);
+    if (result[0].count > 0) {
+      res.json({
+        message: "failed"
+      });
+    } else {
+      con.query("INSERT INTO gecilenseviyeler (KullaniciID,SeviyeID,Tarih) values(?,?,?)", [KullaniciID, SeviyeID, Date], function (err, result) {
+        if (err) throw err;
+        res.json({
+          message: "succes"
+        });
+      });
+    }
+  });
+});
+router.get("/GecilenSeviyeler", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  con.query("SELECT * FROM gecilenseviyeler WHERE KullaniciID = ?", [KullaniciID], function (err, result) {
+    if (err) throw err;
+    res.json({
+      message: result
     });
   });
 });
