@@ -954,6 +954,27 @@ router.get("/GecilenSeviyeler", function (req, res) {
     });
   });
 });
+router.get("/MeslekiIlerleme", function (req, res) {
+  var con = getDb.getConnection();
+  var KullaniciID = req.query.KullaniciID;
+  var SeviyeID = req.query.SeviyeID;
+  //SELECT COUNT(*) FROM seviye s INNER JOIN sezon sz ON s.SeviyeID = sz.SeviyeID INNER JOIN bolum b ON b.SezonID = sz.SezonID WHERE s.SeviyeID = 1
+
+  con.query("SELECT COUNT(*) as count FROM seviye s INNER JOIN sezon sz ON s.SeviyeID = sz.SeviyeID INNER JOIN bolum b ON b.SezonID = sz.SezonID WHERE s.SeviyeID = ?", [SeviyeID], function (err, result) {
+    if (err) throw err;
+    var tumBolumler = result[0].count;
+    console.log(tumBolumler);
+    con.query("SELECT COUNT(*) as count FROM seviye s INNER JOIN sezon sz ON s.SeviyeID = sz.SeviyeID INNER JOIN bolum b ON b.SezonID = sz.SezonID INNER JOIN oynananbolumler ob ON b.BolumID = ob.BolumID WHERE s.SeviyeID = ? AND ob.KullaniciID = ? AND ob.GectiMi = 1", [SeviyeID, KullaniciID], function (err, result) {
+      if (err) throw err;
+      var gecilenBolumler = result[0].count;
+      console.log("gecilen bölümler = " + gecilenBolumler);
+      res.json({
+        tumBolumler: tumBolumler,
+        gecilenBolumler: gecilenBolumler
+      });
+    });
+  });
+});
 router.post("/GunlukGiris", function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
