@@ -403,7 +403,7 @@ router.get("/meslek", function (req, res) {
     });
   });
 });
-router.post("/meslekSecim", function (req, res) {
+router.post("/meslekSecim", userMiddleware, function (req, res) {
   var meslek = req.body.meslek;
   var id = req.body.id;
   var con = getDb.getConnection();
@@ -424,7 +424,7 @@ router.get("/dil", function (req, res) {
     });
   });
 });
-router.post("/dilSecim", function (req, res) {
+router.post("/dilSecim", userMiddleware, function (req, res) {
   var dil = req.body.dil;
   var id = req.body.id;
   var con = getDb.getConnection();
@@ -437,7 +437,7 @@ router.post("/dilSecim", function (req, res) {
     });
   });
 });
-router.post("/sectigiDilSecim", function (req, res) {
+router.post("/sectigiDilSecim", userMiddleware, function (req, res) {
   var sectigiDil = req.body.sectigiDil;
   var id = req.body.id;
   var con = getDb.getConnection();
@@ -450,7 +450,7 @@ router.post("/sectigiDilSecim", function (req, res) {
     });
   });
 });
-router.get("/user/:id", function (req, res) {
+router.get("/user/:id", userMiddleware, function (req, res) {
   var id = req.params.id;
   var con = getDb.getConnection();
   con.query("SELECT * FROM kullanici WHERE id = ?", [id], function (err, result) {
@@ -458,28 +458,6 @@ router.get("/user/:id", function (req, res) {
       throw err;
     }
     res.send(result);
-  });
-});
-router.post("/DilSeviyesi", function (req, res) {
-  var con = getDb.getConnection();
-  var dilSeviyesi = req.body.sectigiDil;
-  var id = req.body.id;
-  con.query("Update kullanici SET dilSeviyesi = ? WHERE id = ?", [dilSeviyesi, id], function (err, result) {
-    if (err) throw err;
-    res.json({
-      status: "SUCCES"
-    });
-  });
-});
-router.post("/NedenOgreniyor", function (req, res) {
-  var con = getDb.getConnection();
-  var nedenOgreniyor = req.body.nedenOgreniyor;
-  var id = req.body.id;
-  con.query("Update kullanici SET nedenOgreniyor = ? WHERE id = ?", [nedenOgreniyor, id], function (err, result) {
-    if (err) throw err;
-    res.json({
-      status: "SUCCES"
-    });
   });
 });
 router.get("/KullaniciBilgileri", userMiddleware, function (req, res) {
@@ -609,7 +587,7 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
                         var accessToken = _jsonwebtoken["default"].sign({
                           id: id
                         }, process.env.ACCESS_TOKEN_SECRET, {
-                          expiresIn: "30s"
+                          expiresIn: "30m"
                         });
 
                         // Yeni access token'ı veritabanında güncelle
@@ -652,7 +630,7 @@ router.put("/NewAccessToken", /*#__PURE__*/function () {
     return _ref7.apply(this, arguments);
   };
 }());
-router.get("/Seviye", function (req, res) {
+router.get("/Seviye", userMiddleware, function (req, res) {
   //seviye sezon bölüm bunları order'ına göre sıralama yapsın
   var con = getDb.getConnection();
   con.query("SELECT * FROM seviye ORDER BY seviye.Order", function (err, result) {
@@ -662,7 +640,7 @@ router.get("/Seviye", function (req, res) {
     res.json(result);
   });
 });
-router.get("/Sezon", function (req, res) {
+router.get("/Sezon", userMiddleware, function (req, res) {
   var SeviyeID = req.query.SeviyeID;
   var HangiDilID = req.query.HangiDilID;
   var con = getDb.getConnection();
@@ -673,7 +651,7 @@ router.get("/Sezon", function (req, res) {
     res.json(result);
   });
 });
-router.get("/Bolum", function (req, res) {
+router.get("/Bolum", userMiddleware, function (req, res) {
   var SezonID = req.query.SezonID;
   var HangiDilID = req.query.HangiDilID;
   var con = getDb.getConnection();
@@ -684,9 +662,7 @@ router.get("/Bolum", function (req, res) {
     res.json(result);
   });
 });
-
-//oyunun sorgusunu düzlet
-router.get("/Oyun", function (req, res) {
+router.get("/Oyun", userMiddleware, function (req, res) {
   var BolumID = req.query.BolumID;
   var con = getDb.getConnection();
   con.query("SELECT anakelimeler.AnaKelimelerID , ceviriler.AnaKelimeID , anakelimeler.value , ceviriler.ceviri FROM anakelimeler INNER JOIN ceviriler ON anakelimeler.AnaKelimelerID = ceviriler.AnaKelimeID WHERE anakelimeler.BolumID = ? AND anakelimeler.test = 1 ", [BolumID], function (err, result) {
@@ -696,7 +672,7 @@ router.get("/Oyun", function (req, res) {
     res.json(result);
   });
 });
-router.get("/Egitim", function (req, res) {
+router.get("/Egitim", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var SeviyeID = req.query.SeviyeID;
   var MeslekID = req.query.MeslekID;
@@ -709,7 +685,7 @@ router.get("/Egitim", function (req, res) {
     res.json(result);
   });
 });
-router.post("/SozlugeKelimeEkleme", function (req, res) {
+router.post("/SozlugeKelimeEkleme", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var AnaKelimeID = req.body.AnaKelimeID;
@@ -734,7 +710,7 @@ router.post("/SozlugeKelimeEkleme", function (req, res) {
     }
   });
 });
-router["delete"]("/SozluktenKelimeSilme", function (req, res) {
+router["delete"]("/SozluktenKelimeSilme", userMiddleware, function (req, res) {
   var KullaniciID = req.query.KullaniciID;
   var KelimeID = req.query.KelimeID;
   con.query("DELETE FROM sozluk WHERE KullaniciID = ? AND AnaKelimeID = ?", [KullaniciID, KelimeID], function (err, result) {
@@ -758,7 +734,7 @@ router["delete"]("/SozluktenKelimeSilme", function (req, res) {
     });
   });
 });
-router.get("/SozluguGetir", function (req, res) {
+router.get("/SozluguGetir", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   con.query("SELECT sozluk.SozlukID,anakelimeler.AnaKelimelerID, anakelimeler.Value,ceviriler.Ceviri FROM sozluk INNER JOIN anakelimeler ON sozluk.AnaKelimeID = anakelimeler.AnaKelimelerID INNER JOIN ceviriler ON ceviriler.AnaKelimeID = anakelimeler.AnaKelimelerID WHERE sozluk.KullaniciID = ?", [KullaniciID], function (err, result) {
@@ -768,7 +744,7 @@ router.get("/SozluguGetir", function (req, res) {
     });
   });
 });
-router.get("/SozlugeEkliMi", function (req, res) {
+router.get("/SozlugeEkliMi", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var KelimeID = req.query.KelimeID;
@@ -782,7 +758,7 @@ router.get("/SozlugeEkliMi", function (req, res) {
     }
   });
 });
-router.post("/OynananOyun", function (req, res) {
+router.post("/OynananOyun", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var BolumID = req.body.BolumID;
@@ -816,7 +792,7 @@ router.post("/OynananOyun", function (req, res) {
     }
   });
 });
-router.get("/GecilenBolumler", function (req, res) {
+router.get("/GecilenBolumler", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SezonID = req.query.SezonID;
@@ -827,7 +803,7 @@ router.get("/GecilenBolumler", function (req, res) {
     });
   });
 });
-router.post("/GecilenSezonEkle", function (req, res) {
+router.post("/GecilenSezonEkle", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var SezonID = req.body.SezonID;
@@ -847,7 +823,7 @@ router.post("/GecilenSezonEkle", function (req, res) {
     }
   });
 });
-router.get("/GecilenSezonlar", function (req, res) {
+router.get("/GecilenSezonlar", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SeviyeID = req.query.SeviyeID;
@@ -858,7 +834,7 @@ router.get("/GecilenSezonlar", function (req, res) {
     });
   });
 });
-router.get("/SezonBittiMiKontrol", function (req, res) {
+router.get("/SezonBittiMiKontrol", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SezonID = req.query.SezonID;
@@ -897,7 +873,7 @@ router.get("/SezonBittiMiKontrol", function (req, res) {
     });
   });
 });
-router.get("/SeviyeBittiMiKontrol", function (req, res) {
+router.get("/SeviyeBittiMiKontrol", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SeviyeID = req.query.SeviyeID;
@@ -922,7 +898,7 @@ router.get("/SeviyeBittiMiKontrol", function (req, res) {
     });
   });
 });
-router.post("/GecilenSeviyeEkle", function (req, res) {
+router.post("/GecilenSeviyeEkle", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var SeviyeID = req.body.SeviyeID;
@@ -944,7 +920,7 @@ router.post("/GecilenSeviyeEkle", function (req, res) {
     }
   });
 });
-router.get("/GecilenSeviyeler", function (req, res) {
+router.get("/GecilenSeviyeler", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   con.query("SELECT * FROM gecilenseviyeler WHERE KullaniciID = ?", [KullaniciID], function (err, result) {
@@ -954,7 +930,7 @@ router.get("/GecilenSeviyeler", function (req, res) {
     });
   });
 });
-router.get("/MeslekiIlerleme", function (req, res) {
+router.get("/MeslekiIlerleme", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var SeviyeID = req.query.SeviyeID;
@@ -975,7 +951,7 @@ router.get("/MeslekiIlerleme", function (req, res) {
     });
   });
 });
-router.post("/GunlukGiris", function (req, res) {
+router.post("/GunlukGiris", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var Date = req.body.Date;
@@ -1002,7 +978,7 @@ router.post("/GunlukGiris", function (req, res) {
   });
 });
 
-router.get("/GunlukGiris", function (req, res) {
+router.get("/GunlukGiris", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   console.log(KullaniciID);
@@ -1018,7 +994,7 @@ router.get("/GunlukGiris", function (req, res) {
     });
   });
 });
-router.get("/temelKategoriler", function (req, res) {
+router.get("/temelKategoriler", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var AnaDilID = req.query.AnaDilID;
   var HangiDilID = req.query.HangiDilID;
@@ -1031,7 +1007,7 @@ router.get("/temelKategoriler", function (req, res) {
     });
   });
 });
-router.get("/temelBolumler", function (req, res) {
+router.get("/temelBolumler", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var AnaDilID = req.query.AnaDilID;
   var HangiDilID = req.query.HangiDilID;
@@ -1045,7 +1021,7 @@ router.get("/temelBolumler", function (req, res) {
     });
   });
 });
-router.get("/temelKelimeler", function (req, res) {
+router.get("/temelKelimeler", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var AnaDilID = req.query.AnaDilID;
   var HangiDilID = req.query.HangiDilID;
@@ -1059,7 +1035,7 @@ router.get("/temelKelimeler", function (req, res) {
     });
   });
 });
-router.post("/OynananTemelOyun", function (req, res) {
+router.post("/OynananTemelOyun", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var BolumID = req.body.BolumID;
@@ -1102,7 +1078,7 @@ router.post("/OynananTemelOyun", function (req, res) {
     }
   });
 });
-router.get("/temelGecilenBolum", function (req, res) {
+router.get("/temelGecilenBolum", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   con.query("SELECT gtb.GecilenBolumID,tb.KategoriID,gtb.KullaniciID,tb.Order FROM oynanantemelbolumler gtb INNER JOIN temelbolumler tb ON gtb.GecilenBolumID = tb.id WHERE KullaniciID = ? AND GectiMi = 1", [KullaniciID], function (err, result) {
@@ -1112,7 +1088,7 @@ router.get("/temelGecilenBolum", function (req, res) {
     });
   });
 });
-router.post("/temelSozluk", function (req, res) {
+router.post("/temelSozluk", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var KelimeID = req.body.KelimeID;
@@ -1138,7 +1114,7 @@ router.post("/temelSozluk", function (req, res) {
     }
   });
 });
-router.get("/temelSozluk", function (req, res) {
+router.get("/temelSozluk", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   con.query("SELECT tk.id,tk.value,tkc.Ceviri,tk.Image FROM temelkelimelersozluk tks INNER JOIN temelkelimeler tk ON tks.KelimeID = tk.id INNER JOIN temelkelimelerceviri tkc ON tkc.KelimeID = tk.id WHERE tks.KullaniciID = ?", [KullaniciID], function (err, result) {
@@ -1151,7 +1127,7 @@ router.get("/temelSozluk", function (req, res) {
     });
   });
 });
-router["delete"]("/temelSozluk", function (req, res) {
+router["delete"]("/temelSozluk", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var KelimeID = req.query.KelimeID;
@@ -1172,7 +1148,7 @@ router["delete"]("/temelSozluk", function (req, res) {
     }
   });
 });
-router.get("/temelIlerleme", function (req, res) {
+router.get("/temelIlerleme", userMiddleware, function (req, res) {
   /* temel eğitimdeki ilerleme barı */
   var con = getDb.getConnection();
   var id = req.query.id;
@@ -1193,7 +1169,7 @@ router.get("/temelIlerleme", function (req, res) {
     });
   });
 });
-router.get("/egzersiz", function (req, res) {
+router.get("/egzersiz", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   con.query("SELECT * FROM egzersiz", function (err, result) {
     if (err) {
@@ -1204,7 +1180,7 @@ router.get("/egzersiz", function (req, res) {
     });
   });
 });
-router.post("/yanlisBilinenKelime", function (req, res) {
+router.post("/yanlisBilinenKelime", userMiddleware, function (req, res) {
   /* yanlis bilinen kelime kaydetme */
   var con = getDb.getConnection();
   var KelimeID = req.body.KelimeID;
@@ -1238,7 +1214,7 @@ router.post("/yanlisBilinenKelime", function (req, res) {
     }
   });
 });
-router.get("/yanlisBilinenKelime", function (req, res) {
+router.get("/yanlisBilinenKelime", userMiddleware, function (req, res) {
   /* yanlis bilinen kelime getirme */
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
@@ -1265,7 +1241,7 @@ router.get("/yanlisBilinenKelime", function (req, res) {
     });
   }
 });
-router.put("/yanlisBilinenKelime", function (req, res) {
+router.put("/yanlisBilinenKelime", userMiddleware, function (req, res) {
   /* yanlis bilinen kelime silme(değiştirme aktifliği) */
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
@@ -1289,7 +1265,8 @@ router.put("/yanlisBilinenKelime", function (req, res) {
     }
   });
 });
-router.get("/dinlemeEgzersizi", function (req, res) {
+router.get("/EgzersizKelimeleri", userMiddleware, function (req, res) {
+  /* direkt bunu egzersiz yapcam */
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var temelMi = req.query.temelMi;
@@ -1304,7 +1281,7 @@ router.get("/dinlemeEgzersizi", function (req, res) {
       });
     });
   } else if (temelMi == 1) {
-    con.query("SELECT tk.id,tk.value,tkc.Ceviri FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ?", [AnaDilID, HangiDilID], function (err, result) {
+    con.query("SELECT tk.id,tk.value,tkc.Ceviri,tk.Image FROM temelkelimeler tk INNER JOIN temelkelimelerceviri tkc ON tk.id = tkc.KelimeID WHERE tkc.AnaDilID = ? AND tkc.HangiDilID = ?", [AnaDilID, HangiDilID], function (err, result) {
       if (err) throw err;
       res.json({
         message: result
@@ -1312,7 +1289,41 @@ router.get("/dinlemeEgzersizi", function (req, res) {
     });
   }
 });
-router.post("/GunlukGorevSozluk", function (req, res) {
+router.post("/Egzersiz", userMiddleware, function (req, res) {
+  /* yapılan egzersizleri kaydeden endpoint */
+  var con = getDb.getConnection();
+  var KullaniciID = req.body.KullaniciID;
+  var TemelMi = req.body.TemelMi;
+  var EgzersizID = req.body.EgzersizID;
+  var KelimeID = req.body.KelimeID;
+  var DogruMu = req.body.DogruMu;
+  con.query("SELECT COUNT(*) as count FROM egzersizistatistikleri WHERE KullaniciID = ? AND EgzersizID = ?  AND KelimeID = ? AND TemelMi = ?", [KullaniciID, EgzersizID, KelimeID, TemelMi], function (err, result) {
+    if (err) throw err;
+    console.log("egzersiz istatistik = " + result[0].count);
+    if (result[0].count > 0) {
+      con.query("UPDATE egzersizistatistikleri SET DogruMu = ? WHERE KullaniciID = ? AND EgzersizID = ? AND KelimeID = ? AND TemelMi = ?", [DogruMu, KullaniciID, EgzersizID, KelimeID, TemelMi], function (err, result) {
+        if (err) throw err;
+        res.json({
+          message: "Degistirildi"
+        });
+      });
+    } else {
+      con.query("INSERT INTO egzersizistatistikleri (KullaniciID,TemelMi,EgzersizID,KelimeID,DogruMu) values(?,?,?,?,?)", [KullaniciID, TemelMi, EgzersizID, KelimeID, DogruMu], function (err, result) {
+        if (err) throw err;
+        if (result.affectedRows > 0) {
+          res.json({
+            message: "Eklendi"
+          });
+        } else {
+          res.json({
+            message: "Ekleme Hatasi"
+          });
+        }
+      });
+    }
+  });
+});
+router.post("/GunlukGorevSozluk", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var Date = req.body.Date;
@@ -1337,7 +1348,7 @@ router.post("/GunlukGorevSozluk", function (req, res) {
     }
   });
 });
-router.post("/GunlukGorevHata", function (req, res) {
+router.post("/GunlukGorevHata", userMiddleware, function (req, res) {
   /* hataları gözden geçirme ekranaına baktıysa bu api çalışcak */
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
@@ -1367,7 +1378,7 @@ router.post("/GunlukGorevHata", function (req, res) {
     }
   });
 });
-router.post("/GunlukGorevEgzersiz", function (req, res) {
+router.post("/GunlukGorevEgzersiz", userMiddleware, function (req, res) {
   /* egzersiz yaparsa kaydetcek */
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
@@ -1397,7 +1408,7 @@ router.post("/GunlukGorevEgzersiz", function (req, res) {
     }
   });
 });
-router.get("/MeslekiEgitimKontrol", function (req, res) {
+router.get("/MeslekiEgitimKontrol", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
@@ -1408,7 +1419,7 @@ router.get("/MeslekiEgitimKontrol", function (req, res) {
     });
   });
 });
-router.get("/TemelEgitimKontrol", function (req, res) {
+router.get("/TemelEgitimKontrol", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
@@ -1419,7 +1430,7 @@ router.get("/TemelEgitimKontrol", function (req, res) {
     });
   });
 });
-router.get("/SozlukTekrariKontrol", function (req, res) {
+router.get("/SozlukTekrariKontrol", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
@@ -1438,7 +1449,7 @@ router.get("/SozlukTekrariKontrol", function (req, res) {
     }
   });
 });
-router.get("/GunlukGorevHataKontrol", function (req, res) {
+router.get("/GunlukGorevHataKontrol", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
@@ -1457,7 +1468,7 @@ router.get("/GunlukGorevHataKontrol", function (req, res) {
     }
   });
 });
-router.get("/GunlukGorevEgzersizKontrol", function (req, res) {
+router.get("/GunlukGorevEgzersizKontrol", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   var Tarih = req.query.Date;
@@ -1476,7 +1487,7 @@ router.get("/GunlukGorevEgzersizKontrol", function (req, res) {
     }
   });
 });
-router.post("/GunlukGorevTamamlandi", function (req, res) {
+router.post("/GunlukGorevTamamlandi", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.body.KullaniciID;
   var Tarih = req.body.Date;
@@ -1499,7 +1510,7 @@ router.post("/GunlukGorevTamamlandi", function (req, res) {
     }
   });
 });
-router.get("/Test", function (req, res) {
+router.get("/Test", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var MeslekID = req.query.MeslekID;
   var DilID = req.query.DilID;
@@ -1511,7 +1522,7 @@ router.get("/Test", function (req, res) {
     });
   });
 });
-router.post("/test", function (req, res) {
+router.post("/test", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var name = req.body.Name;
   var Tarih = req.body.Date;
@@ -1523,7 +1534,7 @@ router.post("/test", function (req, res) {
     });
   });
 });
-router.post("/TestSorulari", function (req, res) {
+router.post("/TestSorulari", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var TestID = req.body.TestID;
   var KelimeID = req.body.KelimeID;
@@ -1535,7 +1546,7 @@ router.post("/TestSorulari", function (req, res) {
     });
   });
 });
-router.post("/TestIDKaydet", function (req, res) {
+router.post("/TestIDKaydet", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var TestID = req.body.TestID;
   var KullaniciID = req.body.KullaniciID;
@@ -1589,50 +1600,16 @@ router.post("/TestIDKaydet", function (req, res) {
     });
   });
 });
-router.get("/TestSonucu", function (req, res) {
+router.get("/TestSonucu", userMiddleware, function (req, res) {
   var con = getDb.getConnection();
   var KullaniciID = req.query.KullaniciID;
   console.log(KullaniciID);
-  con.query("SELECT k.TestID, ak.AnaKelimelerID,ts.dogruMu,sv.SeviyeAdi,sv.Order FROM kullanici k INNER JOIN testsorulari ts ON k.TestID = ts.TestID INNER JOIN anakelimeler ak ON ts.KelimeID = ak.AnaKelimelerID INNER JOIN bolum b ON ak.BolumID = b.BolumID INNER JOIN sezon s ON b.SezonID = s.SezonID INNER JOIN seviye sv ON s.SeviyeID = sv.SeviyeID WHERE k.id = ? ORDER BY sv.Order asc", [KullaniciID], function (err, result) {
+  con.query("SELECT k.TestID, ak.AnaKelimelerID,ts.dogruMu,sv.SeviyeAdi,sv.Order,c.Ceviri,ak.Value FROM kullanici k INNER JOIN testsorulari ts ON k.TestID = ts.TestID INNER JOIN ceviriler c ON ts.KelimeID = C.AnaKelimeID INNER JOIN anakelimeler ak ON c.AnaKelimeID = ak.AnaKelimelerID INNER JOIN bolum b ON ak.BolumID = b.BolumID INNER JOIN sezon s ON b.SezonID = s.SezonID INNER JOIN seviye sv ON s.SeviyeID = sv.SeviyeID WHERE k.id = ? ORDER BY sv.Order asc", [KullaniciID], function (err, result) {
     if (err) throw err;
     console.log(result);
     res.json({
       message: result
     });
-  });
-});
-router.post("/Egzersiz", function (req, res) {
-  /* yapılan egzersizleri kaydeden endpoint */
-  var con = getDb.getConnection();
-  var KullaniciID = req.body.KullaniciID;
-  var TemelMi = req.body.TemelMi;
-  var EgzersizID = req.body.EgzersizID;
-  var KelimeID = req.body.KelimeID;
-  var DogruMu = req.body.DogruMu;
-  con.query("SELECT COUNT(*) as count FROM egzersizistatistikleri WHERE KullaniciID = ? AND EgzersizID = ?  AND KelimeID = ? AND TemelMi = ?", [KullaniciID, EgzersizID, KelimeID, TemelMi], function (err, result) {
-    if (err) throw err;
-    console.log("egzersiz istatistik = " + result[0].count);
-    if (result[0].count > 0) {
-      con.query("UPDATE egzersizistatistikleri SET DogruMu = ? WHERE KullaniciID = ? AND EgzersizID = ? AND KelimeID = ? AND TemelMi = ?", [DogruMu, KullaniciID, EgzersizID, KelimeID, TemelMi], function (err, result) {
-        if (err) throw err;
-        res.json({
-          message: "Degistirildi"
-        });
-      });
-    } else {
-      con.query("INSERT INTO egzersizistatistikleri (KullaniciID,TemelMi,EgzersizID,KelimeID,DogruMu) values(?,?,?,?,?)", [KullaniciID, TemelMi, EgzersizID, KelimeID, DogruMu], function (err, result) {
-        if (err) throw err;
-        if (result.affectedRows > 0) {
-          res.json({
-            message: "Eklendi"
-          });
-        } else {
-          res.json({
-            message: "Ekleme Hatasi"
-          });
-        }
-      });
-    }
   });
 });
 module.exports = router;
